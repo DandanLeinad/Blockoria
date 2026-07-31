@@ -1,0 +1,9 @@
+[package]
+name = "blockoria-application"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+blockoria-domain = { path = "../blockoria-domain" }

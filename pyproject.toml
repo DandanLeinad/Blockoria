@@ -1,0 +1,17 @@
+[project]
+name = "blockoria-tools"
+version = "0.1.0"
+description = "Development tools and automation scripts for Blockoria"
+requires-python = ">=3.14"
+
+authors = [
+    { name = "DandanLeinad", email = "141470228+DandanLeinad@users.noreply.github.com" },
+]
+
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.1",
+    "zensical>=0.0.51"
+]

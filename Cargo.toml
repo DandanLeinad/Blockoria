@@ -1,0 +1,16 @@
+[workspace]
+resolver = "3"
+
+members = [
+    "crates/blockoria-application",
+    "crates/blockoria-domain",
+    "crates/blockoria-infrastructure",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["DandanLeinad <141470228+DandanLeinad@users.noreply.github.com>"]
+license = "AGPL-3.0-or-later"
+
+[workspace.dependencies]

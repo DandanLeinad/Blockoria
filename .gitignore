@@ -1,0 +1,12 @@
+# Rust
+/target/
+
+# Zensical
+site/
+
+# Opencode
+.opencode/
+opencode.json
+
+# .vscode/
+.vscode/
