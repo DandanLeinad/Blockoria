@@ -19,7 +19,6 @@
       ]
     ],
     "header-max-length": [2, "always", 72],
-    "subject-empty": [2, "never"],
-    "subject-case": [2, "always", "lower-case"]
+    "subject-empty": [2, "never"]
   }
 }
