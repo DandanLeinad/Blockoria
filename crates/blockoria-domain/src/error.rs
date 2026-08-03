@@ -75,45 +75,85 @@ mod tests {
 
     #[test]
     fn display_formats_variant_message() {
+        // Given
         let err = DomainError::InvalidWorldFolderName("empty".into());
-        assert_eq!(err.to_string(), "InvalidWorldFolderName: empty");
+
+        // When
+        let display = err.to_string();
+
+        // Then
+        assert_eq!(display, "InvalidWorldFolderName: empty");
     }
 
     #[test]
     fn error_trait_implemented() {
+        // Given
         let err = DomainError::InvalidWorldPath("not found".into());
+
+        // When
         let _: &dyn std::error::Error = &err;
+
+        // Then (compiles if Error trait implemented)
     }
 
     #[test]
     fn partial_eq_works_for_assertions() {
+        // Given
         let a = DomainError::InvalidLevelName("x".into());
         let b = DomainError::InvalidLevelName("x".into());
-        assert_eq!(a, b);
+
+        // When
+        let equal = a == b;
+
+        // Then
+        assert!(equal);
     }
 
     #[test]
     fn clone_works() {
+        // Given
         let err = DomainError::InvalidWorldVersion("bad".into());
+
+        // When
         let cloned = err.clone();
+
+        // Then
         assert_eq!(err, cloned);
     }
 
     #[test]
     fn world_icon_path_error_works() {
+        // Given
         let err = DomainError::InvalidWorldIconPath("not a file".into());
-        assert_eq!(err.to_string(), "InvalidWorldIconPath: not a file");
+
+        // When
+        let display = err.to_string();
+
+        // Then
+        assert_eq!(display, "InvalidWorldIconPath: not a file");
     }
 
     #[test]
     fn account_id_error_works() {
+        // Given
         let err = DomainError::InvalidAccountId("empty".into());
-        assert_eq!(err.to_string(), "InvalidAccountId: empty");
+
+        // When
+        let display = err.to_string();
+
+        // Then
+        assert_eq!(display, "InvalidAccountId: empty");
     }
 
     #[test]
     fn world_version_error_works() {
+        // Given
         let err = DomainError::InvalidWorldVersion("not 5 ints".into());
-        assert_eq!(err.to_string(), "InvalidWorldVersion: not 5 ints");
+
+        // When
+        let display = err.to_string();
+
+        // Then
+        assert_eq!(display, "InvalidWorldVersion: not 5 ints");
     }
 }

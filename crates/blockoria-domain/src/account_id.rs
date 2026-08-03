@@ -3,10 +3,10 @@
 
 use crate::DomainError;
 
-/// Value Object para o nome de exibição do mundo Minecraft Bedrock.
+/// Value Object para ID da conta Microsoft do jogador.
 ///
-/// Este nome é lido do arquivo `levelname.txt` dentro da pasta do mundo.
-/// É o nome que o jogador vê no menu de seleção de mundos.
+/// Identificador único da conta Microsoft associada ao mundo.
+/// Lido do arquivo `level.dat` ou configuração do Minecraft Bedrock.
 ///
 /// Regra de validação:
 /// - Não pode ser vazio ou apenas whitespace
@@ -14,29 +14,29 @@ use crate::DomainError;
 /// # Exemplos
 ///
 /// ```
-/// use blockoria_domain::LevelName;
-/// let name = LevelName::new("My World").unwrap();
-/// assert_eq!(name.as_str(), "My World");
+/// use blockoria_domain::AccountId;
+/// let id = AccountId::new("123456789012345678").unwrap();
+/// assert_eq!(id.as_str(), "123456789012345678");
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct LevelName(String);
+pub struct AccountId(String);
 
-impl LevelName {
-    /// Cria um novo LevelName validando o formato.
+impl AccountId {
+    /// Cria um novo AccountId validando o formato.
     ///
     /// # Erros
     ///
-    /// Retorna `DomainError::InvalidLevelName` se:
+    /// Retorna `DomainError::InvalidAccountId` se:
     /// - String vazia
     /// - Apenas whitespace (espaços, tabs, newlines)
     pub fn new(value: impl Into<String>) -> Result<Self, DomainError> {
         let value = value.into();
         if value.trim().is_empty() {
-            return Err(DomainError::InvalidLevelName(
-                "Level name cannot be empty or whitespace".into(),
+            return Err(DomainError::InvalidAccountId(
+                "Account ID cannot be empty or whitespace".into(),
             ));
         }
-        Ok(LevelName(value))
+        Ok(AccountId(value))
     }
 
     /// Retorna a string interna como slice.
@@ -50,16 +50,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn given_valid_name_when_new_then_ok() {
+    fn given_valid_id_when_new_then_ok() {
         // Given
-        let input = "My World";
+        let input = "123456789012345678";
 
         // When
-        let result = LevelName::new(input);
+        let result = AccountId::new(input);
 
         // Then
         assert!(result.is_ok());
-        assert_eq!(result.unwrap().as_str(), "My World");
+        assert_eq!(result.unwrap().as_str(), "123456789012345678");
     }
 
     #[test]
@@ -68,10 +68,10 @@ mod tests {
         let input = "";
 
         // When
-        let result = LevelName::new(input);
+        let result = AccountId::new(input);
 
         // Then
-        assert!(matches!(result, Err(DomainError::InvalidLevelName(_))));
+        assert!(matches!(result, Err(DomainError::InvalidAccountId(_))));
     }
 
     #[test]
@@ -80,10 +80,10 @@ mod tests {
         let input = "   ";
 
         // When
-        let result = LevelName::new(input);
+        let result = AccountId::new(input);
 
         // Then
-        assert!(matches!(result, Err(DomainError::InvalidLevelName(_))));
+        assert!(matches!(result, Err(DomainError::InvalidAccountId(_))));
     }
 
     #[test]
@@ -92,9 +92,9 @@ mod tests {
         let input = "\t\n\r";
 
         // When
-        let result = LevelName::new(input);
+        let result = AccountId::new(input);
 
         // Then
-        assert!(matches!(result, Err(DomainError::InvalidLevelName(_))));
+        assert!(matches!(result, Err(DomainError::InvalidAccountId(_))));
     }
 }
