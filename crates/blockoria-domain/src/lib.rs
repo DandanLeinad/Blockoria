@@ -7,3 +7,5 @@ pub mod world_folder_name;
 pub use world_folder_name::WorldFolderName;
 pub mod world_path;
 pub use world_path::WorldPath;
+pub mod level_name;
+pub use level_name::LevelName;
