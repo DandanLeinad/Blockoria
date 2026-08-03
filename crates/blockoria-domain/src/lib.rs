@@ -3,3 +3,5 @@
 
 pub mod error;
 pub use error::DomainError;
+pub mod world_folder_name;
+pub use world_folder_name::WorldFolderName;
