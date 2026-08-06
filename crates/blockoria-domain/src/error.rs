@@ -47,6 +47,16 @@ pub enum DomainError {
     ///
     /// Regras: deve ser lista de exatamente 5 inteiros não-negativos.
     InvalidWorldVersion(String),
+
+    /// Timestamp de backup inválido.
+    ///
+    /// Regra: não pode ser anterior a 1970-01-01 (Unix epoch).
+    InvalidBackupTimestamp(String),
+
+    /// Caminho de backup inválido.
+    ///
+    /// Regras: não vazio, deve existir, deve ser diretório, não ".".
+    InvalidBackupPath(String),
 }
 
 /// Implementação Display para mensagens legíveis em logs/UX.
@@ -63,6 +73,12 @@ impl fmt::Display for DomainError {
             DomainError::InvalidAccountId(msg) => write!(f, "InvalidAccountId: {}", msg),
             DomainError::InvalidWorldVersion(msg) => write!(f, "InvalidWorldVersion: {}", msg),
             DomainError::InvalidLevelName(msg) => write!(f, "InvalidLevelName: {}", msg),
+            DomainError::InvalidBackupTimestamp(msg) => {
+                write!(f, "InvalidBackupTimestamp: {}", msg)
+            }
+            DomainError::InvalidBackupPath(msg) => {
+                write!(f, "InvalidBackupPath: {}", msg)
+            }
         }
     }
 }
@@ -155,5 +171,29 @@ mod tests {
 
         // Then
         assert_eq!(display, "InvalidWorldVersion: not 5 ints");
+    }
+
+    #[test]
+    fn backup_timestamp_error_works() {
+        // Given
+        let err = DomainError::InvalidBackupTimestamp("before epoch".into());
+
+        // When
+        let display = err.to_string();
+
+        // Then
+        assert_eq!(display, "InvalidBackupTimestamp: before epoch");
+    }
+
+    #[test]
+    fn backup_path_error_works() {
+        // Given
+        let err = DomainError::InvalidBackupPath("not a directory".into());
+
+        // When
+        let display = err.to_string();
+
+        // Then
+        assert_eq!(display, "InvalidBackupPath: not a directory");
     }
 }
