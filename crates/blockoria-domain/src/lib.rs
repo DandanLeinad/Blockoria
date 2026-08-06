@@ -19,3 +19,5 @@ pub mod backup_timestamp;
 pub use backup_timestamp::BackupTimestamp;
 pub mod backup_path;
 pub use backup_path::BackupPath;
+pub mod entities;
+pub use entities::{Backup, World};
