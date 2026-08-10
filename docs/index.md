@@ -38,7 +38,7 @@ hide:
 
 The pure domain layer, no external dependencies, containing:
 
-### Value Objects (9)
+### Value Objects (8)
 | VO | Description | Tests |
 |------|-------------|-------|
 | `WorldFolderName` | World folder name (12 chars + `=`) | 7 |
@@ -135,5 +135,3 @@ See [LICENSE](../../LICENSE) for details.
 ---
 
 ⚠️ **NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.**
-
-*Made with :heart: by [DandanLeinad](https://github.com/DandanLeinad) as hobby/learning project · Powered by [Zensical](https://zensical.org)*

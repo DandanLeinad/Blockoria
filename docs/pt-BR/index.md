@@ -135,5 +135,3 @@ Consulte [LICENSE](../../LICENSE) para detalhes.
 ---
 
 ⚠️ **NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.**
-
-*Feito com :heart: por [DandanLeinad](https://github.com/DandanLeinad) como projeto de hobby/estudo · Powered by [Zensical](https://zensical.org)*
