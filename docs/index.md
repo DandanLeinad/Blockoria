@@ -7,12 +7,12 @@ hide:
 
 # Blockoria
 
-> **Minecraft Bedrock world backup manager for Windows 10/11.**
-> Native GUI, versioned backups, restore with preview.
+> **Gerenciador de backups de mundos Minecraft Bedrock Edition para Windows 10/11.**
+> Interface gráfica nativa, backups versionados, restauração com preview.
 
-!!! warning "⚠️ Legal Disclaimer"
+!!! warning "⚠️ Aviso Legal"
     **NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.**
-    This is an independent open-source project, developed as a hobby/learning project.
+    Este é um projeto open-source independente, desenvolvido como hobby/estudo.
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg?style=for-the-badge)](https://github.com/DandanLeinad/blockoria/blob/main/LICENSE)
 [![Rust](https://img.shields.io/badge/Rust-1.80%2B-4f46e5?style=for-the-badge&logo=rust&logoColor=white)](https://rust-lang.org)
@@ -21,62 +21,62 @@ hide:
 
 ---
 
-## 🏗️ Current Status
+## 🏗️ Status Atual
 
-**Under active development** — Currently implementing only the **domain layer** (`blockoria-domain`).
+**Em desenvolvimento ativo** — Atualmente implementando apenas a **camada de domínio** (`blockoria-domain`).
 
-| Layer | Status |
-|-------|--------|
-| **Domain** (`blockoria-domain`) | ✅ Complete — VOs, Entities, Aggregates, Tests |
-| **Application** (`blockoria-application`) | ❌ Not started |
-| **Infrastructure** (`blockoria-infrastructure`) | ❌ Not started |
-| **Frontend (Tauri + React)** | ❌ Not started |
+| Camada | Status |
+|--------|--------|
+| **Domain** (`blockoria-domain`) | ✅ Completo — VOs, Entities, Aggregates, Testes |
+| **Application** (`blockoria-application`) | ❌ Não iniciado |
+| **Infrastructure** (`blockoria-infrastructure`) | ❌ Não iniciado |
+| **Frontend (Tauri + React)** | ❌ Não iniciado |
 
 ---
 
-## 📦 blockoria-domain (Complete)
+## 📦 blockoria-domain (Concluído)
 
-The pure domain layer, no external dependencies, containing:
+A camada de domínio pura, sem dependências externas, contendo:
 
 ### Value Objects (8)
-| VO | Description | Tests |
-|------|-------------|-------|
-| `WorldFolderName` | World folder name (12 chars + `=`) | 7 |
-| `LevelName` | World display name | 4 |
-| `WorldPath` | World path (FS: exists + is_dir) | 5 |
-| `AccountId` | Microsoft account ID | 4 |
-| `WorldVersion` | World version `[u16; 5]` ≥ 0 | 4 |
-| `WorldIconPath` | Icon path (`world_icon.jpeg`) | 6 |
-| `BackupTimestamp` | Backup UTC timestamp | 6 |
-| `BackupPath` | Backup directory path | 5 |
+| VO | Descrição | Testes |
+|------|-----------|--------|
+| `WorldFolderName` | Nome da pasta do mundo (12 chars + `=`) | 7 |
+| `LevelName` | Nome de exibição do mundo | 4 |
+| `WorldPath` | Caminho do mundo (FS: exists + is_dir) | 5 |
+| `AccountId` | ID da conta Microsoft | 4 |
+| `WorldVersion` | Versão do mundo `[u16; 5]` ≥ 0 | 4 |
+| `WorldIconPath` | Caminho do ícone (`world_icon.jpeg`) | 6 |
+| `BackupTimestamp` | Timestamp UTC do backup | 6 |
+| `BackupPath` | Caminho do diretório de backup | 5 |
 
 ### Entities / Aggregates
-| Entity | Type | Description |
-|--------|------|-------------|
-| `World` | Aggregate Root | Minecraft world with folder_name, level_name, path, account_id, version, icon_path |
-| `Backup` | Aggregate Root | Backup with world_folder_name, world_account_id, world_version, created_at, backup_path |
+| Entity | Tipo | Descrição |
+|--------|------|-----------|
+| `World` | Aggregate Root | Mundo Minecraft com folder_name, level_name, path, account_id, version, icon_path |
+| `Backup` | Aggregate Root | Backup com world_folder_name, world_account_id, world_version, created_at, backup_path |
 
 ### DomainError (8 variants)
-| Variant | When it occurs |
-|---------|----------------|
-| `InvalidWorldFolderName` | Invalid format (not 12 chars, doesn't end with `=`, whitespace) |
-| `InvalidWorldPath` | Empty, doesn't exist, not a directory |
-| `InvalidWorldIconPath` | Filename isn't `world_icon.jpeg` |
-| `InvalidLevelName` | Empty or only whitespace |
-| `InvalidAccountId` | Empty or only whitespace |
-| `InvalidWorldVersion` | Not 5 elements or contains negatives |
-| `InvalidBackupTimestamp` | Before Unix epoch (1970) |
-| `InvalidBackupPath` | Empty, doesn't exist, not a directory |
+| Variant | Quando ocorre |
+|---------|---------------|
+| `InvalidWorldFolderName` | Formato inválido (não 12 chars, não termina com `=`, whitespace) |
+| `InvalidWorldPath` | Vazio, não existe, não é diretório |
+| `InvalidWorldIconPath` | Nome do arquivo não é `world_icon.jpeg` |
+| `InvalidLevelName` | Vazio ou apenas whitespace |
+| `InvalidAccountId` | Vazio ou apenas whitespace |
+| `InvalidWorldVersion` | Não tem 5 elementos ou contém negativos |
+| `InvalidBackupTimestamp` | Anterior a Unix epoch (1970) |
+| `InvalidBackupPath` | Vazio, não existe, não é diretório |
 
 ---
 
-## ✅ Tests
+## ✅ Testes
 
-| Metric | Value |
-|--------|-------|
-| Unit tests | 53 |
+| Métrica | Valor |
+|---------|-------|
+| Testes unitários | 53 |
 | Doctests | 11 |
-| **Total** | **64 passing** |
+| **Total** | **64 passando** |
 
 ```bash
 cargo test -p blockoria-domain
@@ -89,22 +89,22 @@ cargo test -p blockoria-domain --doc
 
 ## 🛠️ Tech Stack (Domain)
 
-| Item | Version |
-|------|---------|
+| Item | Versão |
+|------|--------|
 | Rust | 1.80+ |
 | Edition | 2024 |
-| Testing | `cargo test` (built-in) |
-| Serialization | `serde` (planned) |
+| Testes | `cargo test` (built-in) |
+| Serialização | `serde` (planejado) |
 
 ---
 
-## 📁 Crate Structure
+## 📁 Estrutura do Crate
 
 ```
 crates/blockoria-domain/
 ├── Cargo.toml
 └── src/
-    ├── lib.rs              # Public re-exports
+    ├── lib.rs              # Re-exports públicos
     ├── error.rs            # DomainError (8 variants)
     ├── world_folder_name.rs
     ├── level_name.rs
@@ -119,18 +119,18 @@ crates/blockoria-domain/
 
 ---
 
-## 🎯 Next Steps
+## 🎯 Próximos Passos
 
 1. **Application Layer** (`blockoria-application`) — Use Cases, Ports (Traits)
 2. **Infrastructure** (`blockoria-infrastructure`) — File Repositories, Tauri Commands
-3. **Frontend** — Tauri 2 + React + TypeScript
+2. **Frontend** — Tauri 2 + React + TypeScript
 
 ---
 
-## 📄 License
+## 📄 Licença
 
-**AGPL-3.0-or-later** — Open source, free to use, modify and distribute.
-See [LICENSE](../../LICENSE) for details.
+**AGPL-3.0-or-later** — Código aberto, livre para usar, modificar e distribuir.
+Consulte [LICENSE](../LICENSE) para detalhes.
 
 ---
 

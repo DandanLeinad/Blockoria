@@ -1,7 +1,7 @@
 # ============================================================================
 #
 # Zensical Configuration for Blockoria
-# Multi-language: pt-BR (default) + English
+# Portuguese only (pt-BR)
 #
 # ============================================================================
 
@@ -9,19 +9,14 @@
 site_name = "Blockoria"
 site_description = "Gerenciador de backups de mundos Minecraft Bedrock Edition."
 site_author = "DandanLeinad"
-site_url = "https://dandanleinad.github.io/"
+site_url = "https://dandanleinad.github.io/blockoria/"
 copyright = """
 Copyright &copy; 2026 DandanLeinad
 """
-# ----------------------------------------------------------------------------
-# Navigation structure (en default) - minimal for now
-# ----------------------------------------------------------------------------
-nav = [{ "Início" = "index.md" }]
 
 [project.theme]
-language = "en"
+language = "pt-BR"
 favicon = "assets/favicon.svg"
-custom_dir = "overrides"
 
 # ----------------------------------------------------------------------------
 # Feature toggles
@@ -39,7 +34,7 @@ features = [
   "navigation.instant.prefetch",
   "navigation.path",
   "navigation.sections",
-  # "navigation.tabs",
+  "navigation.tabs",
   "navigation.tabs.sticky",
   "navigation.top",
   "navigation.tracking",
@@ -48,13 +43,10 @@ features = [
 ]
 
 # ----------------------------------------------------------------------------
-# Multi-language support (pt-BR default + English)
-# O alternate SUBSTITUI o seletor padrão do tema
+# Navigation structure (pt-BR only for now)
 # ----------------------------------------------------------------------------
-[project.extra]
-alternate = [
-  { name = "English", link = "/", lang = "en" },
-  { name = "Português", link = "/pt-br/", lang = "pt-BR" },
+nav = [
+  { "Início" = "index.md" },
 ]
 
 # ----------------------------------------------------------------------------
@@ -113,7 +105,7 @@ pygments_lang_class = true
 [project.markdown_extensions.pymdownx.smartsymbols]
 [project.markdown_extensions.pymdownx.superfences]
 custom_fences = [
-  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }
 ]
 [project.markdown_extensions.pymdownx.tabbed]
 alternate_style = true
