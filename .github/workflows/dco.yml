@@ -33,6 +33,13 @@ jobs:
           echo "Checking commits in $RANGE"
 
           for commit in $(git rev-list "$RANGE"); do
+            # Skip merge commits (they have more than one parent)
+            parent_count=$(git rev-list --parents -n 1 "$commit" | wc -w)
+            if [ "$parent_count" -gt 1 ]; then
+              echo "Skipping merge commit $commit"
+              continue
+            fi
+
             trailer=$(git log -1 \
               --format='%(trailers:key=Signed-off-by)' \
               "$commit")

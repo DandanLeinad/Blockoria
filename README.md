@@ -1,20 +1,12 @@
----
-icon: lucide/database-backup
-hide:
-  - toc
-  - navigation
----
-
 # Blockoria
 
 > **Gerenciador de backups de mundos Minecraft Bedrock Edition para Windows 10/11.**
 > Interface gráfica nativa, backups versionados, restauração com preview.
 
-!!! warning "⚠️ Aviso Legal"
-    **NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.**
-    Este é um projeto open-source independente, desenvolvido como hobby/estudo.
+> ⚠️ **NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.**
+> Este é um projeto open-source independente, desenvolvido como hobby/estudo.
 
-[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg?style=for-the-badge)](https://github.com/DandanLeinad/blockoria/blob/main/LICENSE)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg?style=for-the-badge)](LICENSE)
 [![Rust](https://img.shields.io/badge/Rust-1.80%2B-4f46e5?style=for-the-badge&logo=rust&logoColor=white)](https://rust-lang.org)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-4f46e5?style=for-the-badge&logo=tauri&logoColor=white)](https://tauri.app)
 [![Windows](https://img.shields.io/badge/Windows-10%2F11-0078d6?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
@@ -36,7 +28,7 @@ hide:
 
 ## 📦 blockoria-domain (Concluído)
 
-A camada de domínio pura, sem dependências externas, contendo:
+Camada de domínio pura, sem dependências externas.
 
 ### Value Objects (8)
 | VO | Descrição | Testes |
@@ -72,17 +64,10 @@ A camada de domínio pura, sem dependências externas, contendo:
 
 ## ✅ Testes
 
-| Métrica | Valor |
-|---------|-------|
-| Testes unitários | 53 |
-| Doctests | 11 |
-| **Total** | **64 passando** |
-
 ```bash
-cargo test -p blockoria-domain
-# 53 passed
-cargo test -p blockoria-domain --doc
-# 11 passed
+cargo test -p blockoria-domain    # 53 unit tests
+cargo test -p blockoria-domain --doc  # 11 doctests
+# Total: 64 passing
 ```
 
 ---
@@ -98,23 +83,17 @@ cargo test -p blockoria-domain --doc
 
 ---
 
-## 📁 Estrutura do Crate
+## 📁 Estrutura do Workspace
 
 ```
-crates/blockoria-domain/
+blockoria/
 ├── Cargo.toml
-└── src/
-    ├── lib.rs              # Re-exports públicos
-    ├── error.rs            # DomainError (8 variants)
-    ├── world_folder_name.rs
-    ├── level_name.rs
-    ├── world_path.rs
-    ├── account_id.rs
-    ├── world_version.rs
-    ├── world_icon_path.rs
-    ├── backup_timestamp.rs
-    ├── backup_path.rs
-    └── entities.rs         # World, Backup
+├── crates/
+│   ├── blockoria-domain/      # ✅ Completo
+│   ├── blockoria-application/ # ❌ Não iniciado
+│   └── blockoria-infrastructure/ # ❌ Não iniciado
+├── docs/                      # Documentação (Zensical)
+└── LICENSE                    # AGPL-3.0-or-later
 ```
 
 ---
@@ -123,14 +102,14 @@ crates/blockoria-domain/
 
 1. **Application Layer** (`blockoria-application`) — Use Cases, Ports (Traits)
 2. **Infrastructure** (`blockoria-infrastructure`) — File Repositories, Tauri Commands
-2. **Frontend** — Tauri 2 + React + TypeScript
+3. **Frontend** — Tauri 2 + React + TypeScript
 
 ---
 
 ## 📄 Licença
 
 **AGPL-3.0-or-later** — Código aberto, livre para usar, modificar e distribuir.
-Consulte [LICENSE](../LICENSE) para detalhes.
+Consulte [LICENSE](LICENSE) para detalhes.
 
 ---
 
