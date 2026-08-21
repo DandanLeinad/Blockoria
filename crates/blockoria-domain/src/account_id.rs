@@ -2,16 +2,18 @@
 // Copyright (C) 2026 DandanLeinad
 
 use crate::DomainError;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Value Object para ID da conta Microsoft do jogador.
+/// Value Object for the player's Microsoft account ID.
 ///
-/// Identificador único da conta Microsoft associada ao mundo.
-/// Lido do arquivo `level.dat` ou configuração do Minecraft Bedrock.
+/// Unique identifier of the Microsoft account associated with the world.
+/// Read from the `level.dat` file or Minecraft Bedrock configuration.
 ///
-/// Regra de validação:
-/// - Não pode ser vazio ou apenas whitespace
+/// Validation rule:
+/// - Cannot be empty or just whitespace
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::AccountId;
@@ -19,16 +21,17 @@ use crate::DomainError;
 /// assert_eq!(id.as_str(), "123456789012345678");
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AccountId(String);
 
 impl AccountId {
-    /// Cria um novo AccountId validando o formato.
+    /// Creates a new AccountId validating the format.
     ///
-    /// # Erros
+    /// # Errors
     ///
-    /// Retorna `DomainError::InvalidAccountId` se:
-    /// - String vazia
-    /// - Apenas whitespace (espaços, tabs, newlines)
+    /// Returns `DomainError::InvalidAccountId` if:
+    /// - Empty string
+    /// - Just whitespace (spaces, tabs, newlines)
     pub fn new(value: impl Into<String>) -> Result<Self, DomainError> {
         let value = value.into();
         if value.trim().is_empty() {
@@ -39,7 +42,7 @@ impl AccountId {
         Ok(AccountId(value))
     }
 
-    /// Retorna a string interna como slice.
+    /// Returns the inner string as a slice.
     pub fn as_str(&self) -> &str {
         &self.0
     }

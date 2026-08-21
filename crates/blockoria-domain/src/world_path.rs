@@ -3,15 +3,17 @@
 
 use crate::DomainError;
 use std::path::{Path, PathBuf};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Value Object para caminho de mundo Minecraft Bedrock.
+/// Value Object for Minecraft Bedrock world path.
 ///
-/// Valida que o caminho:
-/// - Não é vazio
-/// - Existe no filesystem
-/// - É um diretório (não arquivo)
+/// Validates that the path:
+/// - Is not empty
+/// - Exists in the filesystem
+/// - Is a directory (not a file)
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::WorldPath;
@@ -21,21 +23,22 @@ use std::path::{Path, PathBuf};
 /// assert!(path.as_path().exists());
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct WorldPath(PathBuf);
 
 impl WorldPath {
-    /// Cria um novo WorldPath validando o filesystem.
+    /// Creates a new WorldPath validating the filesystem.
     ///
-    /// # Erros
+    /// # Errors
     ///
-    /// Retorna `DomainError::InvalidWorldPath` se:
-    /// - Caminho vazio
-    /// - Caminho é "." (diretório atual)
-    /// - Caminho não existe
-    /// - Caminho não é um diretório
+    /// Returns `DomainError::InvalidWorldPath` if:
+    /// - Path is empty
+    /// - Path is "." (current directory)
+    /// - Path does not exist
+    /// - Path is not a directory
     pub fn new(path: impl Into<PathBuf>) -> Result<Self, DomainError> {
         let path = path.into();
-        // Rejeita "." explicitamente (como Python)
+        // Explicitly reject "." (like Python)
         if path == Path::new(".") {
             return Err(DomainError::InvalidWorldPath(
                 "World path cannot be current directory".into(),
@@ -54,7 +57,7 @@ impl WorldPath {
         Ok(WorldPath(path))
     }
 
-    /// Retorna o caminho como referência a `Path`.
+    /// Returns the path as a `Path` reference.
     pub fn as_path(&self) -> &Path {
         &self.0
     }

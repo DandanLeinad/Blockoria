@@ -3,16 +3,18 @@
 
 use crate::DomainError;
 use chrono::{DateTime, Utc};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Value Object para timestamp de criação do backup.
+/// Value Object for backup creation timestamp.
 ///
-/// Armazena a data/hora UTC exata da criação do backup.
-/// Usa `chrono::DateTime<Utc>` internamente para precisão e serialização.
+/// Stores the exact UTC date/time of backup creation.
+/// Uses `chrono::DateTime<Utc>` internally for precision and serialization.
 ///
-/// Regra de validação:
-/// - Timestamp não pode ser anterior a 1970 (Unix epoch)
+/// Validation rule:
+/// - Timestamp cannot be before 1970 (Unix epoch)
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::BackupTimestamp;
@@ -22,15 +24,16 @@ use chrono::{DateTime, Utc};
 /// assert_eq!(ts.as_datetime().year(), 2024);
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BackupTimestamp(DateTime<Utc>);
 
 impl BackupTimestamp {
-    /// Cria um novo BackupTimestamp validando o timestamp.
+    /// Creates a new BackupTimestamp validating the timestamp.
     ///
-    /// # Erros
+    /// # Errors
     ///
-    /// Retorna `DomainError::InvalidBackupTimestamp` se:
-    /// - Timestamp anterior a 1970-01-01 00:00:00 UTC
+    /// Returns `DomainError::InvalidBackupTimestamp` if:
+    /// - Timestamp before 1970-01-01 00:00:00 UTC
     pub fn new(value: DateTime<Utc>) -> Result<Self, DomainError> {
         if value.timestamp() < 0 {
             return Err(DomainError::InvalidBackupTimestamp(
@@ -40,20 +43,28 @@ impl BackupTimestamp {
         Ok(BackupTimestamp(value))
     }
 
-    /// Cria timestamp para o momento atual (now).
+    /// Creates timestamp for current moment (now).
     pub fn now() -> Self {
-        // unwrap seguro: now() sempre >= epoch
+        // safe unwrap: now() is always >= epoch
         BackupTimestamp::new(Utc::now()).expect("current time is always valid")
     }
 
-    /// Retorna o `DateTime<Utc>` interno.
+    /// Returns the inner `DateTime<Utc>`.
     pub fn as_datetime(&self) -> &DateTime<Utc> {
         &self.0
     }
 
-    /// Formata como string ISO 8601 (ex: "2024-01-15T10:30:00Z").
+    /// Formats as ISO 8601 string (e.g., "2024-01-15T10:30:00Z").
     pub fn to_iso_string(&self) -> String {
         self.0.to_rfc3339()
+    }
+
+    /// Formats as filename-safe string.
+    ///
+    /// Replaces Windows-invalid characters (`:`, etc.) with safe alternatives.
+    /// E.g., "2024-01-15T10-30-00Z" (colons replaced with hyphens).
+    pub fn to_filename_safe(&self) -> String {
+        self.0.format("%Y-%m-%dT%H-%M-%SZ").to_string()
     }
 }
 

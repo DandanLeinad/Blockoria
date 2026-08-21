@@ -5,16 +5,18 @@ use crate::{
     AccountId, BackupPath, BackupTimestamp, LevelName, WorldFolderName, WorldIconPath, WorldPath,
     WorldVersion,
 };
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Aggregate Root: Mundo Minecraft Bedrock.
+/// Aggregate Root: Minecraft Bedrock World.
 ///
-/// Representa um mundo completo com todos os seus dados de identidade e localização.
+/// Represents a complete world with all its identity and location data.
 ///
-/// # Invariantes
-/// - Todos os campos são obrigatórios e validados na criação
-/// - `icon_path` pode ser `None` (mundo sem ícone)
+/// # Invariants
+/// - All fields are required and validated on creation
+/// - `icon_path` can be `None` (world without icon)
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::{World, WorldFolderName, LevelName, WorldPath, AccountId, WorldVersion, WorldIconPath};
@@ -25,15 +27,16 @@ use crate::{
 /// let dir = tempdir().unwrap();
 /// let world = World::new(
 ///     WorldFolderName::new("6LknJ3qXcJo=").unwrap(),
-///     LevelName::new("Meu Mundo").unwrap(),
+///     LevelName::new("My World").unwrap(),
 ///     WorldPath::new(dir.path()).unwrap(),
 ///     AccountId::new("123456789012345678").unwrap(),
 ///     WorldVersion::new([1, 21, 0, 0, 0]).unwrap(),
 ///     WorldIconPath::new(None::<PathBuf>).unwrap(),
 /// );
-/// assert_eq!(world.level_name().as_str(), "Meu Mundo");
+/// assert_eq!(world.level_name().as_str(), "My World");
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct World {
     folder_name: WorldFolderName,
     level_name: LevelName,
@@ -44,7 +47,7 @@ pub struct World {
 }
 
 impl World {
-    /// Cria um novo mundo com todos os dados validados.
+    /// Creates a new world with all validated data.
     pub fn new(
         folder_name: WorldFolderName,
         level_name: LevelName,
@@ -63,48 +66,48 @@ impl World {
         }
     }
 
-    /// Retorna o nome da pasta do mundo (formato base64, 11 chars + '=').
+    /// Returns the world folder name (base64 format, 11 chars + '=').
     pub fn folder_name(&self) -> &WorldFolderName {
         &self.folder_name
     }
 
-    /// Retorna o nome de exibição do mundo (levelname).
+    /// Returns the world display name (levelname).
     pub fn level_name(&self) -> &LevelName {
         &self.level_name
     }
 
-    /// Retorna o caminho do mundo no filesystem.
+    /// Returns the world path in the filesystem.
     pub fn path(&self) -> &WorldPath {
         &self.path
     }
 
-    /// Retorna o ID da conta Microsoft associada.
+    /// Returns the associated Microsoft account ID.
     pub fn account_id(&self) -> &AccountId {
         &self.account_id
     }
 
-    /// Retorna a versão do mundo (lastOpenedWithVersion).
+    /// Returns the world version (lastOpenedWithVersion).
     pub fn version(&self) -> &WorldVersion {
         &self.version
     }
 
-    /// Retorna o caminho do ícone do mundo (pode ser None).
+    /// Returns the world icon path (can be None).
     pub fn icon_path(&self) -> &WorldIconPath {
         &self.icon_path
     }
 }
 
-/// Aggregate Root: Backup de um mundo Minecraft Bedrock.
+/// Aggregate Root: Minecraft Bedrock World Backup.
 ///
-/// Representa um backup completo de um mundo em um momento específico.
-/// Contém a versão do mundo no momento do backup para garantir restore correto.
+/// Represents a complete backup of a world at a specific point in time.
+/// Contains the world version at backup time to ensure correct restore.
 ///
-/// # Invariantes
-/// - `world_version` garante que o restore saiba qual versão restaurar
-/// - `created_at` é o timestamp exato da criação do backup
-/// - `backup_path` aponta para o diretório onde os arquivos foram copiados
+/// # Invariants
+/// - `world_version` ensures restore knows which version to restore
+/// - `created_at` is the exact timestamp of backup creation
+/// - `backup_path` points to the directory where files were copied
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::{Backup, WorldFolderName, AccountId, WorldVersion, BackupTimestamp, BackupPath};
@@ -123,6 +126,7 @@ impl World {
 /// assert_eq!(backup.world_folder_name().as_str(), "6LknJ3qXcJo=");
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Backup {
     world_folder_name: WorldFolderName,
     world_account_id: AccountId,
@@ -132,14 +136,14 @@ pub struct Backup {
 }
 
 impl Backup {
-    /// Cria um novo backup com todos os dados validados.
+    /// Creates a new backup with all validated data.
     ///
-    /// # Argumentos
-    /// * `world_folder_name` - Nome da pasta do mundo (base64, 11 chars + '=')
-    /// * `world_account_id` - ID da conta Microsoft do dono do mundo
-    /// * `world_version` - Versão do mundo no momento do backup (para restore correto)
-    /// * `created_at` - Timestamp exato da criação do backup
-    /// * `backup_path` - Caminho do diretório onde o backup foi armazenado
+    /// # Arguments
+    /// * `world_folder_name` - World folder name (base64, 11 chars + '=')
+    /// * `world_account_id` - Microsoft account ID of the world owner
+    /// * `world_version` - World version at backup time (for correct restore)
+    /// * `created_at` - Exact timestamp of backup creation
+    /// * `backup_path` - Path of the directory where backup was stored
     pub fn new(
         world_folder_name: WorldFolderName,
         world_account_id: AccountId,
@@ -156,30 +160,30 @@ impl Backup {
         }
     }
 
-    /// Retorna o nome da pasta do mundo original.
+    /// Returns the original world folder name.
     pub fn world_folder_name(&self) -> &WorldFolderName {
         &self.world_folder_name
     }
 
-    /// Retorna o ID da conta do dono do mundo.
+    /// Returns the world owner's account ID.
     pub fn world_account_id(&self) -> &AccountId {
         &self.world_account_id
     }
 
-    /// Retorna a versão do mundo no momento do backup.
+    /// Returns the world version at backup time.
     ///
-    /// Essencial para restore correto - garante que a versão restaurada
-    /// corresponde à versão do mundo no momento do backup.
+    /// Essential for correct restore - ensures restored version matches
+    /// the world version at backup time.
     pub fn world_version(&self) -> &WorldVersion {
         &self.world_version
     }
 
-    /// Retorna o timestamp exato da criação do backup.
+    /// Returns the exact timestamp of backup creation.
     pub fn created_at(&self) -> &BackupTimestamp {
         &self.created_at
     }
 
-    /// Retorna o caminho do diretório onde o backup foi armazenado.
+    /// Returns the path of the directory where the backup was stored.
     pub fn backup_path(&self) -> &BackupPath {
         &self.backup_path
     }

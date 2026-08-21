@@ -3,41 +3,44 @@
 
 use crate::DomainError;
 use std::path::{Path, PathBuf};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Value Object para caminho do ícone do mundo Minecraft.
+/// Value Object for Minecraft world icon path.
 ///
-/// Representa o arquivo `world_icon.jpeg` dentro da pasta do mundo.
-/// Pode ser `None` se o mundo não tiver ícone (feature desativada).
+/// Represents the `world_icon.jpeg` file inside the world folder.
+/// Can be `None` if the world has no icon (feature disabled).
 ///
-/// Regra de validação (quando `Some`):
-/// - Arquivo deve se chamar exatamente `world_icon.jpeg`
-/// - Caminho não pode ser vazio
+/// Validation rule (when `Some`):
+/// - File must be named exactly `world_icon.jpeg`
+/// - Path cannot be empty
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::WorldIconPath;
 /// use std::path::PathBuf;
 ///
-/// // Com ícone válido
+/// // With valid icon
 /// let icon = WorldIconPath::new(Some(PathBuf::from("world_icon.jpeg"))).unwrap();
 /// assert!(icon.is_some());
 ///
-/// // Sem ícone
+/// // Without icon
 /// let no_icon = WorldIconPath::new(None::<PathBuf>).unwrap();
 /// assert!(no_icon.is_none());
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct WorldIconPath(Option<PathBuf>);
 
 impl WorldIconPath {
-    /// Cria um novo WorldIconPath validando o formato.
+    /// Creates a new WorldIconPath validating the format.
     ///
-    /// # Erros
+    /// # Errors
     ///
-    /// Retorna `DomainError::InvalidWorldIconPath` se:
-    /// - `Some(path)` onde filename não é `world_icon.jpeg`
-    /// - `Some(path)` onde path é vazio
+    /// Returns `DomainError::InvalidWorldIconPath` if:
+    /// - `Some(path)` where filename is not `world_icon.jpeg`
+    /// - `Some(path)` where path is empty
     pub fn new(value: Option<impl Into<PathBuf>>) -> Result<Self, DomainError> {
         match value {
             Some(path) => {
@@ -61,17 +64,17 @@ impl WorldIconPath {
         }
     }
 
-    /// Retorna `true` se tem ícone.
+    /// Returns `true` if has icon.
     pub fn is_some(&self) -> bool {
         self.0.is_some()
     }
 
-    /// Retorna `true` se não tem ícone.
+    /// Returns `true` if has no icon.
     pub fn is_none(&self) -> bool {
         self.0.is_none()
     }
 
-    /// Retorna o caminho interno como `Option<&Path>`.
+    /// Returns the inner path as `Option<&Path>`.
     pub fn as_path(&self) -> Option<&Path> {
         self.0.as_deref()
     }
