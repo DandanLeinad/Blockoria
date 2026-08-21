@@ -45,15 +45,22 @@ pub fn create_backup(world: &World, backup_root: &BackupPath) -> Result<Backup, 
 }
 
 fn copy_dir_all(src: &Path, dst: &Path) -> Result<(), std::io::Error> {
+    // Iterative directory copy using explicit stack to avoid stack overflow
+    // on deeply nested directory structures.
     fs::create_dir_all(dst)?;
-    for entry in fs::read_dir(src)? {
-        let entry = entry?;
-        let src_path = entry.path();
-        let dst_path = dst.join(entry.file_name());
-        if src_path.is_dir() {
-            copy_dir_all(&src_path, &dst_path)?;
-        } else {
-            fs::copy(&src_path, &dst_path)?;
+    let mut stack = vec![(src.to_path_buf(), dst.to_path_buf())];
+
+    while let Some((src, dst)) = stack.pop() {
+        fs::create_dir_all(&dst)?;
+        for entry in fs::read_dir(&src)? {
+            let entry = entry?;
+            let src_path = entry.path();
+            let dst_path = dst.join(entry.file_name());
+            if src_path.is_dir() {
+                stack.push((src_path, dst_path));
+            } else {
+                fs::copy(&src_path, &dst_path)?;
+            }
         }
     }
     Ok(())
