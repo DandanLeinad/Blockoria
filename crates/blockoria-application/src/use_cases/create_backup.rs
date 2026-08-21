@@ -44,15 +44,15 @@ pub fn create_backup(world: &World, backup_root: &BackupPath) -> Result<Backup, 
     ))
 }
 
+/// Copies a directory recursively to a destination using an iterative
+/// approach (explicit stack) to avoid stack overflow on deeply nested
+/// directory structures.
+///
+/// Errors:
+/// - Source directory cannot be read
+/// - Destination directory cannot be created
+/// - Any file copy operation fails
 fn copy_dir_all(src: &Path, dst: &Path) -> Result<(), std::io::Error> {
-    // Copies a directory recursively to a destination using an iterative
-    // approach (explicit stack) to avoid stack overflow on deeply nested
-    // directory structures.
-    //
-    // Errors:
-    // - Source directory cannot be read
-    // - Destination directory cannot be created
-    // - Any file copy operation fails
 
     let mut stack = vec![(src.to_path_buf(), dst.to_path_buf())];
 
