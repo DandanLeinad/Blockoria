@@ -49,9 +49,7 @@ fn copy_dir_all(src: &Path, dst: &Path) -> Result<(), std::io::Error> {
     // approach (explicit stack) to avoid stack overflow on deeply nested
     // directory structures.
     //
-    // # Errors
-    //
-    // Returns `std::io::Error` if:
+    // Errors:
     // - Source directory cannot be read
     // - Destination directory cannot be created
     // - Any file copy operation fails

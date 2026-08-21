@@ -25,4 +25,4 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v1
         with:
           command: check
-          args: --all-features
+          options: --all-features
