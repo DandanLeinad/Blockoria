@@ -2,7 +2,7 @@
 // Copyright (C) 2026 DandanLeinad
 
 use crate::DomainError;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 // These imports are required when the "serde" feature is enabled.
 // rust-analyzer may mark them as "unused" when the feature is disabled,
 // but they are REQUIRED for the derive(Serialize, Deserialize) to work
@@ -18,6 +18,7 @@ use serde::{Deserialize, Serialize};
 /// Validation rule (when `Some`):
 /// - File must be named exactly `world_icon.jpeg`
 /// - Path cannot be empty
+/// - Path must be a simple filename (no parent directories, no path traversal)
 ///
 /// # Examples
 ///
@@ -45,6 +46,8 @@ impl WorldIconPath {
     /// Returns `DomainError::InvalidWorldIconPath` if:
     /// - `Some(path)` where filename is not `world_icon.jpeg`
     /// - `Some(path)` where path is empty
+    /// - `Some(path)` contains path traversal (`..`)
+    /// - `Some(path)` contains parent directories (subdirectories not allowed)
     pub fn new(value: Option<impl Into<PathBuf>>) -> Result<Self, DomainError> {
         match value {
             Some(path) => {
@@ -54,6 +57,22 @@ impl WorldIconPath {
                         "World icon path cannot be empty".into(),
                     ));
                 }
+
+                // Reject path traversal attempts (..)
+                if path.components().any(|c| matches!(c, Component::ParentDir)) {
+                    return Err(DomainError::InvalidWorldIconPath(
+                        "Path traversal not allowed (..)".into(),
+                    ));
+                }
+
+                // Reject paths with parent directories (subdirectories not allowed)
+                // The icon must be directly in the world folder, not in a subdirectory.
+                if path.parent().is_some_and(|p| !p.as_os_str().is_empty()) {
+                    return Err(DomainError::InvalidWorldIconPath(
+                        "Only filename allowed, no subdirectories".into(),
+                    ));
+                }
+
                 let file_name = path.file_name().and_then(|s| s.to_str()).ok_or_else(|| {
                     DomainError::InvalidWorldIconPath("World icon path has invalid filename".into())
                 })?;
@@ -116,7 +135,22 @@ mod tests {
     }
 
     #[test]
-    fn given_valid_nested_path_when_new_then_ok() {
+    fn given_parent_dir_traversal_when_new_then_err() {
+        // Given
+        let input = Some(PathBuf::from("../world_icon.jpeg"));
+
+        // When
+        let result = WorldIconPath::new(input);
+
+        // Then
+        assert!(matches!(
+            result,
+            Err(DomainError::InvalidWorldIconPath(_))
+        ));
+    }
+
+    #[test]
+    fn given_subdirectory_when_new_then_err() {
         // Given
         let input = Some(PathBuf::from("folder/world_icon.jpeg"));
 
@@ -124,8 +158,10 @@ mod tests {
         let result = WorldIconPath::new(input);
 
         // Then
-        assert!(result.is_ok());
-        assert!(result.unwrap().is_some());
+        assert!(matches!(
+            result,
+            Err(DomainError::InvalidWorldIconPath(_))
+        ));
     }
 
     #[test]
