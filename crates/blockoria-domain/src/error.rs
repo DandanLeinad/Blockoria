@@ -25,12 +25,20 @@ pub enum DomainError {
 
     /// Invalid world path.
     ///
-    /// Rules: not empty, must exist in filesystem, must be a directory.
+    /// Rules:
+    /// - Not empty
+    /// - Not "." (current directory)
+    /// - Must exist in filesystem (after resolving symlinks/junctions)
+    /// - Must be a directory (after resolving symlinks/junctions)
     InvalidWorldPath(String),
 
     /// Invalid world icon path.
     ///
-    /// Rules: not empty, must exist, must be a file (world_icon.jpeg).
+    /// Rules:
+    /// - Not empty
+    /// - File name must be exactly "world_icon.jpeg"
+    /// - No path traversal (".." not allowed)
+    /// - No parent directories (icon must be directly in world folder)
     InvalidWorldIconPath(String),
 
     /// Invalid world name (levelname).
@@ -45,7 +53,10 @@ pub enum DomainError {
 
     /// Invalid world version.
     ///
-    /// Rules: must be a list of exactly 5 non-negative integers.
+    /// Rules:
+    /// - Exactly 5 elements
+    /// - All non-negative integers (u16)
+    /// - Each component must not exceed 32767 (i16::MAX)
     InvalidWorldVersion(String),
 
     /// Invalid backup timestamp.
@@ -55,7 +66,11 @@ pub enum DomainError {
 
     /// Invalid backup path.
     ///
-    /// Rules: not empty, must exist, must be a directory, not ".".
+    /// Rules:
+    /// - Not empty
+    /// - Not "." (current directory)
+    /// - Must exist in filesystem (after resolving symlinks/junctions)
+    /// - Must be a directory (after resolving symlinks/junctions)
     InvalidBackupPath(String),
 }
 

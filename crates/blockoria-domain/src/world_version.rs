@@ -33,7 +33,7 @@ impl WorldVersion {
     /// Maximum value for each version component (i16::MAX).
     /// Minecraft uses small values (e.g., [1, 21, 0, 0, 0]),
     /// this limit prevents absurd values without restricting real versions.
-    const MAX_VERSION_COMPONENT: u16 = 32767;
+    pub const MAX_VERSION_COMPONENT: u16 = 32767;
 
     /// Creates a new WorldVersion validating the format.
     ///
@@ -96,8 +96,8 @@ mod tests {
     #[test]
     fn given_negative_version_when_new_then_err() {
         // Given
-        // u16 não permite negativo, mas testamos semântica via erro customizado
-        // Este teste documenta que a validação existe
+        // u16 doesn't allow negative, but we test semantics via custom error
+        // This test documents that validation exists
         let input = [1, 2, 3, 4, 5];
 
         // When
