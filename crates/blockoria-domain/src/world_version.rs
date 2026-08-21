@@ -30,20 +30,28 @@ use serde::{Deserialize, Serialize};
 pub struct WorldVersion([u16; 5]);
 
 impl WorldVersion {
+    /// Maximum value for each version component (i16::MAX).
+    /// Minecraft uses small values (e.g., [1, 21, 0, 0, 0]),
+    /// this limit prevents absurd values without restricting real versions.
+    const MAX_VERSION_COMPONENT: u16 = 32767;
+
     /// Creates a new WorldVersion validating the format.
     ///
     /// # Errors
     ///
     /// Returns `DomainError::InvalidWorldVersion` if:
     /// - Array does not have exactly 5 elements
-    /// - Any element is negative (impossible with u16, but validates semantics)
+    /// - Any element exceeds the maximum allowed value
     pub fn new(value: [u16; 5]) -> Result<Self, DomainError> {
         // u16 already guarantees non-negative, but we validate semantics
         for &num in &value {
-            if num > 32767 {
-                // reasonable limit for Minecraft versions
+            if num > Self::MAX_VERSION_COMPONENT {
                 return Err(DomainError::InvalidWorldVersion(
-                    "World version number exceeds reasonable maximum".into(),
+                    format!(
+                        "World version component {} exceeds maximum allowed value {}",
+                        num,
+                        Self::MAX_VERSION_COMPONENT
+                    ),
                 ));
             }
         }
