@@ -184,7 +184,11 @@ mod tests {
         let expected_parent = backup_root
             .path()
             .join(test_world.world.folder_name().as_str().replace('=', "_"));
-        assert_eq!(backup_dir.parent().unwrap(), expected_parent);
+        // canonicalize both paths for comparison (handles Windows \\?\ prefix)
+        assert_eq!(
+            backup_dir.parent().unwrap().canonicalize().unwrap(),
+            expected_parent.canonicalize().unwrap()
+        );
         let dir_name = backup_dir.file_name().unwrap().to_str().unwrap();
         assert!(!dir_name.contains(':'));
         assert!(dir_name.contains('T') || dir_name.contains('-'));

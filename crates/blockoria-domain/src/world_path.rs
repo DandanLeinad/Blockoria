@@ -38,8 +38,8 @@ impl WorldPath {
     /// Returns `DomainError::InvalidWorldPath` if:
     /// - Path is empty
     /// - Path is "." (current directory)
-    /// - Path does not exist
-    /// - Path is not a directory
+    /// - Path does not exist (after resolving symlinks/junctions)
+    /// - Path is not a directory (after resolving symlinks/junctions)
     pub fn new(path: impl Into<PathBuf>) -> Result<Self, DomainError> {
         let path = path.into();
         // Explicitly reject "." (like Python)
@@ -48,6 +48,11 @@ impl WorldPath {
                 "World path cannot be current directory".into(),
             ));
         }
+        // Resolve symlinks/junctions to prevent path traversal attacks.
+        // This must happen before validation to ensure we validate the real path.
+        let path = path.canonicalize().map_err(|e| {
+            DomainError::InvalidWorldPath(format!("Failed to resolve path: {e}"))
+        })?;
         if !path.exists() {
             return Err(DomainError::InvalidWorldPath(
                 "World path does not exist".into(),
