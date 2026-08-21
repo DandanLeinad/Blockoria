@@ -3,6 +3,10 @@
 
 use crate::DomainError;
 use chrono::{DateTime, Utc};
+// These imports are required when the "serde" feature is enabled.
+// rust-analyzer may mark them as "unused" when the feature is disabled,
+// but they are REQUIRED for the derive(Serialize, Deserialize) to work
+// when the "serde" feature is enabled (for Tauri serialization).
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 

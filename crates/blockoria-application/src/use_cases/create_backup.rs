@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
+use blockoria_domain::{Backup, BackupPath, BackupTimestamp, DomainError, World};
 use std::fs;
 use std::path::Path;
-use blockoria_domain::{Backup, BackupPath, BackupTimestamp, DomainError, World};
 
 /// Creates a backup of the given world.
 ///
@@ -25,13 +25,15 @@ pub fn create_backup(world: &World, backup_root: &BackupPath) -> Result<Backup, 
     // Sanitize folder name for filesystem (replace = with _ for Windows compatibility)
     let safe_folder_name = world.folder_name().as_str().replace('=', "_");
 
-    let backup_dir = backup_root.as_path()
+    let backup_dir = backup_root
+        .as_path()
         .join(&safe_folder_name)
         .join(&timestamp_dir_name);
 
     fs::create_dir_all(&backup_dir).map_err(|e| DomainError::InvalidBackupPath(e.to_string()))?;
 
-    copy_dir_all(world.path().as_path(), &backup_dir).map_err(|e| DomainError::InvalidBackupPath(e.to_string()))?;
+    copy_dir_all(world.path().as_path(), &backup_dir)
+        .map_err(|e| DomainError::InvalidBackupPath(e.to_string()))?;
 
     Ok(Backup::new(
         world.folder_name().clone(),
@@ -60,7 +62,9 @@ fn copy_dir_all(src: &Path, dst: &Path) -> Result<(), std::io::Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use blockoria_domain::{AccountId, LevelName, WorldFolderName, WorldIconPath, WorldPath, WorldVersion};
+    use blockoria_domain::{
+        AccountId, LevelName, WorldFolderName, WorldIconPath, WorldPath, WorldVersion,
+    };
     use std::path::PathBuf;
     use tempfile::TempDir;
 
@@ -84,12 +88,16 @@ mod tests {
                 WorldIconPath::new(None::<PathBuf>).unwrap(),
             );
 
-            TestWorld { world, _temp_dir: temp_dir }
+            TestWorld {
+                world,
+                _temp_dir: temp_dir,
+            }
         }
     }
 
     #[test]
-    fn given_valid_world_and_backup_root_when_create_backup_then_returns_backup_with_correct_structure() {
+    fn given_valid_world_and_backup_root_when_create_backup_then_returns_backup_with_correct_structure()
+     {
         // Given
         let test_world = TestWorld::new();
         let backup_root = TempDir::new().unwrap();
@@ -173,7 +181,9 @@ mod tests {
 
         // Then
         let backup_dir = backup.backup_path().as_path();
-        let expected_parent = backup_root.path().join(test_world.world.folder_name().as_str().replace('=', "_"));
+        let expected_parent = backup_root
+            .path()
+            .join(test_world.world.folder_name().as_str().replace('=', "_"));
         assert_eq!(backup_dir.parent().unwrap(), expected_parent);
         let dir_name = backup_dir.file_name().unwrap().to_str().unwrap();
         assert!(!dir_name.contains(':'));
