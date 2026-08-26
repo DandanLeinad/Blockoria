@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.3.0] - 2026-08-26
+
+### Features
+- feat(application): add blockoria-application crate with create_backup use case
+- feat(application): add iterative copy_dir_all to prevent stack overflow
+- feat(application): add 5 integration tests for backup creation
+
+### Bug Fixes
+- fix: cargo-deny license identifier (AGPL-3.0-or-later -> AGPL-3.0)
+- fix: security audit workflow jq parsing for all JSON formats
+- fix: cargo-binstall cache conflict by removing ~/.cargo/bin from cache
+
+### CI/CD
+- ci: upgrade cargo-deny action to v2 with rust-version: stable
+- ci: optimize security audit with cargo-binstall (pre-built binaries)
+- ci: add cargo report future-incompatibilities step
+- ci: add concurrency with cancel-in-progress to security audit
+- ci: add rust-toolchain.toml (stable channel with rustfmt, clippy)
+
+### Documentation
+- docs: update Application layer status to started (create_backup implemented)
+- docs: correct Domain test count to 65 (54 unit + 11 doctests)
+- docs: update next steps to reflect remaining Application work
+
 ## [0.2.0] - 2026-08-16
 
 ### Features
