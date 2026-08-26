@@ -57,7 +57,10 @@ jobs:
           if [ -s audit-report.json ]; then
             echo "::warning::Security vulnerabilities found"
             cat audit-report.json |
-              jq -r '.vulnerabilities[]?.advisory.title' || true
+              jq -r '
+                (.vulnerabilities // [])[]?.advisory?.title //
+                .vulnerabilities[]?.title // empty
+              ' || true
           else
             echo "No vulnerabilities found"
           fi
