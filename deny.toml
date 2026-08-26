@@ -10,7 +10,7 @@ allow = [
     "BSD-3-Clause",
     "ISC",
     "Unlicense",
-    "AGPL-3.0-or-later",
+    "AGPL-3.0",
     "Unicode-3.0",
 ]
 
