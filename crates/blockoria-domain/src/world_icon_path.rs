@@ -2,42 +2,52 @@
 // Copyright (C) 2026 DandanLeinad
 
 use crate::DomainError;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
+// These imports are required when the "serde" feature is enabled.
+// rust-analyzer may mark them as "unused" when the feature is disabled,
+// but they are REQUIRED for the derive(Serialize, Deserialize) to work
+// when the "serde" feature is enabled (for Tauri serialization).
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Value Object para caminho do ícone do mundo Minecraft.
+/// Value Object for Minecraft world icon path.
 ///
-/// Representa o arquivo `world_icon.jpeg` dentro da pasta do mundo.
-/// Pode ser `None` se o mundo não tiver ícone (feature desativada).
+/// Represents the `world_icon.jpeg` file inside the world folder.
+/// Can be `None` if the world has no icon (feature disabled).
 ///
-/// Regra de validação (quando `Some`):
-/// - Arquivo deve se chamar exatamente `world_icon.jpeg`
-/// - Caminho não pode ser vazio
+/// Validation rule (when `Some`):
+/// - File must be named exactly `world_icon.jpeg`
+/// - Path cannot be empty
+/// - Path must be a simple filename (no parent directories, no path traversal)
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::WorldIconPath;
 /// use std::path::PathBuf;
 ///
-/// // Com ícone válido
+/// // With valid icon
 /// let icon = WorldIconPath::new(Some(PathBuf::from("world_icon.jpeg"))).unwrap();
 /// assert!(icon.is_some());
 ///
-/// // Sem ícone
+/// // Without icon
 /// let no_icon = WorldIconPath::new(None::<PathBuf>).unwrap();
 /// assert!(no_icon.is_none());
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct WorldIconPath(Option<PathBuf>);
 
 impl WorldIconPath {
-    /// Cria um novo WorldIconPath validando o formato.
+    /// Creates a new WorldIconPath validating the format.
     ///
-    /// # Erros
+    /// # Errors
     ///
-    /// Retorna `DomainError::InvalidWorldIconPath` se:
-    /// - `Some(path)` onde filename não é `world_icon.jpeg`
-    /// - `Some(path)` onde path é vazio
+    /// Returns `DomainError::InvalidWorldIconPath` if:
+    /// - `Some(path)` where filename is not `world_icon.jpeg`
+    /// - `Some(path)` where path is empty
+    /// - `Some(path)` contains path traversal (`..`)
+    /// - `Some(path)` contains parent directories (subdirectories not allowed)
     pub fn new(value: Option<impl Into<PathBuf>>) -> Result<Self, DomainError> {
         match value {
             Some(path) => {
@@ -47,6 +57,22 @@ impl WorldIconPath {
                         "World icon path cannot be empty".into(),
                     ));
                 }
+
+                // Reject path traversal attempts (..)
+                if path.components().any(|c| matches!(c, Component::ParentDir)) {
+                    return Err(DomainError::InvalidWorldIconPath(
+                        "Path traversal not allowed (..)".into(),
+                    ));
+                }
+
+                // Reject paths with parent directories (subdirectories not allowed)
+                // The icon must be directly in the world folder, not in a subdirectory.
+                if path.parent().is_some_and(|p| !p.as_os_str().is_empty()) {
+                    return Err(DomainError::InvalidWorldIconPath(
+                        "Only filename allowed, no subdirectories".into(),
+                    ));
+                }
+
                 let file_name = path.file_name().and_then(|s| s.to_str()).ok_or_else(|| {
                     DomainError::InvalidWorldIconPath("World icon path has invalid filename".into())
                 })?;
@@ -61,17 +87,17 @@ impl WorldIconPath {
         }
     }
 
-    /// Retorna `true` se tem ícone.
+    /// Returns `true` if has icon.
     pub fn is_some(&self) -> bool {
         self.0.is_some()
     }
 
-    /// Retorna `true` se não tem ícone.
+    /// Returns `true` if has no icon.
     pub fn is_none(&self) -> bool {
         self.0.is_none()
     }
 
-    /// Retorna o caminho interno como `Option<&Path>`.
+    /// Returns the inner path as `Option<&Path>`.
     pub fn as_path(&self) -> Option<&Path> {
         self.0.as_deref()
     }
@@ -109,7 +135,19 @@ mod tests {
     }
 
     #[test]
-    fn given_valid_nested_path_when_new_then_ok() {
+    fn given_parent_dir_traversal_when_new_then_err() {
+        // Given
+        let input = Some(PathBuf::from("../world_icon.jpeg"));
+
+        // When
+        let result = WorldIconPath::new(input);
+
+        // Then
+        assert!(matches!(result, Err(DomainError::InvalidWorldIconPath(_))));
+    }
+
+    #[test]
+    fn given_subdirectory_when_new_then_err() {
         // Given
         let input = Some(PathBuf::from("folder/world_icon.jpeg"));
 
@@ -117,8 +155,7 @@ mod tests {
         let result = WorldIconPath::new(input);
 
         // Then
-        assert!(result.is_ok());
-        assert!(result.unwrap().is_some());
+        assert!(matches!(result, Err(DomainError::InvalidWorldIconPath(_))));
     }
 
     #[test]

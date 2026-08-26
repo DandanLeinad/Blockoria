@@ -1,0 +1,17 @@
+# deny.toml
+
+[advisories]
+
+[licenses]
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unlicense",
+    "AGPL-3.0",
+    "Unicode-3.0",
+]
+
+[bans]

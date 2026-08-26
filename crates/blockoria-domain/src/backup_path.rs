@@ -3,19 +3,25 @@
 
 use crate::DomainError;
 use std::path::{Path, PathBuf};
+// These imports are required when the "serde" feature is enabled.
+// rust-analyzer may mark them as "unused" when the feature is disabled,
+// but they are REQUIRED for the derive(Serialize, Deserialize) to work
+// when the "serde" feature is enabled (for Tauri serialization).
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Value Object para caminho de pasta de backup.
+/// Value Object for backup folder path.
 ///
-/// Representa o diretório onde um backup é armazenado.
-/// Valida que o caminho existe no filesystem e é um diretório válido.
+/// Represents the directory where a backup is stored.
+/// Validates that the path exists in the filesystem and is a valid directory.
 ///
-/// Regra de validação:
-/// - Não vazio
-/// - Não "." (diretório atual)
-/// - Deve existir no filesystem
-/// - Deve ser um diretório
+/// Validation rules:
+/// - Not empty
+/// - Not "." (current directory)
+/// - Must exist in filesystem
+/// - Must be a directory
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::BackupPath;
@@ -27,27 +33,34 @@ use std::path::{Path, PathBuf};
 /// assert!(path.as_path().exists());
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BackupPath(PathBuf);
 
 impl BackupPath {
-    /// Cria um novo BackupPath validando o filesystem.
+    /// Creates a new BackupPath validating the filesystem.
     ///
-    /// # Erros
+    /// # Errors
     ///
-    /// Retorna `DomainError::InvalidBackupPath` se:
-    /// - Caminho vazio
-    /// - Caminho é "." (diretório atual)
-    /// - Caminho não existe no filesystem
-    /// - Caminho não é um diretório
+    /// Returns `DomainError::InvalidBackupPath` if:
+    /// - Path is empty
+    /// - Path is "." (current directory)
+    /// - Path does not exist in filesystem (after resolving symlinks/junctions)
+    /// - Path is not a directory (after resolving symlinks/junctions)
     pub fn new(path: impl Into<PathBuf>) -> Result<Self, DomainError> {
         let path = path.into();
 
-        // Rejeita "." explicitamente
+        // Explicitly reject "."
         if path == Path::new(".") {
             return Err(DomainError::InvalidBackupPath(
                 "Backup path cannot be current directory".into(),
             ));
         }
+
+        // Resolve symlinks/junctions to prevent path traversal attacks.
+        // This must happen before validation to ensure we validate the real path.
+        let path = path
+            .canonicalize()
+            .map_err(|e| DomainError::InvalidBackupPath(format!("Failed to resolve path: {e}")))?;
 
         if !path.exists() {
             return Err(DomainError::InvalidBackupPath(
@@ -64,7 +77,7 @@ impl BackupPath {
         Ok(BackupPath(path))
     }
 
-    /// Retorna o caminho como referência a `Path`.
+    /// Returns the path as a `Path` reference.
     pub fn as_path(&self) -> &Path {
         &self.0
     }

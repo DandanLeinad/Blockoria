@@ -3,15 +3,21 @@
 
 use crate::DomainError;
 use std::path::{Path, PathBuf};
+// These imports are required when the "serde" feature is enabled.
+// rust-analyzer may mark them as "unused" when the feature is disabled,
+// but they are REQUIRED for the derive(Serialize, Deserialize) to work
+// when the "serde" feature is enabled (for Tauri serialization).
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Value Object para caminho de mundo Minecraft Bedrock.
+/// Value Object for Minecraft Bedrock world path.
 ///
-/// Valida que o caminho:
-/// - Não é vazio
-/// - Existe no filesystem
-/// - É um diretório (não arquivo)
+/// Validates that the path:
+/// - Is not empty
+/// - Exists in the filesystem
+/// - Is a directory (not a file)
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::WorldPath;
@@ -21,26 +27,32 @@ use std::path::{Path, PathBuf};
 /// assert!(path.as_path().exists());
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct WorldPath(PathBuf);
 
 impl WorldPath {
-    /// Cria um novo WorldPath validando o filesystem.
+    /// Creates a new WorldPath validating the filesystem.
     ///
-    /// # Erros
+    /// # Errors
     ///
-    /// Retorna `DomainError::InvalidWorldPath` se:
-    /// - Caminho vazio
-    /// - Caminho é "." (diretório atual)
-    /// - Caminho não existe
-    /// - Caminho não é um diretório
+    /// Returns `DomainError::InvalidWorldPath` if:
+    /// - Path is empty
+    /// - Path is "." (current directory)
+    /// - Path does not exist (after resolving symlinks/junctions)
+    /// - Path is not a directory (after resolving symlinks/junctions)
     pub fn new(path: impl Into<PathBuf>) -> Result<Self, DomainError> {
         let path = path.into();
-        // Rejeita "." explicitamente (como Python)
+        // Explicitly reject "." (like Python)
         if path == Path::new(".") {
             return Err(DomainError::InvalidWorldPath(
                 "World path cannot be current directory".into(),
             ));
         }
+        // Resolve symlinks/junctions to prevent path traversal attacks.
+        // This must happen before validation to ensure we validate the real path.
+        let path = path
+            .canonicalize()
+            .map_err(|e| DomainError::InvalidWorldPath(format!("Failed to resolve path: {e}")))?;
         if !path.exists() {
             return Err(DomainError::InvalidWorldPath(
                 "World path does not exist".into(),
@@ -54,7 +66,7 @@ impl WorldPath {
         Ok(WorldPath(path))
     }
 
-    /// Retorna o caminho como referência a `Path`.
+    /// Returns the path as a `Path` reference.
     pub fn as_path(&self) -> &Path {
         &self.0
     }

@@ -2,16 +2,22 @@
 // Copyright (C) 2026 DandanLeinad
 
 use crate::DomainError;
+// These imports are required when the "serde" feature is enabled.
+// rust-analyzer may mark them as "unused" when the feature is disabled,
+// but they are REQUIRED for the derive(Serialize, Deserialize) to work
+// when the "serde" feature is enabled (for Tauri serialization).
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Value Object para o nome de exibição do mundo Minecraft Bedrock.
+/// Value Object for Minecraft Bedrock world display name.
 ///
-/// Este nome é lido do arquivo `levelname.txt` dentro da pasta do mundo.
-/// É o nome que o jogador vê no menu de seleção de mundos.
+/// This name is read from the `levelname.txt` file inside the world folder.
+/// It is the name the player sees in the world selection menu.
 ///
-/// Regra de validação:
-/// - Não pode ser vazio ou apenas whitespace
+/// Validation rule:
+/// - Cannot be empty or just whitespace
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::LevelName;
@@ -19,16 +25,17 @@ use crate::DomainError;
 /// assert_eq!(name.as_str(), "My World");
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct LevelName(String);
 
 impl LevelName {
-    /// Cria um novo LevelName validando o formato.
+    /// Creates a new LevelName validating the format.
     ///
-    /// # Erros
+    /// # Errors
     ///
-    /// Retorna `DomainError::InvalidLevelName` se:
-    /// - String vazia
-    /// - Apenas whitespace (espaços, tabs, newlines)
+    /// Returns `DomainError::InvalidLevelName` if:
+    /// - Empty string
+    /// - Just whitespace (spaces, tabs, newlines)
     pub fn new(value: impl Into<String>) -> Result<Self, DomainError> {
         let value = value.into();
         if value.trim().is_empty() {
@@ -39,7 +46,7 @@ impl LevelName {
         Ok(LevelName(value))
     }
 
-    /// Retorna a string interna como slice.
+    /// Returns the inner string as a slice.
     pub fn as_str(&self) -> &str {
         &self.0
     }

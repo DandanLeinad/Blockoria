@@ -2,15 +2,21 @@
 // Copyright (C) 2026 DandanLeinad
 
 use crate::DomainError;
+// These imports are required when the "serde" feature is enabled.
+// rust-analyzer may mark them as "unused" when the feature is disabled,
+// but they are REQUIRED for the derive(Serialize, Deserialize) to work
+// when the "serde" feature is enabled (for Tauri serialization).
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Value Object para nome de pasta do mundo Minecraft Bedrock.
+/// Value Object for Minecraft Bedrock world folder name.
 ///
-/// Regras de validação (baseado no formato base64 do Minecraft):
-/// - Exatamente 12 caracteres
-/// - Termina com '=' (padding base64)
-/// - Não vazio, não apenas whitespace
+/// Validation rules (based on Minecraft's base64 format):
+/// - Exactly 12 characters
+/// - Ends with '=' (base64 padding)
+/// - Not empty, not just whitespace
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::WorldFolderName;
@@ -18,17 +24,18 @@ use crate::DomainError;
 /// assert_eq!(name.as_str(), "6LknJ3qXcJo=");
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct WorldFolderName(String);
 
 impl WorldFolderName {
-    /// Cria um novo WorldFolderName validando o formato.
+    /// Creates a new WorldFolderName validating the format.
     ///
-    /// # Erros
+    /// # Errors
     ///
-    /// Retorna `DomainError::InvalidWorldFolderName` se:
-    /// - String vazia ou apenas whitespace
-    /// - Tamanho diferente de 12 caracteres
-    /// - Não termina com '='
+    /// Returns `DomainError::InvalidWorldFolderName` if:
+    /// - Empty string or just whitespace
+    /// - Length different from 12 characters
+    /// - Does not end with '='
     pub fn new(value: impl Into<String>) -> Result<Self, DomainError> {
         let value = value.into();
         if value.trim().is_empty() {
@@ -49,7 +56,7 @@ impl WorldFolderName {
         Ok(WorldFolderName(value))
     }
 
-    /// Retorna a string interna como slice.
+    /// Returns the inner string as a slice.
     pub fn as_str(&self) -> &str {
         &self.0
     }

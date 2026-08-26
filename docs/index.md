@@ -23,12 +23,12 @@ hide:
 
 ## 🏗️ Status Atual
 
-**Em desenvolvimento ativo** — Atualmente implementando apenas a **camada de domínio** (`blockoria-domain`).
+**Em desenvolvimento ativo** — Camada de domínio completa, **Application iniciada** (`create_backup`).
 
 | Camada | Status |
 |--------|--------|
 | **Domain** (`blockoria-domain`) | ✅ Completo — VOs, Entities, Aggregates, Testes |
-| **Application** (`blockoria-application`) | ❌ Não iniciado |
+| **Application** (`blockoria-application`) | 🚧 Iniciado — `create_backup` (use case + 5 testes) |
 | **Infrastructure** (`blockoria-infrastructure`) | ❌ Não iniciado |
 | **Frontend (Tauri + React)** | ❌ Não iniciado |
 
@@ -74,9 +74,9 @@ A camada de domínio pura, sem dependências externas, contendo:
 
 | Métrica | Valor |
 |---------|-------|
-| Testes unitários | 53 |
+| Testes unitários | 54 |
 | Doctests | 11 |
-| **Total** | **64 passando** |
+| **Total** | **65 passando** |
 
 ```bash
 cargo test -p blockoria-domain
@@ -121,9 +121,9 @@ crates/blockoria-domain/
 
 ## 🎯 Próximos Passos
 
-1. **Application Layer** (`blockoria-application`) — Use Cases, Ports (Traits)
+1. **Application Layer** (`blockoria-application`) — Demais Use Cases, Ports (Traits)
 2. **Infrastructure** (`blockoria-infrastructure`) — File Repositories, Tauri Commands
-2. **Frontend** — Tauri 2 + React + TypeScript
+3. **Frontend** — Tauri 2 + React + TypeScript
 
 ---
 

@@ -2,17 +2,23 @@
 // Copyright (C) 2026 DandanLeinad
 
 use crate::DomainError;
+// These imports are required when the "serde" feature is enabled.
+// rust-analyzer may mark them as "unused" when the feature is disabled,
+// but they are REQUIRED for the derive(Serialize, Deserialize) to work
+// when the "serde" feature is enabled (for Tauri serialization).
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
-/// Value Object para versão do mundo Minecraft Bedrock.
+/// Value Object for Minecraft Bedrock world version.
 ///
-/// Representa o campo `lastOpenedWithVersion` do `level.dat`.
-/// Formato: exatamente 5 inteiros não-negativos (ex: [1, 21, 0, 0, 0]).
+/// Represents the `lastOpenedWithVersion` field from `level.dat`.
+/// Format: exactly 5 non-negative integers (e.g., [1, 21, 0, 0, 0]).
 ///
-/// Regra de validação:
-/// - Exatamente 5 elementos
-/// - Todos inteiros não-negativos (u16)
+/// Validation rules:
+/// - Exactly 5 elements
+/// - All non-negative integers (u16)
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::WorldVersion;
@@ -20,30 +26,37 @@ use crate::DomainError;
 /// assert_eq!(version.as_array(), &[1, 21, 0, 0, 0]);
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct WorldVersion([u16; 5]);
 
 impl WorldVersion {
-    /// Cria um novo WorldVersion validando o formato.
+    /// Maximum value for each version component (i16::MAX).
+    /// Minecraft uses small values (e.g., [1, 21, 0, 0, 0]),
+    /// this limit prevents absurd values without restricting real versions.
+    pub const MAX_VERSION_COMPONENT: u16 = 32767;
+
+    /// Creates a new WorldVersion validating the format.
     ///
-    /// # Erros
+    /// # Errors
     ///
-    /// Retorna `DomainError::InvalidWorldVersion` se:
-    /// - Array não tem exatamente 5 elementos
-    /// - Algum elemento é negativo (impossível com u16, mas valida semântica)
+    /// Returns `DomainError::InvalidWorldVersion` if:
+    /// - Array does not have exactly 5 elements
+    /// - Any element exceeds the maximum allowed value
     pub fn new(value: [u16; 5]) -> Result<Self, DomainError> {
-        // u16 já garante não-negativo, mas validamos semântica
+        // u16 already guarantees non-negative, but we validate semantics
         for &num in &value {
-            if num > 32767 {
-                // limite razoável para versões Minecraft
-                return Err(DomainError::InvalidWorldVersion(
-                    "World version number exceeds reasonable maximum".into(),
-                ));
+            if num > Self::MAX_VERSION_COMPONENT {
+                return Err(DomainError::InvalidWorldVersion(format!(
+                    "World version component {} exceeds maximum allowed value {}",
+                    num,
+                    Self::MAX_VERSION_COMPONENT
+                )));
             }
         }
         Ok(WorldVersion(value))
     }
 
-    /// Retorna o array interno como slice.
+    /// Returns the inner array as a slice.
     pub fn as_array(&self) -> &[u16; 5] {
         &self.0
     }
@@ -81,8 +94,8 @@ mod tests {
     #[test]
     fn given_negative_version_when_new_then_err() {
         // Given
-        // u16 não permite negativo, mas testamos semântica via erro customizado
-        // Este teste documenta que a validação existe
+        // u16 doesn't allow negative, but we test semantics via custom error
+        // This test documents that validation exists
         let input = [1, 2, 3, 4, 5];
 
         // When

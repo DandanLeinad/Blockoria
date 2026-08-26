@@ -3,12 +3,12 @@
 
 use std::fmt;
 
-/// Erros de validação do domínio Blockoria.
+/// Blockoria domain validation errors.
 ///
-/// Cada variante carrega uma mensagem descritiva do problema de validação.
-/// Use `DomainError::Variante("detalhe")` para criar instâncias.
+/// Each variant carries a descriptive message about the validation problem.
+/// Use `DomainError::Variant("detail")` to create instances.
 ///
-/// # Exemplos
+/// # Examples
 ///
 /// ```
 /// use blockoria_domain::DomainError;
@@ -17,49 +17,64 @@ use std::fmt;
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DomainError {
-    /// Pasta do mundo inválida.
+    /// Invalid world folder name.
     ///
-    /// Regras: exatamente 12 caracteres, termina com '=', não apenas whitespace.
+    /// Rules: exactly 12 characters, ends with '=', not just whitespace.
     /// Ex: `InvalidWorldFolderName("empty")`, `InvalidWorldFolderName("11 chars")`
     InvalidWorldFolderName(String),
 
-    /// Caminho do mundo inválido.
+    /// Invalid world path.
     ///
-    /// Regras: não vazio, deve existir no filesystem, deve ser diretório.
+    /// Rules:
+    /// - Not empty
+    /// - Not "." (current directory)
+    /// - Must exist in filesystem (after resolving symlinks/junctions)
+    /// - Must be a directory (after resolving symlinks/junctions)
     InvalidWorldPath(String),
 
-    /// Caminho do ícone do mundo inválido.
+    /// Invalid world icon path.
     ///
-    /// Regras: não vazio, deve existir, deve ser arquivo (world_icon.jpeg).
+    /// Rules:
+    /// - Not empty
+    /// - File name must be exactly "world_icon.jpeg"
+    /// - No path traversal (".." not allowed)
+    /// - No parent directories (icon must be directly in world folder)
     InvalidWorldIconPath(String),
 
-    /// Nome do mundo (levelname) inválido.
+    /// Invalid world name (levelname).
     ///
-    /// Regra: não pode ser vazio ou apenas whitespace.
+    /// Rule: cannot be empty or just whitespace.
     InvalidLevelName(String),
 
-    /// ID da conta Microsoft inválido.
+    /// Invalid Microsoft account ID.
     ///
-    /// Regra: não pode ser vazio ou apenas whitespace.
+    /// Rule: cannot be empty or just whitespace.
     InvalidAccountId(String),
 
-    /// Versão do mundo inválida.
+    /// Invalid world version.
     ///
-    /// Regras: deve ser lista de exatamente 5 inteiros não-negativos.
+    /// Rules:
+    /// - Exactly 5 elements
+    /// - All non-negative integers (u16)
+    /// - Each component must not exceed 32767 (i16::MAX)
     InvalidWorldVersion(String),
 
-    /// Timestamp de backup inválido.
+    /// Invalid backup timestamp.
     ///
-    /// Regra: não pode ser anterior a 1970-01-01 (Unix epoch).
+    /// Rule: cannot be before 1970-01-01 (Unix epoch).
     InvalidBackupTimestamp(String),
 
-    /// Caminho de backup inválido.
+    /// Invalid backup path.
     ///
-    /// Regras: não vazio, deve existir, deve ser diretório, não ".".
+    /// Rules:
+    /// - Not empty
+    /// - Not "." (current directory)
+    /// - Must exist in filesystem (after resolving symlinks/junctions)
+    /// - Must be a directory (after resolving symlinks/junctions)
     InvalidBackupPath(String),
 }
 
-/// Implementação Display para mensagens legíveis em logs/UX.
+/// Display implementation for readable messages in logs/UX.
 impl fmt::Display for DomainError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
