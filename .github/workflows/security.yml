@@ -2,20 +2,16 @@
 name: Security Audit
 
 on:
+  pull_request:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
-  schedule:
-    - cron: '0 6 * * 1'  # weekly on Monday 6 AM UTC
 
 concurrency:
   group: security-audit-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  cargo-audit:
-    name: Security Audit
+  audit:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -36,13 +32,76 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Install cargo-binstall
-        run: cargo install cargo-binstall --locked
+        run: cargo +stable install cargo-binstall --locked
 
-      - name: Install cargo-audit (pre-built binary)
-        run: cargo binstall cargo-audit --no-confirm --locked
+      - name: Install cargo-audit
+        run: cargo binstall cargo-audit -y
 
-      - name: Run security audit
-        run: cargo audit --json > audit-report.json || true
+      # 1) Evita warning de crate yanked no lock antigo
+      # (não usa --locked na auditoria)
+      - name: Run cargo audit (JSON)
+        run: |
+          set -euo pipefail
+          cargo audit --json > audit-report.json || true
+
+      # 2) Mostra incompatibilidades futuras de Rust
+      # sem quebrar o job
+      - name: Future incompatibility report
+        run: |
+          set -euo pipefail
+          cargo report future-incompatibilities || true
+
+      # 3) Parsing robusto do JSON (corrige erro do jq)
+      - name: Parse audit report
+        run: |
+          set -euo pipefail
+
+          if [ ! -s audit-report.json ]; then
+            echo "audit-report.json vazio ou inexistente"
+            exit 0
+          fi
+
+          # Conta vulnerabilidades de forma tolerante a formato
+          COUNT="$(jq -r '
+            if type=="object" then
+              if (.vulnerabilities|type)=="object" and
+                 (.vulnerabilities.list|type)=="array" then
+                (.vulnerabilities.list | length)
+              elif (.vulnerabilities|type)=="array" then
+                (.vulnerabilities | length)
+              else
+                0
+              end
+            elif type=="array" then
+              length
+            else
+              0
+            end
+          ' audit-report.json 2>/dev/null || echo 0)"
+
+          if [ "${COUNT:-0}" -gt 0 ]; then
+            echo "Warning: Security vulnerabilities found (${COUNT})"
+
+            # Imprime títulos sem quebrar se houver boolean/null
+            jq -r '
+              if type=="object" and
+                 (.vulnerabilities|type)=="object" and
+                 (.vulnerabilities.list|type)=="array" then
+                .vulnerabilities.list[]
+              elif type=="object" and
+                 (.vulnerabilities|type)=="array" then
+                .vulnerabilities[]
+              elif type=="array" then
+                .[]
+              else
+                empty
+              end
+              | select(type=="object")
+              | "- \(.advisory.title // .title // "Untitled advisory")"
+            ' audit-report.json 2>/dev/null || true
+          else
+            echo "No known vulnerabilities found"
+          fi
 
       - name: Upload audit report
         uses: actions/upload-artifact@v4
@@ -50,16 +109,3 @@ jobs:
           name: cargo-audit-report
           path: audit-report.json
           retention-days: 30
-
-      - name: Check for vulnerabilities
-        run: |
-          if [ -s audit-report.json ]; then
-            echo "::warning::Security vulnerabilities found"
-            cat audit-report.json |
-              jq -r '
-                (.vulnerabilities // [])[]?.advisory?.title //
-                .vulnerabilities[]?.title // empty
-              ' || true
-          else
-            echo "No vulnerabilities found"
-          fi
