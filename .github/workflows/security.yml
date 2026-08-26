@@ -3,43 +3,47 @@ name: Security Audit
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]
   pull_request:
-    branches: [main]
+    branches: ["main"]
   schedule:
-    - cron: '0 6 * * 1'  # Weekly on Monday 6 AM UTC
+    - cron: '0 6 * * 1'  # weekly on Monday 6 AM UTC
 
-permissions:
-  contents: read
-  security-events: write
+concurrency:
+  group: security-audit-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   cargo-audit:
     name: Security Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
+      - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry
+      - name: Cache cargo (registry + git + bin + target)
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
+            ~/.cargo/bin
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Install cargo-audit
-        run: cargo install cargo-audit
+      - name: Install cargo-binstall
+        run: cargo install cargo-binstall --locked
+
+      - name: Install cargo-audit (pre-built binary)
+        run: cargo binstall cargo-audit --no-confirm --locked
 
       - name: Run security audit
-        run: cargo audit --workspace --json > audit-report.json || true
+        run: cargo audit --json > audit-report.json || true
 
       - name: Upload audit report
         uses: actions/upload-artifact@v4
@@ -52,8 +56,8 @@ jobs:
         run: |
           if [ -s audit-report.json ]; then
             echo "::warning::Security vulnerabilities found"
-            cat audit-report.json | jq -r \
-              '.vulnerabilities[]?.advisory.title' || true
+            cat audit-report.json |
+              jq -r '.vulnerabilities[]?.advisory.title' || true
           else
             echo "No vulnerabilities found"
           fi
