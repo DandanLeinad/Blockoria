@@ -53,7 +53,6 @@ pub fn create_backup(world: &World, backup_root: &BackupPath) -> Result<Backup, 
 /// - Destination directory cannot be created
 /// - Any file copy operation fails
 fn copy_dir_all(src: &Path, dst: &Path) -> Result<(), std::io::Error> {
-
     let mut stack = vec![(src.to_path_buf(), dst.to_path_buf())];
 
     while let Some((src, dst)) = stack.pop() {

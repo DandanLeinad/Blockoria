@@ -58,9 +58,9 @@ impl BackupPath {
 
         // Resolve symlinks/junctions to prevent path traversal attacks.
         // This must happen before validation to ensure we validate the real path.
-        let path = path.canonicalize().map_err(|e| {
-            DomainError::InvalidBackupPath(format!("Failed to resolve path: {e}"))
-        })?;
+        let path = path
+            .canonicalize()
+            .map_err(|e| DomainError::InvalidBackupPath(format!("Failed to resolve path: {e}")))?;
 
         if !path.exists() {
             return Err(DomainError::InvalidBackupPath(

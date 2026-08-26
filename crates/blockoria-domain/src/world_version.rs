@@ -46,13 +46,11 @@ impl WorldVersion {
         // u16 already guarantees non-negative, but we validate semantics
         for &num in &value {
             if num > Self::MAX_VERSION_COMPONENT {
-                return Err(DomainError::InvalidWorldVersion(
-                    format!(
-                        "World version component {} exceeds maximum allowed value {}",
-                        num,
-                        Self::MAX_VERSION_COMPONENT
-                    ),
-                ));
+                return Err(DomainError::InvalidWorldVersion(format!(
+                    "World version component {} exceeds maximum allowed value {}",
+                    num,
+                    Self::MAX_VERSION_COMPONENT
+                )));
             }
         }
         Ok(WorldVersion(value))

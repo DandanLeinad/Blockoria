@@ -143,10 +143,7 @@ mod tests {
         let result = WorldIconPath::new(input);
 
         // Then
-        assert!(matches!(
-            result,
-            Err(DomainError::InvalidWorldIconPath(_))
-        ));
+        assert!(matches!(result, Err(DomainError::InvalidWorldIconPath(_))));
     }
 
     #[test]
@@ -158,10 +155,7 @@ mod tests {
         let result = WorldIconPath::new(input);
 
         // Then
-        assert!(matches!(
-            result,
-            Err(DomainError::InvalidWorldIconPath(_))
-        ));
+        assert!(matches!(result, Err(DomainError::InvalidWorldIconPath(_))));
     }
 
     #[test]
