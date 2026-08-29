@@ -11,7 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  audit:
+  security-audit:
+    name: Security Audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

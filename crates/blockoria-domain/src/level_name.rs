@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
+//! World display name (levelname).
+//!
+//! Provides the `LevelName` value object representing the world's display name
+//! as read from `levelname.txt`. Validates that the name is not empty or whitespace.
+
 use crate::DomainError;
 // These imports are required when the "serde" feature is enabled.
 // rust-analyzer may mark them as "unused" when the feature is disabled,

@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
+//! World folder name value object (12 chars base64 + `=` suffix).
+//!
+//! This module provides the `WorldFolderName` value object which validates
+//! Minecraft Bedrock world folder names according to the base64 format
+//! (12 characters, ends with `=` suffix).
+
 use crate::DomainError;
 // These imports are required when the "serde" feature is enabled.
 // rust-analyzer may mark them as "unused" when the feature is disabled,

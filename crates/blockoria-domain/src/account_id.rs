@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
+//! Microsoft account identifier.
+//!
+//! Provides the `AccountId` value object representing the player's Microsoft
+// account identifier. Read from the world's level.dat or Minecraft Bedrock
+// configuration.
+
 use crate::DomainError;
 // These imports are required when the "serde" feature is enabled.
 // rust-analyzer may mark them as "unused" when the feature is disabled,

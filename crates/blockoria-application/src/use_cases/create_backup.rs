@@ -1,9 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
+//! Create a new backup of a world.
+//!
+//! This use case creates a new backup of a Minecraft Bedrock world by copying
+//! all files from the world directory to a timestamped backup directory under
+//! the backup root.
+//!
+//! # Operation
+//! 1. Generates a timestamp for the backup
+//! 2. Creates a sanitized folder name (replaces `=` with `_` for Windows)
+//! 3. Creates the backup directory structure
+//! 4. Recursively copies all files from the world directory
+//! 5. Returns the created `Backup` aggregate
+
+use crate::util::copy_dir_all;
 use blockoria_domain::{Backup, BackupPath, BackupTimestamp, DomainError, World};
 use std::fs;
-use std::path::Path;
 
 /// Creates a backup of the given world.
 ///
@@ -42,33 +55,6 @@ pub fn create_backup(world: &World, backup_root: &BackupPath) -> Result<Backup, 
         timestamp,
         BackupPath::new(&backup_dir)?,
     ))
-}
-
-/// Copies a directory recursively to a destination using an iterative
-/// approach (explicit stack) to avoid stack overflow on deeply nested
-/// directory structures.
-///
-/// Errors:
-/// - Source directory cannot be read
-/// - Destination directory cannot be created
-/// - Any file copy operation fails
-fn copy_dir_all(src: &Path, dst: &Path) -> Result<(), std::io::Error> {
-    let mut stack = vec![(src.to_path_buf(), dst.to_path_buf())];
-
-    while let Some((src, dst)) = stack.pop() {
-        fs::create_dir_all(&dst)?;
-        for entry in fs::read_dir(&src)? {
-            let entry = entry?;
-            let src_path = entry.path();
-            let dst_path = dst.join(entry.file_name());
-            if src_path.is_dir() {
-                stack.push((src_path, dst_path));
-            } else {
-                fs::copy(&src_path, &dst_path)?;
-            }
-        }
-    }
-    Ok(())
 }
 
 #[cfg(test)]

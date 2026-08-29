@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
+//! Domain aggregates: `World` and `Backup`.
+//!
+//! This module contains the two aggregate roots of the domain:
+//! - `World` — Aggregate root representing a Minecraft Bedrock world
+//! - `Backup` — Aggregate root representing a world backup at a point in time
+
 use crate::{
     AccountId, BackupPath, BackupTimestamp, LevelName, WorldFolderName, WorldIconPath, WorldPath,
     WorldVersion,
