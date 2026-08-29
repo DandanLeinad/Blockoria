@@ -7,6 +7,11 @@ site/
 # Opencode
 .opencode/
 opencode.json
+AGENTS.md
+
+# .agents/
+.agents/
+skills-lock.json
 
 # .vscode/
 .vscode/
