@@ -15,12 +15,12 @@
 
 ## 🏗️ Status Atual
 
-**Em desenvolvimento ativo** — Camada de domínio completa, **Application iniciada** (`create_backup`).
+**Em desenvolvimento ativo** — Camada de domínio completa, **Application implementada** (5 use cases, 14 testes).
 
 | Camada | Status |
 |--------|--------|
 | **Domain** (`blockoria-domain`) | ✅ Completo — VOs, Entities, Aggregates, Testes |
-| **Application** (`blockoria-application`) | 🚧 Iniciado — `create_backup` (use case + 5 testes) |
+| **Application** (`blockoria-application`) | ✅ Implementado — 5 use cases, 14 testes |
 | **Infrastructure** (`blockoria-infrastructure`) | ❌ Não iniciado |
 | **Frontend (Tauri + React)** | ❌ Não iniciado |
 
@@ -67,7 +67,8 @@ Camada de domínio pura, sem dependências externas.
 ```bash
 cargo test -p blockoria-domain    # 54 unit tests
 cargo test -p blockoria-domain --doc  # 11 doctests
-# Total: 65 passing
+cargo test -p blockoria-application  # 14 use case tests
+# Total: 79 passing
 ```
 
 ---
@@ -90,7 +91,7 @@ blockoria/
 ├── Cargo.toml
 ├── crates/
 │   ├── blockoria-domain/      # ✅ Completo
-│   ├── blockoria-application/ # ❌ Não iniciado
+│   ├── blockoria-application/ # ✅ Implementado (5 use cases)
 │   └── blockoria-infrastructure/ # ❌ Não iniciado
 ├── docs/                      # Documentação (Zensical)
 └── LICENSE                    # AGPL-3.0-or-later
@@ -100,9 +101,8 @@ blockoria/
 
 ## 🎯 Próximos Passos
 
-1. **Application Layer** (`blockoria-application`) — Demais Use Cases, Ports (Traits)
-2. **Infrastructure** (`blockoria-infrastructure`) — File Repositories, Tauri Commands
-3. **Frontend** — Tauri 2 + React + TypeScript
+1. **Infrastructure** (`blockoria-infrastructure`) — File Repositories, Tauri Commands
+2. **Frontend** — Tauri 2 + React + TypeScript
 
 ---
 
