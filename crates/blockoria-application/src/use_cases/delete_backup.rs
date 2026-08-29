@@ -20,7 +20,7 @@ pub fn delete_backup(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use blockoria_domain::{AccountId, Backup, BackupPath, DomainError, WorldFolderName};
+    use blockoria_domain::{Backup, BackupPath, DomainError, WorldFolderName, WorldLocation};
     use tempfile::TempDir;
 
     struct MockBackupRepo {
@@ -43,7 +43,7 @@ mod tests {
         fn list_by_world(
             &self,
             _folder_name: &WorldFolderName,
-            _account_id: &AccountId,
+            _location: &WorldLocation,
         ) -> Result<Vec<Backup>, DomainError> {
             Ok(vec![])
         }

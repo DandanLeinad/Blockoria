@@ -8,8 +8,8 @@
 //! - `Backup` — Aggregate root representing a world backup at a point in time
 
 use crate::{
-    AccountId, BackupPath, BackupTimestamp, LevelName, WorldFolderName, WorldIconPath, WorldPath,
-    WorldVersion,
+    AccountId, BackupPath, BackupTimestamp, LevelName, WorldFolderName, WorldIconPath,
+    WorldLocation, WorldPath, WorldVersion,
 };
 // These imports are required when the "serde" feature is enabled.
 // rust-analyzer may mark them as "unused" when the feature is disabled,
@@ -29,7 +29,7 @@ use serde::{Deserialize, Serialize};
 /// # Examples
 ///
 /// ```
-/// use blockoria_domain::{World, WorldFolderName, LevelName, WorldPath, AccountId, WorldVersion, WorldIconPath};
+/// use blockoria_domain::{World, WorldFolderName, LevelName, WorldPath, WorldLocation, AccountId, WorldVersion, WorldIconPath};
 /// use std::path::PathBuf;
 /// use tempfile::tempdir;
 /// use chrono::{TimeZone, Utc};
@@ -39,7 +39,7 @@ use serde::{Deserialize, Serialize};
 ///     WorldFolderName::new("6LknJ3qXcJo=").unwrap(),
 ///     LevelName::new("My World").unwrap(),
 ///     WorldPath::new(dir.path()).unwrap(),
-///     AccountId::new("123456789012345678").unwrap(),
+///     WorldLocation::Account(AccountId::new("123456789012345678").unwrap()),
 ///     WorldVersion::new([1, 21, 0, 0, 0]).unwrap(),
 ///     WorldIconPath::new(None::<PathBuf>).unwrap(),
 /// );
@@ -51,7 +51,7 @@ pub struct World {
     folder_name: WorldFolderName,
     level_name: LevelName,
     path: WorldPath,
-    account_id: AccountId,
+    location: WorldLocation,
     version: WorldVersion,
     icon_path: WorldIconPath,
 }
@@ -62,7 +62,7 @@ impl World {
         folder_name: WorldFolderName,
         level_name: LevelName,
         path: WorldPath,
-        account_id: AccountId,
+        location: WorldLocation,
         version: WorldVersion,
         icon_path: WorldIconPath,
     ) -> Self {
@@ -70,7 +70,7 @@ impl World {
             folder_name,
             level_name,
             path,
-            account_id,
+            location,
             version,
             icon_path,
         }
@@ -91,9 +91,21 @@ impl World {
         &self.path
     }
 
-    /// Returns the associated Microsoft account ID.
-    pub fn account_id(&self) -> &AccountId {
-        &self.account_id
+    /// Returns the world location (Account or Shared).
+    pub fn location(&self) -> &WorldLocation {
+        &self.location
+    }
+
+    /// Returns the associated Microsoft account ID if this world is in account-specific storage.
+    ///
+    /// Returns `None` for worlds in shared storage.
+    pub fn account_id(&self) -> Option<&AccountId> {
+        self.location.account_id()
+    }
+
+    /// Returns `true` if the world is in shared storage.
+    pub fn is_shared(&self) -> bool {
+        self.location.is_shared()
     }
 
     /// Returns the world version (lastOpenedWithVersion).
@@ -202,7 +214,10 @@ impl Backup {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{AccountId, LevelName, WorldFolderName, WorldIconPath, WorldPath, WorldVersion};
+    use crate::{
+        AccountId, LevelName, WorldFolderName, WorldIconPath, WorldLocation, WorldPath,
+        WorldVersion,
+    };
     use std::path::PathBuf;
     use tempfile::tempdir;
 
@@ -212,7 +227,7 @@ mod tests {
             WorldFolderName::new("6LknJ3qXcJo=").unwrap(),
             LevelName::new("Test World").unwrap(),
             WorldPath::new(dir.path()).unwrap(),
-            AccountId::new("123456789012345678").unwrap(),
+            WorldLocation::Account(AccountId::new("123456789012345678").unwrap()),
             WorldVersion::new([1, 21, 0, 0, 0]).unwrap(),
             WorldIconPath::new(None::<PathBuf>).unwrap(),
         )
@@ -226,9 +241,28 @@ mod tests {
         // Then
         assert_eq!(world.folder_name().as_str(), "6LknJ3qXcJo=");
         assert_eq!(world.level_name().as_str(), "Test World");
-        assert_eq!(world.account_id().as_str(), "123456789012345678");
+        assert_eq!(world.account_id().unwrap().as_str(), "123456789012345678");
         assert_eq!(world.version().as_array(), &[1, 21, 0, 0, 0]);
         assert!(world.icon_path().is_none());
+    }
+
+    #[test]
+    fn given_shared_world_when_new_then_location_is_shared() {
+        // Given
+        let dir = tempdir().unwrap();
+        let world = World::new(
+            WorldFolderName::new("6LknJ3qXcJo=").unwrap(),
+            LevelName::new("Shared World").unwrap(),
+            WorldPath::new(dir.path()).unwrap(),
+            WorldLocation::Shared,
+            WorldVersion::new([1, 21, 0, 0, 0]).unwrap(),
+            WorldIconPath::new(None::<PathBuf>).unwrap(),
+        );
+
+        // Then
+        assert!(world.is_shared());
+        assert_eq!(world.account_id(), None);
+        assert_eq!(world.location().as_path_segment(), "Shared");
     }
 
     #[test]
@@ -240,7 +274,7 @@ mod tests {
         // When
         let backup = Backup::new(
             world.folder_name().clone(),
-            world.account_id().clone(),
+            world.account_id().unwrap().clone(),
             world.version().clone(),
             BackupTimestamp::now(),
             BackupPath::new(dir.path()).unwrap(),
@@ -263,7 +297,7 @@ mod tests {
         // When
         let backup = Backup::new(
             world.folder_name().clone(),
-            world.account_id().clone(),
+            world.account_id().unwrap().clone(),
             world.version().clone(),
             BackupTimestamp::now(),
             BackupPath::new(dir.path()).unwrap(),
@@ -284,7 +318,7 @@ mod tests {
         // When
         let backup = Backup::new(
             world.folder_name().clone(),
-            world.account_id().clone(),
+            world.account_id().unwrap().clone(),
             world.version().clone(),
             BackupTimestamp::now(),
             BackupPath::new(dir.path()).unwrap(),

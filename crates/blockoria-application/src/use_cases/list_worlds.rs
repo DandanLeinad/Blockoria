@@ -18,7 +18,8 @@ pub fn list_worlds(repo: &dyn WorldRepository) -> Result<Vec<World>, DomainError
 mod tests {
     use super::*;
     use blockoria_domain::{
-        AccountId, LevelName, World, WorldFolderName, WorldIconPath, WorldPath, WorldVersion,
+        AccountId, LevelName, World, WorldFolderName, WorldIconPath, WorldLocation, WorldPath,
+        WorldVersion,
     };
     use std::path::PathBuf;
     use tempfile::TempDir;
@@ -57,7 +58,7 @@ mod tests {
             WorldFolderName::new(folder).unwrap(),
             LevelName::new(name).unwrap(),
             WorldPath::new(temp.path()).unwrap(),
-            AccountId::new("123456789012345678").unwrap(),
+            WorldLocation::Account(AccountId::new("123456789012345678").unwrap()),
             WorldVersion::new([1, 21, 0, 0, 0]).unwrap(),
             WorldIconPath::new(None::<PathBuf>).unwrap(),
         )
