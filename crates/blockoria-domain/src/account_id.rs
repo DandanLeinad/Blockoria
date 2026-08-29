@@ -30,7 +30,7 @@ use serde::{Deserialize, Serialize};
 /// let id = AccountId::new("123456789012345678").unwrap();
 /// assert_eq!(id.as_str(), "123456789012345678");
 /// ```
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct AccountId(String);
 
