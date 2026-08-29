@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.4.0] - 2026-08-29
+
+### Features
+- feat(application): add complete Application layer with 5 use cases (14 tests)
+- feat(application): add WorldRepository and BackupRepository ports
+- feat(application): add util::copy_dir_all shared utility (used by create_backup and restore_backup)
+
+### Documentation
+- docs: add domain.md and application.md reference pages
+- docs: update Application layer status to Implemented (5 use cases, 14 tests)
+- docs: correct Domain test count to 65 (54 unit + 11 doctests)
+- docs: add agent skills configuration (issue-tracker.md, domain.md)
+- docs: update Application layer status to Implemented (5 use cases)
+- docs: update workspace structure in README
+- docs: correct Domain test count to 65 (54 unit + 11 doctests)
+
+### CI/CD
+- ci: upgrade cargo-deny action to v2 with rust-version: stable
+- ci: optimize security audit with cargo-binstall (pre-built binaries)
+- ci: add cargo report future-incompatibilities step
+- ci: add concurrency with cancel-in-progress to security audit
+- ci: fix security audit workflow job ID (security-audit) and name (Security Audit)
+- ci: fix security workflow jq parsing for all JSON formats
+- ci: add rust-toolchain.toml (stable channel with rustfmt, clippy)
+
+### Dependencies
+- deps: bump zensical to 0.0.57
+
 ## [0.3.0] - 2026-08-26
 
 ### Features
