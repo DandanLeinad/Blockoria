@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
+//! Domain validation errors.
+//!
+//! This module defines the `DomainError` enum which represents all possible
+// validation failures in the domain layer. Each variant corresponds to a
+// specific validation rule violation for a value object or entity.
+
 use std::fmt;
 
 /// Blockoria domain validation errors.

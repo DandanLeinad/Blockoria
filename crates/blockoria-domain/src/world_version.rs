@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
+//! World version as `[u16; 5]` with validation.
+//!
+//! Provides the `WorldVersion` value object representing the
+// `lastOpenedWithVersion` field from Minecraft's `level.dat`.
+// Format: exactly 5 non-negative integers (e.g., [1, 21, 0, 0, 0]).
+
 use crate::DomainError;
 // These imports are required when the "serde" feature is enabled.
 // rust-analyzer may mark them as "unused" when the feature is disabled,

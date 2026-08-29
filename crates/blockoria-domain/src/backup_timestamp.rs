@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
+//! UTC timestamp of backup creation.
+//!
+//! Provides the `BackupTimestamp` value object which stores the exact UTC
+// date/time of backup creation. Uses `chrono::DateTime<Utc>` internally
+// for precision and serialization. Provides filename-safe formatting.
+
 use crate::DomainError;
 use chrono::{DateTime, Utc};
 // These imports are required when the "serde" feature is enabled.

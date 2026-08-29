@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
+//! Validated filesystem path to a backup directory.
+//!
+//! Provides the `BackupPath` value object which validates that a path exists
+// in the filesystem and is a valid directory. Resolves symlinks/junctions
+// to prevent path traversal attacks.
+
 use crate::DomainError;
 use std::path::{Path, PathBuf};
 // These imports are required when the "serde" feature is enabled.

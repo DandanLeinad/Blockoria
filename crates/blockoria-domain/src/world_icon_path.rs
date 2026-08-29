@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
+//! World icon path (`world_icon.jpeg`).
+//!
+//! Provides the `WorldIconPath` value object representing the path to a
+// world's icon file (`world_icon.jpeg`). Can be `None` if the world has no
+// icon. Validates filename, path traversal, and subdirectory restrictions.
+
 use crate::DomainError;
 use std::path::{Component, Path, PathBuf};
 // These imports are required when the "serde" feature is enabled.
