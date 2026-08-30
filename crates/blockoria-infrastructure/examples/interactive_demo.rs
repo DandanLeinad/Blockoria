@@ -13,7 +13,7 @@ use blockoria_application::use_cases::{
     create_backup::create_backup, delete_backup::delete_backup, list_backups::list_backups,
     list_worlds::list_worlds, restore_backup::restore_backup,
 };
-use blockoria_domain::{Backup, BackupPath, DomainError};
+use blockoria_domain::{Backup, BackupPath};
 use blockoria_infrastructure::{FileBackupRepository, FileWorldRepository};
 use std::io::{self, Write};
 use std::path::PathBuf;
@@ -278,7 +278,7 @@ fn create_backup_cmd(
     backup_root: &BackupPath,
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("\n--- Criar Backup ---");
-    let Some((folder, location, account_id)) = select_world(world_repo)? else {
+    let Some((folder, _location, account_id)) = select_world(world_repo)? else {
         return Ok(());
     };
 
