@@ -6,6 +6,7 @@
 //! Stores backups under a configurable root directory organized as:
 //! `<backup_root>/<location>/<sanitized_folder_name>/<timestamp>/`
 
+use crate::config::Config;
 use blockoria_application::ports::BackupRepository;
 use blockoria_domain::{
     AccountId, Backup, BackupPath, BackupTimestamp, DomainError, WorldFolderName, WorldLocation,
@@ -31,10 +32,22 @@ impl FileBackupRepository {
         Self { backup_root: root }
     }
 
-    /// Creates a repository with the default backup path.
+    /// Creates a repository with the default backup path from config.
+    ///
+    /// Reads from `%APPDATA%\Blockoria\config.toml` (creates default if missing).
+    /// Default fallback: `%APPDATA%\Blockoria\backups\`
+    pub fn with_default_path() -> Result<Self, DomainError> {
+        let config = Config::load()?;
+        fs::create_dir_all(&config.backup_root).ok();
+        Ok(Self {
+            backup_root: config.backup_root,
+        })
+    }
+
+    /// Creates a repository with the default backup path (no config file).
     ///
     /// Default: `%APPDATA%\Blockoria\backups\`
-    pub fn with_default_path() -> Result<Self, DomainError> {
+    pub fn with_default_path_no_config() -> Result<Self, DomainError> {
         let root = dirs::data_dir()
             .ok_or_else(|| {
                 DomainError::InvalidBackupPath("Could not find APPDATA directory".into())
