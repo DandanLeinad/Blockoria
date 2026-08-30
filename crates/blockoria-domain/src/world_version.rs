@@ -33,6 +33,7 @@ use serde::{Deserialize, Serialize};
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Default)]
 pub struct WorldVersion([u16; 5]);
 
 impl WorldVersion {

@@ -1,17 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+//! # blockoria-infrastructure
+//!
+//! Concrete implementations of the ports defined in `blockoria-application`.
+//! This crate provides filesystem-based implementations for world and backup repositories.
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub mod repositories;
+pub mod test_contract;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use repositories::{FileBackupRepository, FileWorldRepository};

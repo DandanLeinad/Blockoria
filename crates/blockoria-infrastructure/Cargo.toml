@@ -8,3 +8,14 @@ license.workspace = true
 [dependencies]
 blockoria-domain = { path = "../blockoria-domain" }
 blockoria-application = { path = "../blockoria-application" }
+tokio = { version = "1", features = ["fs", "io-util", "sync", "time"] }
+walkdir = "2"
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+dirs = "6"
+uuid = { version = "1", features = ["v4", "serde"] }
+tempfile = "3"
+
+[dev-dependencies]
+blockoria-domain = { path = "../blockoria-domain", features = ["serde"] }
+blockoria-application = { path = "../blockoria-application" }

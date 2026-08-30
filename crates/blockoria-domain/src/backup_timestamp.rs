@@ -8,7 +8,7 @@
 // for precision and serialization. Provides filename-safe formatting.
 
 use crate::DomainError;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc};
 // These imports are required when the "serde" feature is enabled.
 // rust-analyzer may mark them as "unused" when the feature is disabled,
 // but they are REQUIRED for the derive(Serialize, Deserialize) to work
@@ -75,6 +75,31 @@ impl BackupTimestamp {
     /// E.g., "2024-01-15T10-30-00Z" (colons replaced with hyphens).
     pub fn to_filename_safe(&self) -> String {
         self.0.format("%Y-%m-%dT%H-%M-%SZ").to_string()
+    }
+
+    /// Creates a BackupTimestamp from a filename-safe string.
+    ///
+    /// Expected format: "YYYY-MM-DDTHH-MM-SSZ" (UTC timezone indicated by Z suffix)
+    pub fn from_filename_safe(s: &str) -> Result<Self, DomainError> {
+        // Handle "Z" suffix (UTC) by stripping it and parsing as naive datetime
+        let s = s.strip_suffix('Z').unwrap_or(s);
+        let naive = NaiveDateTime::parse_from_str(s, "%Y-%m-%dT%H-%M-%S")
+            .map_err(|e| DomainError::InvalidBackupTimestamp(e.to_string()))?;
+        let dt = DateTime::<Utc>::from_naive_utc_and_offset(naive, Utc);
+        Self::new(dt)
+    }
+}
+
+// Implement Ord for sorting by timestamp
+impl Ord for BackupTimestamp {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.0.cmp(&other.0)
+    }
+}
+
+impl PartialOrd for BackupTimestamp {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 

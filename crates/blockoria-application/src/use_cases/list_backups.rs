@@ -26,6 +26,7 @@ mod tests {
         AccountId, Backup, BackupPath, BackupTimestamp, DomainError, WorldFolderName,
         WorldLocation, WorldVersion,
     };
+    use std::path::Path;
     use tempfile::TempDir;
 
     struct MockBackupRepo {
@@ -64,7 +65,7 @@ mod tests {
                 .collect())
         }
 
-        fn delete(&self, _backup_path: &BackupPath) -> Result<(), DomainError> {
+        fn delete(&self, _backup_path: &Path) -> Result<(), DomainError> {
             Ok(())
         }
     }

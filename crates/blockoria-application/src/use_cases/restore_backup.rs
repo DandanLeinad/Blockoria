@@ -124,7 +124,7 @@ mod tests {
                 .collect())
         }
 
-        fn delete(&self, _backup_path: &BackupPath) -> Result<(), DomainError> {
+        fn delete(&self, _backup_path: &Path) -> Result<(), DomainError> {
             Ok(())
         }
     }
