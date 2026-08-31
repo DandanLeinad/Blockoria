@@ -50,7 +50,10 @@ pub fn create_backup(world: &World, backup_root: &BackupPath) -> Result<Backup, 
 
     Ok(Backup::new(
         world.folder_name().clone(),
-        world.account_id().clone(),
+        world
+            .account_id()
+            .expect("world must have account_id for backup")
+            .clone(),
         world.version().clone(),
         timestamp,
         BackupPath::new(&backup_dir)?,
@@ -61,7 +64,8 @@ pub fn create_backup(world: &World, backup_root: &BackupPath) -> Result<Backup, 
 mod tests {
     use super::*;
     use blockoria_domain::{
-        AccountId, LevelName, WorldFolderName, WorldIconPath, WorldPath, WorldVersion,
+        AccountId, LevelName, WorldFolderName, WorldIconPath, WorldLocation, WorldPath,
+        WorldVersion,
     };
     use std::path::PathBuf;
     use tempfile::TempDir;
@@ -81,7 +85,7 @@ mod tests {
                 WorldFolderName::new("6LknJ3qXcJo=").unwrap(),
                 LevelName::new("Test World").unwrap(),
                 WorldPath::new(temp_dir.path()).unwrap(),
-                AccountId::new("123456789012345678").unwrap(),
+                WorldLocation::Account(AccountId::new("123456789012345678").unwrap()),
                 WorldVersion::new([1, 21, 0, 0, 0]).unwrap(),
                 WorldIconPath::new(None::<PathBuf>).unwrap(),
             );

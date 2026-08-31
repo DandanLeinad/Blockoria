@@ -1,30 +1,32 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (C) 2026 DandanLeinad
 
-//! List all backups for a specific world and account.
+//! List all backups for a specific world and location.
 //!
 //! This use case retrieves all backups for a given world (identified by
-// folder name and account ID) by delegating to the
+// folder name and location) by delegating to the
 // `BackupRepository::list_by_world` method.
 
 use crate::ports::BackupRepository;
-use blockoria_domain::{AccountId, Backup, DomainError, WorldFolderName};
+use blockoria_domain::{Backup, DomainError, WorldFolderName, WorldLocation};
 
 /// Returns all backups for a given world.
 pub fn list_backups(
     repo: &dyn BackupRepository,
     folder_name: &WorldFolderName,
-    account_id: &AccountId,
+    location: &WorldLocation,
 ) -> Result<Vec<Backup>, DomainError> {
-    repo.list_by_world(folder_name, account_id)
+    repo.list_by_world(folder_name, location)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use blockoria_domain::{
-        AccountId, Backup, BackupPath, BackupTimestamp, DomainError, WorldFolderName, WorldVersion,
+        AccountId, Backup, BackupPath, BackupTimestamp, DomainError, WorldFolderName,
+        WorldLocation, WorldVersion,
     };
+    use std::path::Path;
     use tempfile::TempDir;
 
     struct MockBackupRepo {
@@ -45,19 +47,25 @@ mod tests {
         fn list_by_world(
             &self,
             folder_name: &WorldFolderName,
-            account_id: &AccountId,
+            location: &WorldLocation,
         ) -> Result<Vec<Backup>, DomainError> {
             Ok(self
                 .backups
                 .iter()
                 .filter(|b| {
-                    b.world_folder_name() == folder_name && b.world_account_id() == account_id
+                    b.world_folder_name() == folder_name
+                        && match location {
+                            WorldLocation::Account(account_id) => {
+                                b.world_account_id() == account_id
+                            }
+                            WorldLocation::Shared => false,
+                        }
                 })
                 .cloned()
                 .collect())
         }
 
-        fn delete(&self, _backup_path: &BackupPath) -> Result<(), DomainError> {
+        fn delete(&self, _backup_path: &Path) -> Result<(), DomainError> {
             Ok(())
         }
     }
@@ -79,10 +87,10 @@ mod tests {
         // Given
         let repo = MockBackupRepo::new(vec![]);
         let folder = WorldFolderName::new("aaaaaaaaaaa=").unwrap();
-        let account = AccountId::new("123456789012345678").unwrap();
+        let location = WorldLocation::Account(AccountId::new("123456789012345678").unwrap());
 
         // When
-        let result = list_backups(&repo, &folder, &account);
+        let result = list_backups(&repo, &folder, &location);
 
         // Then
         assert!(result.is_ok());
@@ -97,10 +105,10 @@ mod tests {
         let b3 = make_backup("bbbbbbbbbbb=", "123456789012345678"); // different world
         let repo = MockBackupRepo::new(vec![b1, b2, b3]);
         let folder = WorldFolderName::new("aaaaaaaaaaa=").unwrap();
-        let account = AccountId::new("123456789012345678").unwrap();
+        let location = WorldLocation::Account(AccountId::new("123456789012345678").unwrap());
 
         // When
-        let result = list_backups(&repo, &folder, &account);
+        let result = list_backups(&repo, &folder, &location);
 
         // Then
         assert!(result.is_ok());
@@ -114,10 +122,26 @@ mod tests {
         let b1 = make_backup("aaaaaaaaaaa=", "111111111111111111");
         let repo = MockBackupRepo::new(vec![b1]);
         let folder = WorldFolderName::new("aaaaaaaaaaa=").unwrap();
-        let account = AccountId::new("222222222222222222").unwrap();
+        let location = WorldLocation::Account(AccountId::new("222222222222222222").unwrap());
 
         // When
-        let result = list_backups(&repo, &folder, &account);
+        let result = list_backups(&repo, &folder, &location);
+
+        // Then
+        assert!(result.is_ok());
+        assert!(result.unwrap().is_empty());
+    }
+
+    #[test]
+    fn given_shared_location_when_list_backups_then_returns_empty() {
+        // Given
+        let b1 = make_backup("aaaaaaaaaaa=", "123456789012345678");
+        let repo = MockBackupRepo::new(vec![b1]);
+        let folder = WorldFolderName::new("aaaaaaaaaaa=").unwrap();
+        let location = WorldLocation::Shared;
+
+        // When
+        let result = list_backups(&repo, &folder, &location);
 
         // Then
         assert!(result.is_ok());

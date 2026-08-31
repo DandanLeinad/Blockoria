@@ -14,13 +14,13 @@ pub fn delete_backup(
     repo: &dyn BackupRepository,
     backup_path: &BackupPath,
 ) -> Result<(), DomainError> {
-    repo.delete(backup_path)
+    repo.delete(backup_path.as_path())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use blockoria_domain::{AccountId, Backup, BackupPath, DomainError, WorldFolderName};
+    use blockoria_domain::{Backup, BackupPath, DomainError, WorldFolderName, WorldLocation};
     use tempfile::TempDir;
 
     struct MockBackupRepo {
@@ -43,27 +43,30 @@ mod tests {
         fn list_by_world(
             &self,
             _folder_name: &WorldFolderName,
-            _account_id: &AccountId,
+            _location: &WorldLocation,
         ) -> Result<Vec<Backup>, DomainError> {
             Ok(vec![])
         }
 
-        fn delete(&self, backup_path: &BackupPath) -> Result<(), DomainError> {
-            self.deleted.lock().unwrap().push(backup_path.clone());
+        fn delete(&self, backup_path: &std::path::Path) -> Result<(), DomainError> {
+            // Convert Path to BackupPath for storage
+            let bp = BackupPath::new(backup_path).unwrap();
+            self.deleted.lock().unwrap().push(bp);
             Ok(())
         }
     }
 
-    fn make_backup_path() -> BackupPath {
+    fn make_backup_path() -> (BackupPath, TempDir) {
         let temp = TempDir::new().unwrap();
-        BackupPath::new(temp.path()).unwrap()
+        let path = BackupPath::new(temp.path()).unwrap();
+        (path, temp)
     }
 
     #[test]
     fn given_valid_backup_path_when_delete_then_calls_repo_delete() {
         // Given
         let repo = MockBackupRepo::new();
-        let backup_path = make_backup_path();
+        let (backup_path, _temp) = make_backup_path();
 
         // When
         let result = delete_backup(&repo, &backup_path);

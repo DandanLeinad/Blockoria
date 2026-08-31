@@ -70,6 +70,10 @@ pub use level_name::LevelName;
 pub mod account_id;
 pub use account_id::AccountId;
 
+/// World location: Account-specific or Shared storage.
+pub mod world_location;
+pub use world_location::WorldLocation;
+
 /// World version as `[u16; 5]` with validation.
 pub mod world_version;
 pub use world_version::WorldVersion;

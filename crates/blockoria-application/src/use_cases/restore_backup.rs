@@ -7,14 +7,14 @@
 //! from a backup directory to the world directory, overwriting existing files.
 //!
 //! # Operation
-//! 1. Verifies the backup exists and belongs to the specified world/account
+//! 1. Verifies the backup exists and belongs to the specified world/location
 //! 2. Retrieves the world to get the destination path
 //! 3. Recursively copies all files from backup to world directory
 //! 4. Returns success or error
 
 use crate::ports::{BackupRepository, WorldRepository};
 use crate::util::copy_dir_all;
-use blockoria_domain::{AccountId, BackupPath, DomainError, WorldFolderName};
+use blockoria_domain::{BackupPath, DomainError, WorldFolderName, WorldLocation};
 
 /// Restores a world from a backup.
 ///
@@ -24,11 +24,11 @@ pub fn restore_backup(
     backup_repo: &dyn BackupRepository,
     world_repo: &dyn WorldRepository,
     folder_name: &WorldFolderName,
-    account_id: &AccountId,
+    location: &WorldLocation,
     backup_path: &BackupPath,
 ) -> Result<(), DomainError> {
-    // Verify backup exists and belongs to this world/account
-    let backups = backup_repo.list_by_world(folder_name, account_id)?;
+    // Verify backup exists and belongs to this world/location
+    let backups = backup_repo.list_by_world(folder_name, location)?;
     let backup = backups
         .iter()
         .find(|b| b.backup_path() == backup_path)
@@ -51,7 +51,7 @@ mod tests {
     use super::*;
     use blockoria_domain::{
         AccountId, Backup, BackupPath, BackupTimestamp, DomainError, LevelName, World,
-        WorldFolderName, WorldIconPath, WorldPath, WorldVersion,
+        WorldFolderName, WorldIconPath, WorldLocation, WorldPath, WorldVersion,
     };
     use std::fs;
     use std::path::{Path, PathBuf};
@@ -106,29 +106,35 @@ mod tests {
         fn list_by_world(
             &self,
             folder_name: &WorldFolderName,
-            account_id: &AccountId,
+            location: &WorldLocation,
         ) -> Result<Vec<Backup>, DomainError> {
             Ok(self
                 .backups
                 .iter()
                 .filter(|b| {
-                    b.world_folder_name() == folder_name && b.world_account_id() == account_id
+                    b.world_folder_name() == folder_name
+                        && match location {
+                            WorldLocation::Account(account_id) => {
+                                b.world_account_id() == account_id
+                            }
+                            WorldLocation::Shared => false, // Shared worlds don't have account_id in backup
+                        }
                 })
                 .cloned()
                 .collect())
         }
 
-        fn delete(&self, _backup_path: &BackupPath) -> Result<(), DomainError> {
+        fn delete(&self, _backup_path: &Path) -> Result<(), DomainError> {
             Ok(())
         }
     }
 
-    fn make_world(folder: &str, name: &str, path: &Path) -> World {
+    fn make_world(folder: &str, name: &str, path: &Path, location: WorldLocation) -> World {
         World::new(
             WorldFolderName::new(folder).unwrap(),
             LevelName::new(name).unwrap(),
             WorldPath::new(path).unwrap(),
-            AccountId::new("123456789012345678").unwrap(),
+            location,
             WorldVersion::new([1, 21, 0, 0, 0]).unwrap(),
             WorldIconPath::new(None::<PathBuf>).unwrap(),
         )
@@ -155,7 +161,12 @@ mod tests {
         fs::write(world_dir.path().join("level.dat"), b"original").unwrap();
 
         let backup = make_backup("aaaaaaaaaaa=", "123456789012345678", backup_dir.path());
-        let world = make_world("aaaaaaaaaaa=", "Test World", world_dir.path());
+        let world = make_world(
+            "aaaaaaaaaaa=",
+            "Test World",
+            world_dir.path(),
+            WorldLocation::Account(AccountId::new("123456789012345678").unwrap()),
+        );
 
         let backup_repo = MockBackupRepo::new(vec![backup.clone()]);
         let world_repo = MockWorldRepo::new(world);
@@ -165,7 +176,7 @@ mod tests {
             &backup_repo,
             &world_repo,
             &WorldFolderName::new("aaaaaaaaaaa=").unwrap(),
-            &AccountId::new("123456789012345678").unwrap(),
+            &WorldLocation::Account(AccountId::new("123456789012345678").unwrap()),
             backup.backup_path(),
         );
 
@@ -188,7 +199,12 @@ mod tests {
         let world_dir = TempDir::new().unwrap();
 
         let backup = make_backup("aaaaaaaaaaa=", "123456789012345678", backup_dir.path());
-        let world = make_world("aaaaaaaaaaa=", "Test World", world_dir.path());
+        let world = make_world(
+            "aaaaaaaaaaa=",
+            "Test World",
+            world_dir.path(),
+            WorldLocation::Account(AccountId::new("123456789012345678").unwrap()),
+        );
 
         let backup_repo = MockBackupRepo::new(vec![]); // empty
         let world_repo = MockWorldRepo::new(world);
@@ -198,7 +214,7 @@ mod tests {
             &backup_repo,
             &world_repo,
             &WorldFolderName::new("aaaaaaaaaaa=").unwrap(),
-            &AccountId::new("123456789012345678").unwrap(),
+            &WorldLocation::Account(AccountId::new("123456789012345678").unwrap()),
             backup.backup_path(),
         );
 
@@ -217,6 +233,7 @@ mod tests {
             "bbbbbbbbbbb=",
             "Other World",
             TempDir::new().unwrap().path(),
+            WorldLocation::Account(AccountId::new("123456789012345678").unwrap()),
         ));
 
         // When
@@ -224,7 +241,7 @@ mod tests {
             &backup_repo,
             &world_repo,
             &WorldFolderName::new("aaaaaaaaaaa=").unwrap(),
-            &AccountId::new("123456789012345678").unwrap(),
+            &WorldLocation::Account(AccountId::new("123456789012345678").unwrap()),
             backup.backup_path(),
         );
 

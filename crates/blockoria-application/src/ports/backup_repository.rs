@@ -7,7 +7,8 @@
 // to backup aggregates. The infrastructure layer must implement this trait to
 // provide backup persistence from any storage backend.
 
-use blockoria_domain::{AccountId, Backup, BackupPath, DomainError, WorldFolderName};
+use blockoria_domain::{Backup, DomainError, WorldFolderName, WorldLocation};
+use std::path::Path;
 
 /// Port for reading and writing Backup aggregates.
 pub trait BackupRepository: Send + Sync {
@@ -18,13 +19,13 @@ pub trait BackupRepository: Send + Sync {
     /// existing backups, cloud sync metadata).
     fn save(&self, backup: &Backup) -> Result<(), DomainError>;
 
-    /// Returns all backups for a given world (folder_name + account_id).
+    /// Returns all backups for a given world (folder_name + location).
     fn list_by_world(
         &self,
         folder_name: &WorldFolderName,
-        account_id: &AccountId,
+        location: &WorldLocation,
     ) -> Result<Vec<Backup>, DomainError>;
 
     /// Deletes a backup by its backup path.
-    fn delete(&self, backup_path: &BackupPath) -> Result<(), DomainError>;
+    fn delete(&self, backup_path: &Path) -> Result<(), DomainError>;
 }

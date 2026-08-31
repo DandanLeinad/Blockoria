@@ -106,6 +106,12 @@ impl fmt::Display for DomainError {
 
 impl std::error::Error for DomainError {}
 
+impl From<std::io::Error> for DomainError {
+    fn from(err: std::io::Error) -> Self {
+        DomainError::InvalidBackupPath(err.to_string())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
