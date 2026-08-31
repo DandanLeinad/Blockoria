@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.5.0] - 2026-08-31
+
+### Features
+- feat(infrastructure): add FileWorldRepository with explicit directory traversal (20 tests)
+- feat(infrastructure): add FileBackupRepository with timestamp-based structure (20 tests)
+- feat(infrastructure): add Config system with config.toml at %APPDATA%\Blockoria\config.toml
+- feat(domain): add WorldLocation enum (Account|Shared) with 11 TDD tests
+- feat(domain): add BackupTimestamp::from_filename_safe for filename-safe parsing
+- feat(domain): add Ord impl for BackupTimestamp (sort backups by timestamp)
+- feat(domain): add Default for WorldVersion ([0,0,0,0,0])
+- feat(domain): add Hash impl for AccountId (HashMap key support)
+- feat(domain): add From<io::Error> for DomainError (ergonomic error conversion)
+- feat(application): update all 5 use cases and ports for WorldLocation
+
+### Documentation
+- docs: update domain.md with WorldLocation and BackupTimestamp changes
+- docs: update application.md with WorldLocation in use cases signatures
+- docs: update Infrastructure layer status to Implemented (41 tests)
+- docs: update README.md and docs/index.md with Infrastructure status
+- docs: correct Domain test count to 78 (66 unit + 12 doctests)
+- docs: update workspace structure in README and docs
+
+### CI/CD
+- ci: fix cargo-deny license validation (AGPL-3.0 -> AGPL-3.0-only)
+- ci: add MPL-2.0 to allowed licenses for option-ext dependency
+
+### Dependencies
+- deps: add toml for config parsing
+
 ## [0.4.0] - 2026-08-29
 
 ### Features

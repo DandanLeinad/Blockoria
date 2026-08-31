@@ -6,7 +6,7 @@ icon: lucide/database
 
 Camada de domínio pura, sem dependências externas.
 
-## Value Objects (8)
+## Value Objects (9)
 
 | VO | Descrição | Testes |
 |------|-----------|--------|
@@ -18,6 +18,15 @@ Camada de domínio pura, sem dependências externas.
 | `WorldIconPath` | Caminho do ícone (`world_icon.jpeg`) | 6 |
 | `BackupTimestamp` | Timestamp UTC do backup | 6 |
 | `BackupPath` | Caminho do diretório de backup | 5 |
+| `WorldLocation` | Localização do mundo: `Account(AccountId)` \| `Shared` | 11 |
+
+## Novos métodos / traits (atualizações recentes)
+
+- `BackupTimestamp::from_filename_safe()` — Parse de timestamp do nome do diretório (`YYYY-MM-DDTHH-MM-SSZ`)
+- `BackupTimestamp: Ord` — Ordenação para listar backups mais recentes primeiro
+- `WorldVersion: Default` — Versão padrão `[0,0,0,0,0]`
+- `AccountId: Hash` — Para uso como chave em `HashMap`
+- `From<io::Error> for DomainError` — Conversão automática de erros de I/O
 
 ## Entities / Aggregates
 
@@ -43,13 +52,13 @@ Camada de domínio pura, sem dependências externas.
 
 | Métrica | Valor |
 |---------|-------|
-| Testes unitários | 54 |
-| Doctests | 11 |
-| **Total** | **65 passando** |
+| Testes unitários | 66 |
+| Doctests | 12 |
+| **Total** | **78 passando** |
 
 ```bash
-cargo test -p blockoria-domain
-cargo test -p blockoria-domain --doc
+cargo test -p blockoria-domain        # 66 passed
+cargo test -p blockoria-domain --doc  # 12 passed
 ```
 
 ## Estrutura do Crate
@@ -58,8 +67,8 @@ cargo test -p blockoria-domain --doc
 crates/blockoria-domain/
 ├── Cargo.toml
 └── src/
-    ├── lib.rs              # Re-exports públicos
-    ├── error.rs            # DomainError (8 variants)
+    ├── lib.rs                  # Re-exports públicos
+    ├── error.rs                # DomainError (8 variants)
     ├── world_folder_name.rs
     ├── level_name.rs
     ├── world_path.rs
@@ -68,7 +77,8 @@ crates/blockoria-domain/
     ├── world_icon_path.rs
     ├── backup_timestamp.rs
     ├── backup_path.rs
-    └── entities.rs         # World, Backup
+    ├── world_location.rs       # NOVO: WorldLocation enum
+    └── entities.rs             # World, Backup
 ```
 
 ## Próximos Passos

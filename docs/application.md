@@ -10,12 +10,24 @@ Camada de aplicação com use cases e ports (traits). Contém a lógica de negó
 
 ### `WorldRepository`
 - `list_all()` — Retorna todos os mundos conhecidos
-- `find_by_folder_name()` — Busca mundo pelo folder name
+- `find_by_folder_name(folder_name, location)` — Busca mundo pelo folder name + location
 
 ### `BackupRepository`
 - `save()` — Persiste um backup (reservado para uso futuro)
-- `list_by_world()` — Lista backups de um mundo (folder_name + account_id)
-- `delete()` — Remove um backup pelo caminho
+- `list_by_world(location)` — Lista backups de um mundo por `WorldLocation`
+- `delete(path)` — Remove um backup pelo caminho (idempotente)
+
+## Use Cases (5)
+
+| Use Case | Descrição | Testes |
+|----------|-----------|--------|
+| `create_backup` | Cria backup de um mundo copiando arquivos | 5 |
+| `list_worlds` | Lista todos os mundos conhecidos | 2 |
+| `list_backups` | Lista backups filtrando por mundo + conta via `WorldLocation` | 4 |
+| `restore_backup` | Restaura mundo a partir de backup | 3 |
+| `delete_backup` | Remove backup pelo caminho | 1 |
+
+**Total: 15 testes**
 
 ## Use Cases (5)
 
@@ -35,8 +47,8 @@ Camada de aplicação com use cases e ports (traits). Contém a lógica de negó
 
 | Métrica | Valor |
 |---------|-------|
-| Testes unitários | 14 |
-| **Total** | **14 passando** |
+| Testes unitários | 15 |
+| **Total** | **15 passando** |
 
 ```bash
 cargo test -p blockoria-application

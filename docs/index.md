@@ -14,7 +14,7 @@ hide:
     **NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.**
     Este é um projeto open-source independente, desenvolvido como hobby/estudo.
 
-[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg?style=for-the-badge)](https://github.com/DandanLeinad/blockoria/blob/main/LICENSE)
+[![License: AGPL-3.0-only](https://img.shields.io/badge/License-AGPL%203.0--only-blue.svg?style=for-the-badge)](https://github.com/DandanLeinad/blockoria/blob/main/LICENSE)
 [![Rust](https://img.shields.io/badge/Rust-1.80%2B-4f46e5?style=for-the-badge&logo=rust&logoColor=white)](https://rust-lang.org)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-4f46e5?style=for-the-badge&logo=tauri&logoColor=white)](https://tauri.app)
 [![Windows](https://img.shields.io/badge/Windows-10%2F11-0078d6?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
@@ -23,13 +23,13 @@ hide:
 
 ## 🏗️ Status Atual
 
-**Em desenvolvimento ativo** — Camada de domínio completa, **Application implementada** (5 use cases, 14 testes).
+**Em desenvolvimento ativo** — **Domain, Application e Infrastructure implementadas**.
 
 | Camada | Status |
 |--------|--------|
 | **Domain** (`blockoria-domain`) | ✅ Completo — VOs, Entities, Aggregates, Testes |
-| **Application** (`blockoria-application`) | ✅ Implementado — 5 use cases, 14 testes |
-| **Infrastructure** (`blockoria-infrastructure`) | ❌ Não iniciado |
+| **Application** (`blockoria-application`) | ✅ Implementado — 5 use cases, 15 testes |
+| **Infrastructure** (`blockoria-infrastructure`) | ✅ Implementado — FileWorldRepository, FileBackupRepository, Config (41 testes) |
 | **Frontend (Tauri + React)** | ❌ Não iniciado |
 
 ---
@@ -38,7 +38,7 @@ hide:
 
 A camada de domínio pura, sem dependências externas, contendo:
 
-### Value Objects (8)
+### Value Objects (9)
 | VO | Descrição | Testes |
 |------|-----------|--------|
 | `WorldFolderName` | Nome da pasta do mundo (12 chars + `=`) | 7 |
@@ -49,6 +49,14 @@ A camada de domínio pura, sem dependências externas, contendo:
 | `WorldIconPath` | Caminho do ícone (`world_icon.jpeg`) | 6 |
 | `BackupTimestamp` | Timestamp UTC do backup | 6 |
 | `BackupPath` | Caminho do diretório de backup | 5 |
+| `WorldLocation` | Localização do mundo: Account(AccountId) \| Shared | 11 |
+
+### Novos métodos / traits (atualizações recentes)
+- `BackupTimestamp::from_filename_safe()` — Parse de timestamp do nome do diretório
+- `BackupTimestamp: Ord` — Ordenação para listar backups mais recentes primeiro
+- `WorldVersion: Default` — Versão padrão [0,0,0,0,0]
+- `AccountId: Hash` — Para uso como chave em HashMap
+- `From<io::Error> for DomainError` — Conversão automática de erros de I/O
 
 ### Entities / Aggregates
 | Entity | Tipo | Descrição |
@@ -74,15 +82,24 @@ A camada de domínio pura, sem dependências externas, contendo:
 
 | Métrica | Valor |
 |---------|-------|
-| Testes unitários | 54 |
-| Doctests | 11 |
-| **Total** | **65 passando** |
+| Testes unitários (domain) | 66 |
+| Doctests (domain) | 12 |
+| Testes unitários (application) | 15 |
+| Testes unitários (infrastructure) | 21 |
+| Testes integração (infrastructure) | 20 |
+| **Total** | **134 passando** |
 
 ```bash
 cargo test -p blockoria-domain
-# 53 passed
+# 66 passed
 cargo test -p blockoria-domain --doc
-# 11 passed
+# 12 passed
+cargo test -p blockoria-application
+# 15 passed
+cargo test -p blockoria-infrastructure
+# 21 passed
+cargo test -p blockoria-infrastructure --test integration_tests
+# 20 passed
 ```
 
 ---
@@ -121,8 +138,8 @@ crates/blockoria-domain/
 
 ## 🎯 Próximos Passos
 
-1. **Infrastructure** (`blockoria-infrastructure`) — File Repositories, Tauri Commands
-2. **Frontend** — Tauri 2 + React + TypeScript
+1. **Frontend** — Tauri 2 + React + TypeScript (`src-tauri/`)
+2. **Integração** — Tauri commands chamando use cases, composition root em `main.rs`
 
 ---
 
