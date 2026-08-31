@@ -6,7 +6,7 @@
 > ⚠️ **NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.**
 > Este é um projeto open-source independente, desenvolvido como hobby/estudo.
 
-[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg?style=for-the-badge)](LICENSE)
+[![License: AGPL-3.0-only](https://img.shields.io/badge/License-AGPL%203.0--only-blue.svg?style=for-the-badge)](LICENSE)
 [![Rust](https://img.shields.io/badge/Rust-1.80%2B-4f46e5?style=for-the-badge&logo=rust&logoColor=white)](https://rust-lang.org)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-4f46e5?style=for-the-badge&logo=tauri&logoColor=white)](https://tauri.app)
 [![Windows](https://img.shields.io/badge/Windows-10%2F11-0078d6?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
@@ -15,13 +15,13 @@
 
 ## 🏗️ Status Atual
 
-**Em desenvolvimento ativo** — Camada de domínio completa, **Application implementada** (5 use cases, 14 testes).
+**Em desenvolvimento ativo** — **Domain, Application e Infrastructure implementadas**.
 
 | Camada | Status |
 |--------|--------|
-| **Domain** (`blockoria-domain`) | ✅ Completo — VOs, Entities, Aggregates, Testes |
-| **Application** (`blockoria-application`) | ✅ Implementado — 5 use cases, 14 testes |
-| **Infrastructure** (`blockoria-infrastructure`) | ❌ Não iniciado |
+| **Domain** (`blockoria-domain`) | ✅ Completo — 9 VOs, Entities, Aggregates, 66 testes + 12 doctests |
+| **Application** (`blockoria-application`) | ✅ Implementado — 5 use cases, 15 testes |
+| **Infrastructure** (`blockoria-infrastructure`) | ✅ Implementado — FileWorldRepository, FileBackupRepository, Config (41 testes) |
 | **Frontend (Tauri + React)** | ❌ Não iniciado |
 
 ---
@@ -30,7 +30,7 @@
 
 Camada de domínio pura, sem dependências externas.
 
-### Value Objects (8)
+### Value Objects (9)
 | VO | Descrição | Testes |
 |------|-----------|--------|
 | `WorldFolderName` | Nome da pasta do mundo (12 chars + `=`) | 7 |
@@ -41,6 +41,14 @@ Camada de domínio pura, sem dependências externas.
 | `WorldIconPath` | Caminho do ícone (`world_icon.jpeg`) | 6 |
 | `BackupTimestamp` | Timestamp UTC do backup | 6 |
 | `BackupPath` | Caminho do diretório de backup | 5 |
+| `WorldLocation` | Localização do mundo: Account(AccountId) \| Shared | 11 |
+
+### Novos métodos / traits (atualizações recentes)
+- `BackupTimestamp::from_filename_safe()` — Parse de timestamp do nome do diretório
+- `BackupTimestamp: Ord` — Ordenação para listar backups mais recentes primeiro
+- `WorldVersion: Default` — Versão padrão [0,0,0,0,0]
+- `AccountId: Hash` — Para uso como chave em HashMap
+- `From<io::Error> for DomainError` — Conversão automática de erros de I/O
 
 ### Entities / Aggregates
 | Entity | Tipo | Descrição |
@@ -65,10 +73,10 @@ Camada de domínio pura, sem dependências externas.
 ## ✅ Testes
 
 ```bash
-cargo test -p blockoria-domain    # 54 unit tests
-cargo test -p blockoria-domain --doc  # 11 doctests
-cargo test -p blockoria-application  # 14 use case tests
-# Total: 79 passing
+cargo test -p blockoria-domain        # 66 unit tests + 12 doctests = 78
+cargo test -p blockoria-application   # 15 use case tests
+cargo test -p blockoria-infrastructure # 21 unit + 20 integration = 41
+# Total: 134 passing
 ```
 
 ---
@@ -90,9 +98,9 @@ cargo test -p blockoria-application  # 14 use case tests
 blockoria/
 ├── Cargo.toml
 ├── crates/
-│   ├── blockoria-domain/      # ✅ Completo
-│   ├── blockoria-application/ # ✅ Implementado (5 use cases)
-│   └── blockoria-infrastructure/ # ❌ Não iniciado
+│   ├── blockoria-domain/      # ✅ Completo (9 VOs, 66 testes)
+│   ├── blockoria-application/ # ✅ Implementado (5 use cases, 15 testes)
+│   └── blockoria-infrastructure/ # ✅ Implementado (repos, config, 41 testes)
 ├── docs/                      # Documentação (Zensical)
 └── LICENSE                    # AGPL-3.0-or-later
 ```
@@ -101,8 +109,8 @@ blockoria/
 
 ## 🎯 Próximos Passos
 
-1. **Infrastructure** (`blockoria-infrastructure`) — File Repositories, Tauri Commands
-2. **Frontend** — Tauri 2 + React + TypeScript
+1. **Frontend** — Tauri 2 + React + TypeScript (`src-tauri/`)
+2. **Integração** — Tauri commands chamando use cases, composition root em `main.rs`
 
 ---
 
