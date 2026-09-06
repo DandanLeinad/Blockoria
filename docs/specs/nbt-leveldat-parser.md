@@ -171,7 +171,7 @@ pub struct LeReader<R: Read> {
 impl<R: Read> LeReader<R> {
     pub fn new(reader: R) -> Self { ... }
     pub fn offset(&self) -> u64 { self.offset }
-    
+
     // LE reading via from_le_bytes (sem byteorder dep)
     pub fn read_i8(&mut self) -> Result<i8, NbtError>
     pub fn read_u8(&mut self) -> Result<u8, NbtError>
@@ -214,25 +214,25 @@ const MAX_LEVEL_DAT_SIZE: usize = 10_000_000;      // 10 MB arquivo inteiro
 pub enum NbtError {
     #[error("Unexpected EOF at offset {offset}")]
     UnexpectedEof { offset: u64 },
-    
+
     #[error("Unknown tag ID {id} at offset {offset}")]
     UnknownTag { id: u8, offset: u64 },
-    
+
     #[error("Invalid UTF-8 in string at offset {offset}: {source}")]
     InvalidUtf8 { offset: u64, source: std::str::Utf8Error },
-    
+
     #[error("Negative length {len} for {context} at offset {offset}")]
     NegativeLength { len: i32, context: &'static str, offset: u64 },
-    
+
     #[error("Excessive length {len} for {context} at offset {offset} (max {max})")]
     ExcessiveLength { len: i32, context: &'static str, max: usize, offset: u64 },
-    
+
     #[error("Maximum nesting depth ({max}) exceeded at offset {offset}")]
     MaxDepthExceeded { max: usize, offset: u64 },
-    
+
     #[error("IO error at offset {offset}: {source}")]
     Io { offset: u64, source: std::io::Error },
-    
+
     #[error("Invalid level.dat header: {reason}")]
     InvalidHeader { reason: String },
 }
