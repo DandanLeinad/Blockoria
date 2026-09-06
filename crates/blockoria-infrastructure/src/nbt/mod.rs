@@ -9,13 +9,16 @@
 //! - [`NbtValue`] - Parsed NBT value AST
 //! - [`NbtList`] - TAG_List wrapper preserving element type
 //! - [`LeReader`] - Little-endian binary reader with safety limits
+//! - [`Parser`] - Generic LE-NBT parser with depth tracking
 
 pub mod error;
+pub mod parser;
 pub mod reader;
 pub mod tag_type;
 pub mod value;
 
 pub use error::{NbtError, NbtErrorExt};
+pub use parser::Parser;
 pub use reader::LeReader;
 pub use tag_type::NbtTagType;
 pub use value::{NbtList, NbtValue};
