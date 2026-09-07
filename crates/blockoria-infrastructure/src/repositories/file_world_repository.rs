@@ -6,6 +6,7 @@
 //! Scans the Minecraft Bedrock worlds directory structure:
 //! `%APPDATA%\Minecraft Bedrock\Users\<account_id|Shared>\games\com.mojang\minecraftWorlds\`
 
+use crate::nbt::{LevelDatParser, extract_world_version};
 use blockoria_application::ports::WorldRepository;
 use blockoria_domain::{
     AccountId, DomainError, LevelName, World, WorldFolderName, WorldIconPath, WorldLocation,
@@ -193,10 +194,10 @@ impl FileWorldRepository {
     /// Parses world version from level.dat (NBT format).
     /// Returns None if parsing fails - caller should use default.
     fn parse_level_dat_version(path: &Path) -> Option<WorldVersion> {
-        // TODO: Implement proper NBT parsing
-        // For now, return None to use default version
-        let _ = path; // suppress unused warning
-        None
+        let file = fs::File::open(path).ok()?;
+        let parser = LevelDatParser::new(file).ok()?;
+        let nbt = parser.parse().ok()?;
+        extract_world_version(&nbt)
     }
 }
 
