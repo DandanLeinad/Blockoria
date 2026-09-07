@@ -98,16 +98,17 @@ impl<R: Read> LevelDatParser<R> {
 /// Supports both TAG_Int_Array and TAG_List of TAG_Int formats.
 /// Returns None if not found or format is invalid.
 pub fn extract_world_version(nbt: &super::NbtValue) -> Option<WorldVersion> {
-    // Navigate: root Compound -> "Data" (or root) -> "lastOpenedWithVersion"
+    // Navigate: root Compound -> "Data" (or root or empty-key) -> "lastOpenedWithVersion"
     let root_compound = match nbt {
         super::NbtValue::Compound(map) => map,
         _ => return None,
     };
 
-    // Try "Data" first (common in Bedrock), then root
+    // Try "Data" first (common in Bedrock), then empty-key root (common in newer Bedrock), then root
     let data_compound = root_compound
         .get("Data")
         .and_then(|v| v.as_compound())
+        .or_else(|| root_compound.get("").and_then(|v| v.as_compound()))
         .unwrap_or(root_compound);
 
     let version_value = data_compound.get("lastOpenedWithVersion")?;
