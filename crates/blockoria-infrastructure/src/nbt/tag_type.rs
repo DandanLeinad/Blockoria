@@ -4,7 +4,7 @@
 //! NBT Tag Type enumeration (IDs 0-12) for Little-Endian NBT.
 //!
 //! Matches Minecraft Bedrock Edition LE-NBT specification.
-//! Reference: https://minecraft.fandom.com/wiki/Bedrock_Edition_level_format
+//! Reference: <https://minecraft.fandom.com/wiki/Bedrock_Edition_level_format>
 
 use crate::NbtError;
 use std::convert::TryFrom;
@@ -28,17 +28,17 @@ pub enum NbtTagType {
     Float = 5,
     /// TAG_Double - 64-bit floating point (little-endian)
     Double = 6,
-    /// TAG_Byte_Array - Array of bytes [i32 length][bytes...]
+    /// TAG_Byte_Array - Array of bytes \[i32 length\]\[bytes...\]
     ByteArray = 7,
-    /// TAG_String - UTF-8 string [u16 length][bytes...]
+    /// TAG_String - UTF-8 string \[u16 length\]\[bytes...\]
     String = 8,
-    /// TAG_List - Homogeneous list [u8 subtype][i32 length][elements...]
+    /// TAG_List - Homogeneous list \[u8 subtype\]\[i32 length\]\[elements...\]
     List = 9,
-    /// TAG_Compound - Map of named tags [u8 tag_id][string name][payload]... TAG_End
+    /// TAG_Compound - Map of named tags \[u8 tag_id\]\[string name\]\[payload\]... TAG_End
     Compound = 10,
-    /// TAG_Int_Array - Array of ints [i32 length][i32 values...]
+    /// TAG_Int_Array - Array of ints \[i32 length\]\[i32 values...\]
     IntArray = 11,
-    /// TAG_Long_Array - Array of longs [i32 length][i64 values...]
+    /// TAG_Long_Array - Array of longs \[i32 length\]\[i64 values...\]
     LongArray = 12,
 }
 

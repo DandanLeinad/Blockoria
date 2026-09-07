@@ -75,7 +75,7 @@ impl<R: std::io::Read> Parser<R> {
 
     /// Parses a TAG_Compound (map of named tags).
     ///
-    /// Reads repeated [tag_id][name][payload] until TAG_End (0).
+    /// Reads repeated \[tag_id\]\[name\]\[payload\] until TAG_End (0).
     /// Enforces MAX_COMPOUND_ENTRIES and MAX_NESTING_DEPTH limits.
     pub fn parse_compound(&mut self) -> Result<BTreeMap<String, NbtValue>, NbtError> {
         if self.depth >= MAX_NESTING_DEPTH {
