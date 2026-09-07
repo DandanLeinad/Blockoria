@@ -21,7 +21,7 @@
 |--------|--------|
 | **Domain** (`blockoria-domain`) | ✅ Completo — 9 VOs, Entities, Aggregates, 66 testes + 12 doctests |
 | **Application** (`blockoria-application`) | ✅ Implementado — 5 use cases, 15 testes |
-| **Infrastructure** (`blockoria-infrastructure`) | ✅ Implementado — FileWorldRepository, FileBackupRepository, Config (41 testes) |
+| **Infrastructure** (`blockoria-infrastructure`) | ✅ Implementado — FileWorldRepository, FileBackupRepository, Config, **NBT Parser** (115 testes) |
 | **Frontend (Tauri + React)** | ❌ Não iniciado |
 
 ---
@@ -75,8 +75,8 @@ Camada de domínio pura, sem dependências externas.
 ```bash
 cargo test -p blockoria-domain        # 66 unit tests + 12 doctests = 78
 cargo test -p blockoria-application   # 15 use case tests
-cargo test -p blockoria-infrastructure # 21 unit + 20 integration = 41
-# Total: 134 passing
+cargo test -p blockoria-infrastructure # 115 unit/integration tests (incl. NBT parser)
+# Total: 208 passing
 ```
 
 ---
@@ -100,8 +100,12 @@ blockoria/
 ├── crates/
 │   ├── blockoria-domain/      # ✅ Completo (9 VOs, 66 testes)
 │   ├── blockoria-application/ # ✅ Implementado (5 use cases, 15 testes)
-│   └── blockoria-infrastructure/ # ✅ Implementado (repos, config, 41 testes)
+│   └── blockoria-infrastructure/
+│       ├── repos/             # FileWorldRepository, FileBackupRepository
+│       ├── config/            # Config system (config.toml)
+│       └── nbt/               # ✅ LE-NBT parser (level.dat, JSON)
 ├── docs/                      # Documentação (Zensical)
+├── tests/                     # Integração + BDD features
 └── LICENSE                    # AGPL-3.0-or-later
 ```
 

@@ -27,9 +27,9 @@ hide:
 
 | Camada | Status |
 |--------|--------|
-| **Domain** (`blockoria-domain`) | ✅ Completo — VOs, Entities, Aggregates, Testes |
+| **Domain** (`blockoria-domain`) | ✅ Completo — VOs, Entities, Aggregates, 66 testes + 12 doctests |
 | **Application** (`blockoria-application`) | ✅ Implementado — 5 use cases, 15 testes |
-| **Infrastructure** (`blockoria-infrastructure`) | ✅ Implementado — FileWorldRepository, FileBackupRepository, Config (41 testes) |
+| **Infrastructure** (`blockoria-infrastructure`) | ✅ Implementado — FileWorldRepository, FileBackupRepository, Config, **NBT Parser** (115 testes) |
 | **Frontend (Tauri + React)** | ❌ Não iniciado |
 
 ---
@@ -85,9 +85,9 @@ A camada de domínio pura, sem dependências externas, contendo:
 | Testes unitários (domain) | 66 |
 | Doctests (domain) | 12 |
 | Testes unitários (application) | 15 |
-| Testes unitários (infrastructure) | 21 |
+| Testes unitários (infrastructure) | 95 |
 | Testes integração (infrastructure) | 20 |
-| **Total** | **134 passando** |
+| **Total** | **208 passando** |
 
 ```bash
 cargo test -p blockoria-domain
@@ -97,10 +97,57 @@ cargo test -p blockoria-domain --doc
 cargo test -p blockoria-application
 # 15 passed
 cargo test -p blockoria-infrastructure
-# 21 passed
+# 115 passed (incl. 11 NBT JSON + 104 NBT core)
 cargo test -p blockoria-infrastructure --test integration_tests
 # 20 passed
 ```
+
+---
+
+## 📊 NBT Parser (`blockoria-infrastructure/src/nbt/`)
+
+Parser completo **Little-Endian NBT** para arquivos `level.dat` do Minecraft Bedrock.
+
+### Componentes
+| Módulo | Descrição |
+|--------|-----------|
+| `error.rs` | `NbtError` com offsets + limites de segurança (MAX_SIZE=10MB, MAX_DEPTH=64, MAX_COMPOUND_ENTRIES=10k, MAX_LIST_LENGTH=1M) |
+| `tag_type.rs` | `NbtTagType` enum (0-12) com `TryFrom<u8>` |
+| `value.rs` | `NbtValue` AST + `NbtList` wrapper preserva element_type |
+| `reader.rs` | `LeReader<R: Read>` — LE binary reading via `from_le_bytes` (zero deps) |
+| `parser.rs` | Parser genérico recursivo com depth tracking |
+| `level_dat.rs` | `LevelDatHeader` (8 bytes LE), `LevelDatParser`, `extract_world_version` |
+| `json.rs` | `to_json_simple()` + `to_json_typed()` (feature `serde`) |
+
+### Integração
+`FileWorldRepository::parse_level_dat_version()` agora usa o parser real (era stub retornando `None`):
+```rust
+fn parse_level_dat_version(path: &Path) -> Option<WorldVersion> {
+    let file = fs::File::open(path).ok()?;
+    let mut parser = LevelDatParser::new(file).ok()?;
+    let nbt = parser.parse().ok()?;
+    extract_world_version(&nbt)
+}
+```
+
+### Especificação
+- **SDD Spec:** [`docs/specs/nbt-leveldat-parser.md`](specs/nbt-leveldat-parser.md)
+- **BDD Scenarios:** [`tests/features/nbt_leveldat_parser.feature`](../tests/features/nbt_leveldat_parser.feature)
+
+### Limites de Segurança
+```rust
+const MAX_LEVEL_DAT_SIZE: usize = 10_000_000;      // 10 MB
+const MAX_NESTING_DEPTH: usize = 128;
+const MAX_COMPOUND_ENTRIES: usize = 100_000;
+const MAX_LIST_LENGTH: usize = 1_000_000;
+const MAX_STRING_LENGTH: usize = 1_000_000;
+```
+
+### Testes NBT
+- 104 testes unitários (core parser, reader, level_dat)
+- 11 testes JSON serialization (simple + typed)
+- 20 testes integração (repositórios)
+- **Zero `unwrap()`/`expect()`** na lógica do parser
 
 ---
 
