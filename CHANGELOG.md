@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.6.0] - 2026-09-07
+
+### Features
+- feat(nbt): add NbtError with safety limits (MAX_SIZE=10MB, MAX_DEPTH=128, MAX_COMPOUND_ENTRIES=100k, MAX_LIST_LENGTH=1M, MAX_STRING_LENGTH=1M)
+- feat(nbt): add NbtTagType enum (0-12) with TryFrom<u8>, has_payload/is_container/is_array helpers
+- feat(nbt): add NbtValue AST and NbtList wrapper preserving element_type for TAG_List
+- feat(nbt): add LeReader<R: Read> with exact byte counting, offset tracking, from_le_bytes (zero deps)
+- feat(nbt): add generic Parser with depth tracking (compound, list, array, primitive types)
+- feat(nbt): add LevelDatHeader (8-byte LE: version + nbt_size) and LevelDatParser with nbt_size validation
+- feat(nbt): add extract_world_version supporting TAG_Int_Array and TAG_List[TAG_Int] formats for lastOpenedWithVersion
+- feat(nbt): add JSON serialization (to_json_simple + to_json_typed) behind serde feature gate
+- feat(infrastructure): integrate NBT parser in FileWorldRepository::parse_level_dat_version (was stub)
+
+### Documentation
+- docs: add SDD spec for LE-NBT level.dat parser (docs/specs/nbt-leveldat-parser.md)
+- docs: add BDD scenarios in Gherkin (tests/features/nbt_leveldat_parser.feature)
+- docs: update Infrastructure layer status to include NBT Parser (115 tests)
+- docs: update README.md and docs/index.md with NBT Parser section and test counts (208 total)
+- docs: update domain.md with NBT integration section
+
+### Testing
+- test: 115 new tests in blockoria-infrastructure (104 NBT core + 11 JSON)
+- test: all 208 workspace tests passing (78 domain + 15 app + 115 infra)
+
+### Dependencies
+- deps: upgrade dirs to v7
+
 ## [0.5.0] - 2026-08-31
 
 ### Features
