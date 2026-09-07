@@ -450,9 +450,6 @@ mod tests {
         let result = parser.parse_compound();
 
         // Then
-        if let Err(e) = &result {
-            eprintln!("Error: {:?}", e);
-        }
         assert!(result.is_ok());
         let compound = result.unwrap();
         let outer = compound.get("outer").unwrap();
@@ -550,7 +547,6 @@ mod tests {
         let result = parser.parse_compound();
 
         // Then
-        eprintln!("Result: {:?}", result);
         assert!(result.is_err());
         assert!(
             matches!(result, Err(NbtError::ExcessiveLength { context, .. }) if context == "Compound")

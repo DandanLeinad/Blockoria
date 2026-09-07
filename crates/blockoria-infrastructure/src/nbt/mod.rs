@@ -10,14 +10,19 @@
 //! - [`NbtList`] - TAG_List wrapper preserving element type
 //! - [`LeReader`] - Little-endian binary reader with safety limits
 //! - [`Parser`] - Generic LE-NBT parser with depth tracking
+//! - [`LevelDatHeader`] - level.dat file header
+//! - [`LevelDatParser`] - level.dat file parser
+//! - [`extract_world_version`] - Extract WorldVersion from NBT
 
 pub mod error;
+pub mod level_dat;
 pub mod parser;
 pub mod reader;
 pub mod tag_type;
 pub mod value;
 
 pub use error::{NbtError, NbtErrorExt};
+pub use level_dat::{LevelDatHeader, LevelDatParser, extract_world_version};
 pub use parser::Parser;
 pub use reader::LeReader;
 pub use tag_type::NbtTagType;
