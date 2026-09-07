@@ -81,6 +81,13 @@ crates/blockoria-domain/
     └── entities.rs             # World, Backup
 ```
 
+## Integração com Infrastructure (NBT)
+
+O parser LE-NBT em `blockoria-infrastructure/src/nbt/` extrai `WorldVersion` do `level.dat`:
+- `extract_world_version(&NbtValue)` → `Option<WorldVersion>`
+- Suporta `TAG_Int_Array` e `TAG_List[TAG_Int]` para `lastOpenedWithVersion`
+- Integrado em `FileWorldRepository::parse_level_dat_version()`
+
 ## Próximos Passos
 
 A camada de domínio está **completa**. Próximos passos na camada de aplicação e infraestrutura.
