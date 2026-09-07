@@ -13,8 +13,11 @@
 //! - [`LevelDatHeader`] - level.dat file header
 //! - [`LevelDatParser`] - level.dat file parser
 //! - [`extract_world_version`] - Extract WorldVersion from NBT
+//! - [`to_json_simple`] - Simple JSON serialization
+//! - [`to_json_typed`] - Typed JSON serialization
 
 pub mod error;
+pub mod json;
 pub mod level_dat;
 pub mod parser;
 pub mod reader;
@@ -22,6 +25,7 @@ pub mod tag_type;
 pub mod value;
 
 pub use error::{NbtError, NbtErrorExt};
+pub use json::{to_json_simple, to_json_typed};
 pub use level_dat::{LevelDatHeader, LevelDatParser, extract_world_version};
 pub use parser::Parser;
 pub use reader::LeReader;
