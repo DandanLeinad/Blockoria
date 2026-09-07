@@ -121,3 +121,40 @@ repos:
             pre-push
           ]
         pass_filenames: false
+
+
+  # TypeScript / React / Frontend (app/) - local hooks
+  - repo: local
+    hooks:
+      - id: eslint-check
+        name: ESLint check (app/)
+        language: system
+        entry: bunx eslint --max-warnings=0
+        files: ^app/
+        types: [javascript, jsx, tsx]
+        stages: [pre-commit]
+
+      - id: prettier-check
+        name: Prettier check (app/)
+        language: system
+        entry: bunx prettier --check
+        files: ^app/
+        types: [javascript, jsx, tsx, json, css, html, markdown, yaml]
+        stages: [pre-commit]
+
+      - id: prettier-fix
+        name: Prettier fix (app/)
+        language: system
+        entry: bunx prettier --write
+        files: ^app/
+        types: [javascript, jsx, tsx, json, css, html, markdown, yaml]
+        stages: [pre-commit]
+        pass_filenames: true
+
+      - id: tsc-check
+        name: TypeScript type check (app/)
+        language: system
+        entry: cmd /c "cd app && bun run tsc --noEmit"
+        files: ^app/
+        pass_filenames: false
+        stages: [pre-commit]

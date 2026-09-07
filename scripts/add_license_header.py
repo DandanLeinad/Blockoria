@@ -2,11 +2,13 @@
 # Copyright (C) 2026 DandanLeinad
 
 #!/usr/bin/env python3
-"""Script para adicionar header SPDX nos arquivos Rust do projeto Blockoria.
+"""Script para adicionar header SPDX nos arquivos do projeto Blockoria.
 
-Atualmente o projeto utiliza:
-- Cargo Workspace
-- Crates Rust
+Suporta:
+- Rust (.rs) - comentários //
+- TypeScript/JavaScript (.ts, .tsx, .js, .jsx) - comentários //
+- CSS (.css) - comentários /* */
+- HTML (.html) - comentários <!-- -->
 
 Uso:
 
@@ -29,15 +31,44 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-
 SUPPORTED_EXTENSIONS = {
     ".rs",
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
+    ".css",
+    ".html",
 }
 
+# Mapeia extensão para formato de header SPDX
+SPDX_HEADERS = {
+    ".rs": """// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 DandanLeinad""",
+    ".ts": """// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 DandanLeinad""",
+    ".tsx": """// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 DandanLeinad""",
+    ".js": """// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 DandanLeinad""",
+    ".jsx": """// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 DandanLeinad""",
+    ".css": """/* SPDX-License-Identifier: AGPL-3.0-or-later
+ * Copyright (C) 2026 DandanLeinad */""",
+    ".html": """<!-- SPDX-License-Identifier: AGPL-3.0-or-later
+     Copyright (C) 2026 DandanLeinad -->""",
+}
 
-SPDX_LICENSE_HEADER = """// SPDX-License-Identifier: AGPL-3.0-or-later
-// Copyright (C) 2026 DandanLeinad"""
-
+# Prefixos para detecção
+SPDX_PREFIXES = {
+    ".rs": "// SPDX-License-Identifier:",
+    ".ts": "// SPDX-License-Identifier:",
+    ".tsx": "// SPDX-License-Identifier:",
+    ".js": "// SPDX-License-Identifier:",
+    ".jsx": "// SPDX-License-Identifier:",
+    ".css": "/* SPDX-License-Identifier:",
+    ".html": "<!-- SPDX-License-Identifier:",
+}
 
 OLD_AGPL_HEADER_PATTERN = re.compile(
     r"// blockoria\s*\n"
@@ -48,22 +79,34 @@ OLD_AGPL_HEADER_PATTERN = re.compile(
     re.MULTILINE,
 )
 
-
 IGNORE_DIRS = {
     ".git",
     "target",
     ".venv",
+    "node_modules",
+    "site",
 }
 
 
-def has_spdx_header(content: str) -> bool:
+def get_spdx_header(ext: str) -> str:
+    """Retorna o header SPDX apropriado para a extensão."""
+    return SPDX_HEADERS.get(ext, SPDX_HEADERS[".rs"])
+
+
+def get_spdx_prefix(ext: str) -> str:
+    """Retorna o prefixo esperado para detecção."""
+    return SPDX_PREFIXES.get(ext, "// SPDX-License-Identifier:")
+
+
+def has_spdx_header(content: str, ext: str) -> bool:
     """Verifica se arquivo já possui SPDX."""
 
-    return content.lstrip().startswith("// SPDX-License-Identifier:")
+    prefix = get_spdx_prefix(ext)
+    return content.lstrip().startswith(prefix)
 
 
 def has_old_agpl_header(content: str) -> bool:
-    """Verifica header antigo AGPL."""
+    """Verifica header antigo AGPL (formato Rust //)."""
 
     return bool(OLD_AGPL_HEADER_PATTERN.search(content))
 
@@ -72,16 +115,17 @@ def add_license_header(file_path: Path) -> bool:
     """Adiciona ou atualiza header SPDX."""
 
     try:
+        ext = file_path.suffix
         content = file_path.read_text(encoding="utf-8")
 
-        if has_spdx_header(content):
+        if has_spdx_header(content, ext):
             logger.info(f"[=] {file_path} - já possui SPDX")
 
             return False
 
         if has_old_agpl_header(content):
             new_content = OLD_AGPL_HEADER_PATTERN.sub(
-                SPDX_LICENSE_HEADER,
+                get_spdx_header(ext),
                 content,
                 count=1,
             )
@@ -95,7 +139,7 @@ def add_license_header(file_path: Path) -> bool:
 
             return True
 
-        new_content = f"{SPDX_LICENSE_HEADER}\n\n{content}"
+        new_content = f"{get_spdx_header(ext)}\n\n{content}"
 
         file_path.write_text(
             new_content,
@@ -113,7 +157,7 @@ def add_license_header(file_path: Path) -> bool:
 
 
 def find_source_files(path: Path | str) -> list[Path]:
-    """Encontra arquivos Rust."""
+    """Encontra arquivos suportados."""
 
     path = Path(path)
 
@@ -143,12 +187,12 @@ def main():
 
         sys.exit(1)
 
-    logger.info(f"Procurando arquivos Rust em: {target_path.resolve()}")
+    logger.info(f"Procurando arquivos em: {target_path.resolve()}")
 
     source_files = find_source_files(target_path)
 
     if not source_files:
-        logger.warning("Nenhum arquivo Rust encontrado")
+        logger.warning("Nenhum arquivo suportado encontrado")
 
         sys.exit(0)
 
