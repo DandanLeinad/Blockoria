@@ -115,7 +115,7 @@ def validate_files(file_paths: list[Path]) -> bool:
             if not has_spdx_header(content, ext):
                 missing_header.append(path)
 
-        except Exception as exc:
+        except (OSError, UnicodeDecodeError) as exc:
             logger.error(f"Error checking {path}: {exc}")
 
             missing_header.append(path)

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (C) 2026 DandanLeinad
 
-#!/usr/bin/env python3
 """Script para adicionar header SPDX nos arquivos do projeto Blockoria.
 
 Suporta:
@@ -150,7 +149,7 @@ def add_license_header(file_path: Path) -> bool:
 
         return True
 
-    except Exception as exc:
+    except (OSError, UnicodeError) as exc:
         logger.error(f"[-] {file_path} - erro: {exc}")
 
         return False
