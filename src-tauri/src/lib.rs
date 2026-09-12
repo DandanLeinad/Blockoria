@@ -9,6 +9,7 @@
 
 use blockoria_domain::DomainError;
 use blockoria_infrastructure::{FileBackupRepository, FileWorldRepository};
+use std::fs;
 use std::sync::Arc;
 
 // ============================================================================
@@ -158,7 +159,7 @@ mod commands {
         state: State<'_, AppState>,
     ) -> CommandResult<CreateBackupResponseDto> {
         let folder_name = WorldFolderName::new(&world_folder_name).map_err(CommandError::from)?;
-        let _location = match account_id {
+        let location = match account_id {
             Some(id) => WorldLocation::Account(AccountId::new(&id).map_err(CommandError::from)?),
             None => WorldLocation::Shared,
         };
@@ -172,9 +173,14 @@ mod commands {
                     "World not found".into(),
                 ))
             })?;
-        let backup_root = backup_repo.backup_root();
+        let backup_root = backup_repo.backup_root().join(location.as_path_segment());
+        fs::create_dir_all(&backup_root).map_err(|error| {
+            CommandError::from(blockoria_domain::DomainError::InvalidBackupPath(
+                error.to_string(),
+            ))
+        })?;
         let backup =
-            uc_create_backup::create_backup(&world, backup_root).map_err(CommandError::from)?;
+            uc_create_backup::create_backup(&world, &backup_root).map_err(CommandError::from)?;
         Ok(CreateBackupResponseDto {
             backup_path: backup.backup_path().as_path().to_string_lossy().to_string(),
             timestamp: backup.created_at().to_iso_string(),

@@ -15,7 +15,7 @@
 //! 5. Returns the created `Backup` aggregate
 
 use crate::util::copy_dir_all;
-use blockoria_domain::{Backup, BackupPath, BackupTimestamp, DomainError, World};
+use blockoria_domain::{AccountId, Backup, BackupPath, BackupTimestamp, DomainError, World};
 use std::fs;
 use std::path::Path;
 
@@ -55,8 +55,8 @@ pub fn create_backup(world: &World, backup_root: &Path) -> Result<Backup, Domain
         world.folder_name().clone(),
         world
             .account_id()
-            .expect("world must have account_id for backup")
-            .clone(),
+            .cloned()
+            .unwrap_or_else(|| AccountId::new("shared").expect("static account ID is valid")),
         world.version().clone(),
         timestamp,
         BackupPath::new(&backup_dir)?,

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (C) 2026 DandanLeinad
 
-#!/usr/bin/env python3
 """Script to validate SPDX license headers in the Blockoria project.
 
 Este script valida headers SPDX nos arquivos do workspace (Rust + Frontend).
@@ -40,8 +39,8 @@ SPDX_PREFIXES = {
     ".tsx": "//",
     ".js": "//",
     ".jsx": "//",
-    ".css": "/*",
-    ".html": "<!--",
+    ".css": "/* SPDX-License-Identifier:",
+    ".html": "<!-- SPDX-License-Identifier:",
 }
 
 # Mapeia extensão para sufixo de comentário (se necessário)
@@ -69,7 +68,16 @@ def has_spdx_header(content: str, ext: str) -> bool:
     first_lines = content.splitlines()[:10]
     expected_start = get_spdx_header_start(ext)
 
-    return any(line.strip().startswith(expected_start) for line in first_lines)
+    if not any(line.strip().startswith(expected_start) for line in first_lines):
+        return False
+
+    if ext == ".css":
+        return any(line.strip().endswith("*/") for line in first_lines)
+
+    if ext == ".html":
+        return any(line.strip().endswith("-->") for line in first_lines)
+
+    return True
 
 
 def get_all_source_files() -> list[Path]:
