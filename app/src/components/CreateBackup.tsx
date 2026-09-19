@@ -264,20 +264,11 @@ export function CreateBackup({ folderName, onClose, onSuccess }: CreateBackupPro
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Criar Backup</h2>
           <p className="text-muted-foreground mt-1">Novo backup para <span className="text-foreground font-medium">{world.level_name}</span></p>
         </div>
-        <button
-          onClick={onClose}
-          className="p-2 rounded-lg hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          aria-label="Fechar"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
       </div>
 
       <div className="bg-card border border-border rounded-xl p-6 space-y-4">
@@ -341,7 +332,7 @@ export function CreateBackup({ folderName, onClose, onSuccess }: CreateBackupPro
         </div>
       </div>
 
-      <div className="flex gap-3 pt-2">
+      <div className="flex flex-col sm:flex-row gap-3 pt-2">
         <button
           onClick={onClose}
           disabled={status === 'loading'}

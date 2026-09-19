@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 
 interface BackupSummaryDto {
   backup_path: string
+  icon_path: string | null
   timestamp: string
   world_folder_name: string
   world_version: [number, number, number, number, number]
@@ -167,6 +168,7 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
           <p className="text-muted-foreground mt-1">{worldFolderName}</p>
         </div>
         <button
+          type="button"
           onClick={onClose}
           className="px-4 py-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
         >
@@ -195,18 +197,34 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
               role="listitem"
               className="bg-card border border-border rounded-xl p-4 hover:shadow-md hover:border-primary/50 transition-all duration-200"
             >
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 21v-6m0 0v-6m0 6H7m4 0h4" />
-                      </svg>
-                    </div>
+                    {backup.icon_path ? (
+                      <img
+                        src={backup.icon_path}
+                        alt=""
+                        className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
+                        onError={(event) => {
+                          event.currentTarget.style.display = 'none'
+                        }}
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 002 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 21v-6m0 0v-6m0 6H7m4 0h4" />
+                        </svg>
+                      </div>
+                    )}
                     <div>
                       <p className="font-medium text-foreground">{formatDate(backup.timestamp)}</p>
-                      <p className="text-sm text-muted-foreground font-mono">{backup.backup_path}</p>
+                      <p
+                        className="text-xs sm:text-sm text-muted-foreground font-mono break-all line-clamp-2"
+                        title={backup.backup_path}
+                      >
+                        {backup.backup_path}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
@@ -218,11 +236,12 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button
+                    <div className="flex items-center gap-2 flex-shrink-0 self-stretch sm:self-auto">
+                    <button
+                      type="button"
                       onClick={() => openRestoreModal(backup)}
                       disabled={restoring === backup.backup_path}
-                      className="px-3 py-1.5 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 sm:flex-none px-3 py-1.5 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {restoring === backup.backup_path ? (
                         <span className="flex items-center gap-1.5">
@@ -241,7 +260,8 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
                         </span>
                       )}
                   </button>
-                  <button
+                    <button
+                      type="button"
                       onClick={() => openDeleteModal(backup)}
                       disabled={deleting === backup.backup_path}
                       className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -261,7 +281,7 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
       {/* Modal Restaurar */}
       {restoreModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="restore-modal-title">
-          <div className="bg-card rounded-xl p-6 max-w-md w-full shadow-xl">
+          <div className="bg-card rounded-xl p-6 max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
                 <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -279,6 +299,7 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
             </p>
             <div className="flex gap-3 justify-end">
               <button
+                type="button"
                 onClick={() => setRestoreModal(null)}
                 disabled={restoring === restoreModal.backup_path}
                 className="px-4 py-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium disabled:opacity-50"
@@ -286,6 +307,7 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
                 Cancelar
               </button>
               <button
+                type="button"
                 onClick={() => handleRestore(restoreModal)}
                 disabled={restoring === restoreModal.backup_path}
                 className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 font-medium disabled:opacity-50"
@@ -300,7 +322,7 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
       {/* Modal Deletar */}
       {deleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
-          <div className="bg-card rounded-xl p-6 max-w-md w-full shadow-xl">
+          <div className="bg-card rounded-xl p-6 max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                 <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -317,6 +339,7 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
             </p>
             <div className="flex gap-3 justify-end">
               <button
+                type="button"
                 onClick={() => setDeleteModal(null)}
                 disabled={deleting === deleteModal.backup_path}
                 className="px-4 py-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium disabled:opacity-50"
@@ -324,6 +347,7 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
                 Cancelar
               </button>
               <button
+                type="button"
                 onClick={() => handleDelete(deleteModal)}
                 disabled={deleting === deleteModal.backup_path}
                 className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 font-medium disabled:opacity-50"

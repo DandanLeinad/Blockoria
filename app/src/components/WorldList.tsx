@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
 import { invoke } from '@tauri-apps/api/core'
+import { useEffect, useState } from 'react'
 
 export interface WorldSummaryDto {
   folder_name: string
@@ -121,34 +121,57 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4" role="list" aria-label="Lista de mundos do Minecraft Bedrock">
-      {worlds.map((world) => (
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-primary">Minecraft Bedrock</p>
+          <h2 className="text-2xl font-bold text-foreground">Mundos</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Selecione um mundo para criar um backup ou consultar os existentes.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={loadWorlds}
+          disabled={loading}
+          className="inline-flex items-center justify-center gap-2 px-3 py-2 border border-border bg-card text-foreground rounded-lg hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M20 11a8.1 8.1 0 0 0-14.9-3M4 5v3h3M4 13a8.1 8.1 0 0 0 14.9 3M20 19v-3h-3" />
+          </svg>
+          Atualizar
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4" role="list" aria-label="Lista de mundos do Minecraft Bedrock">
+        {worlds.map((world) => (
         <article
           key={world.folder_name}
           role="listitem"
-          tabIndex={0}
-          onClick={() => onWorldSelect?.(world)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              onWorldSelect?.(world)
-            }
-          }}
-          className="group bg-card border border-border rounded-xl p-4 hover:shadow-lg hover:border-primary/50 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="group bg-card border border-border rounded-xl p-4 hover:shadow-lg hover:border-primary/50 transition-all duration-200"
         >
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-3 sm:gap-4">
             <div className="relative flex-shrink-0">
               {world.icon_path ? (
-                <img
-                  src={world.icon_path}
-                  alt={`Ícone do mundo ${world.level_name}`}
-                  className="w-16 h-16 rounded-lg object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
+                <>
+                  <img
+                    src={world.icon_path}
+                    alt={`Ícone do mundo ${world.level_name}`}
+                    className="w-24 h-24 rounded-xl object-cover"
+                    onError={(e) => {
+                      e.currentTarget.classList.add('hidden')
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                    }}
+                  />
+                  <div className="hidden w-24 h-24 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 items-center justify-center">
+                    <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 21v-6m0 0v-6m0 6H7m4 0h4" />
+                    </svg>
+                  </div>
+                </>
               ) : (
-                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center">
+                <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center">
                   <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 21v-6m0 0v-6m0 6H7m4 0h4" />
@@ -157,12 +180,12 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h3 className="font-semibold text-foreground truncate">{world.level_name}</h3>
                   <p className="text-sm text-muted-foreground font-mono">{world.folder_name}</p>
                 </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0">
+                <div className="flex items-center gap-1.5 flex-shrink-0 self-start">
                   {world.is_shared ? (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
                       <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -180,20 +203,31 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 mt-3 pt-3 border-t border-border">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <span>Versão: <code className="font-mono text-foreground">{formatVersion(world.version)}</code></span>
                 </div>
-                {onViewBackups && (
+                <div className="flex flex-col sm:flex-row gap-2 sm:ml-auto">
+                  {onWorldSelect && (
+                    <button
+                      type="button"
+                      onClick={() => onWorldSelect(world)}
+                      className="inline-flex items-center justify-center gap-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors px-3 py-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14m-7-7h14" />
+                      </svg>
+                      Criar backup
+                    </button>
+                  )}
+                  {onViewBackups && (
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onViewBackups(world)
-                    }}
-                    className="ml-auto inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    type="button"
+                    onClick={() => onViewBackups(world)}
+                    className="inline-flex items-center justify-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     aria-label={`Ver backups de ${world.level_name}`}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -202,12 +236,14 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
                     </svg>
                     Ver backups
                   </button>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </article>
-      ))}
+        ))}
+      </div>
     </div>
   )
 }

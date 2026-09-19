@@ -7,10 +7,17 @@
 //! It translates Tauri invoke() calls from the React frontend into
 //! calls to use cases in `blockoria-application`.
 
+use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use blockoria_domain::DomainError;
 use blockoria_infrastructure::{FileBackupRepository, FileWorldRepository};
 use std::fs;
+use std::path::Path;
 use std::sync::Arc;
+
+fn icon_data_url(path: &Path) -> Option<String> {
+    let bytes = fs::read(path).ok()?;
+    Some(format!("data:image/jpeg;base64,{}", BASE64.encode(bytes)))
+}
 
 // ============================================================================
 // Error handling
@@ -105,7 +112,9 @@ mod commands {
                 icon_path: w
                     .icon_path()
                     .as_path()
-                    .map(|p| p.to_string_lossy().to_string()),
+                    .map(|p| w.path().as_path().join(p))
+                    .filter(|p| p.is_file())
+                    .and_then(|p| icon_data_url(&p)),
             })
             .collect();
         Ok(dtos)
@@ -114,6 +123,7 @@ mod commands {
     #[derive(Serialize)]
     pub struct BackupSummaryDto {
         pub backup_path: String,
+        pub icon_path: Option<String>,
         pub timestamp: String,
         pub world_folder_name: String,
         pub world_version: [u16; 5],
@@ -137,6 +147,10 @@ mod commands {
             .into_iter()
             .map(|b| BackupSummaryDto {
                 backup_path: b.backup_path().as_path().to_string_lossy().to_string(),
+                icon_path: {
+                    let path = b.backup_path().as_path().join("world_icon.jpeg");
+                    path.is_file().then(|| icon_data_url(&path)).flatten()
+                },
                 timestamp: b.created_at().to_iso_string(),
                 world_folder_name: b.world_folder_name().as_str().to_string(),
                 world_version: *b.world_version().as_array(),

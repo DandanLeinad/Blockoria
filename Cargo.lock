@@ -331,6 +331,7 @@ dependencies = [
 name = "blockoria-tauri"
 version = "0.6.0"
 dependencies = [
+ "base64 0.23.1",
  "blockoria-application",
  "blockoria-domain",
  "blockoria-infrastructure",
