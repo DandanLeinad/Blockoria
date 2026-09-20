@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.7.0] - 2026-09-20
+
+### Features
+- feat(frontend): implement Tauri + React + TypeScript MVP with 3 screens
+  - WorldList: grid of world cards with icons, badges, version, "Ver backups" action
+  - CreateBackup: world info, backup destination, loading/success/error states with retry
+  - ListBackups: ordered by date desc, Restaurar/Deletar modals with confirmation
+- feat(frontend): React Router v7 with nested routes, loaders, sidebar layout
+- feat(frontend): Tailwind CSS v4 design system with semantic tokens, dark mode
+- feat(frontend): Tauri IPC integration (5 commands, typed DTOs)
+- feat(frontend): 24 frontend tests (Vitest + React Testing Library)
+
+### Documentation
+- docs: add complete Frontend section to docs/index.md
+- docs: add docs/frontend.md with architecture, design system, routing, screens, IPC, testing
+- docs: update README.md Frontend status to ✅, update test counts
+
+### Fixes & CI
+- fix(deny): add Unicode crate advisory ignores and license allowances for Tauri deps
+- fix(pre-commit): cross-platform TypeScript check, CI Linux deps for pre-commit job
+- ci: add Linux dependencies to workflows for Tauri GTK/GLib native deps
+
+### Testing
+- test: 24 frontend tests passing (Vitest + React Testing Library)
+- test: all 226 backend tests passing (domain 78, application 15, infrastructure 135)
+
 ## [0.6.0] - 2026-09-07
 
 ### Features

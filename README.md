@@ -15,14 +15,14 @@
 
 ## 🏗️ Status Atual
 
-**Em desenvolvimento ativo** — **Domain, Application e Infrastructure implementadas**.
+**Em desenvolvimento ativo** — **Domain, Application, Infrastructure e Frontend implementadas**.
 
 | Camada | Status |
 |--------|--------|
 | **Domain** (`blockoria-domain`) | ✅ Completo — 9 VOs, Entities, Aggregates, 66 testes + 12 doctests |
 | **Application** (`blockoria-application`) | ✅ Implementado — 5 use cases, 15 testes |
 | **Infrastructure** (`blockoria-infrastructure`) | ✅ Implementado — FileWorldRepository, FileBackupRepository, Config, **NBT Parser** (115 testes) |
-| **Frontend (Tauri + React)** | ❌ Não iniciado |
+| **Frontend (Tauri + React)** | ✅ MVP Completo — 3 telas, 24 testes, React Router v7, Tailwind v4 |
 
 ---
 
@@ -76,19 +76,23 @@ Camada de domínio pura, sem dependências externas.
 cargo test -p blockoria-domain        # 66 unit tests + 12 doctests = 78
 cargo test -p blockoria-application   # 15 use case tests
 cargo test -p blockoria-infrastructure # 115 unit/integration tests (incl. NBT parser)
-# Total: 208 passing
+cd app && bun test                    # 24 frontend tests (Vitest + RTL)
+# Total: 232 passing
 ```
 
 ---
 
-## 🛠️ Tech Stack (Domain)
+## 🛠️ Tech Stack Completo
 
-| Item | Versão |
-|------|--------|
-| Rust | 1.80+ |
-| Edition | 2024 |
-| Testes | `cargo test` (built-in) |
-| Serialização | `serde` (planejado) |
+| Camada | Tecnologia |
+|--------|------------|
+| **Domain / Application / Infrastructure** | Rust 1.80+, Edition 2024, `thiserror`, `serde`, `tokio` |
+| **Frontend** | Tauri 2, React 19, TypeScript 6, Vite 8, Bun |
+| **Routing** | React Router v7 (loaders, nested routes) |
+| **Styling** | Tailwind CSS v4 (CSS variables, dark mode) |
+| **Testes Backend** | `cargo test` (built-in) |
+| **Testes Frontend** | Vitest + React Testing Library + jsdom |
+| **CI/CD** | GitHub Actions (`cargo test`, `cargo deny`, `cargo fmt`, `pre-commit`) |
 
 ---
 
@@ -97,6 +101,13 @@ cargo test -p blockoria-infrastructure # 115 unit/integration tests (incl. NBT p
 ```
 blockoria/
 ├── Cargo.toml
+├── src-tauri/                 # Tauri app (driving adapter)
+├── app/                       # Frontend React + TypeScript
+│   ├── src/
+│   │   ├── components/        # WorldList, CreateBackup, ListBackups
+│   │   ├── router.tsx         # React Router v7
+│   │   ├── index.css          # Tailwind v4 theme
+│   │   └── test/              # Vitest setup
 ├── crates/
 │   ├── blockoria-domain/      # ✅ Completo (9 VOs, 66 testes)
 │   ├── blockoria-application/ # ✅ Implementado (5 use cases, 15 testes)
@@ -113,8 +124,9 @@ blockoria/
 
 ## 🎯 Próximos Passos
 
-1. **Frontend** — Tauri 2 + React + TypeScript (`src-tauri/`)
-2. **Integração** — Tauri commands chamando use cases, composition root em `main.rs`
+1. **Polimento Frontend** — Toast notifications, shadcn/ui components, configurações
+2. **Integração Completa** — Testes E2E com Tauri (`cargo tauri dev`)
+3. **Empacotamento** — `cargo tauri build` para MSI/EXE
 
 ---
 
