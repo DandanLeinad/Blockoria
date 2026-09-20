@@ -1,11 +1,15 @@
 # deny.toml
 
 [advisories]
+ignore = [
+    { id = "RUSTSEC-2024-0370", reason = "proc-macro-error is a transitive dependency in the Tauri GTK/GLib stack, and no safe upgrade is currently available." },
+]
 
 [licenses]
 allow = [
     "MIT",
     "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
     "BSD-2-Clause",
     "BSD-3-Clause",
     "ISC",
@@ -13,6 +17,7 @@ allow = [
     "AGPL-3.0-or-later",
     "MPL-2.0",
     "Unicode-3.0",
+    "Zlib",
 ]
 
 [bans]
