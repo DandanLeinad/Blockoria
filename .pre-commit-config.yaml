@@ -152,8 +152,15 @@ repos:
 
       - id: tsc-check
         name: TypeScript type check (app/)
-        language: system
-        entry: cmd /c "cd app && bun run tsc --noEmit"
+        language: python
+        entry: |
+          python -c "
+          import subprocess, sys
+          sys.exit(subprocess.run(
+              ['bun', '--cwd', 'app', 'run', 'tsc', '--noEmit'],
+              shell=False
+          ).returncode)
+          "
         files: ^app/
         pass_filenames: false
         stages: [pre-commit]
