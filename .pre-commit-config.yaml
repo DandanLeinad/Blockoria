@@ -66,6 +66,7 @@ repos:
           ]
 
       - id: check-json
+        exclude: ^app/tsconfig\.(app|node)\.json$
 
       - id: check-toml
 
@@ -95,7 +96,7 @@ repos:
           ]
 
 
-      # SPDX Rust
+      # SPDX Rust + frontend
       - id: validate-license-header
         name: Validate SPDX license header
         language: python
@@ -105,10 +106,8 @@ repos:
             pre-commit
           ]
         pass_filenames: true
-        types:
-          [
-            rust
-          ]
+        files: ^(crates/|src-tauri/|app/|scripts/|tests/|docs/)
+        types: [rust, javascript, jsx, ts, tsx, css, html]
 
 
       # Validação completa antes do push
@@ -121,3 +120,47 @@ repos:
             pre-push
           ]
         pass_filenames: false
+
+
+  # TypeScript / React / Frontend (app/) - local hooks
+  - repo: local
+    hooks:
+      - id: eslint-check
+        name: ESLint check (app/)
+        language: system
+        entry: bunx eslint --max-warnings=0
+        files: ^app/
+        types: [javascript, jsx, tsx]
+        stages: [pre-commit]
+
+      - id: prettier-check
+        name: Prettier check (app/)
+        language: system
+        entry: bunx prettier --check
+        files: ^app/
+        types: [javascript, jsx, tsx, json, css, html, markdown, yaml]
+        stages: [pre-commit]
+
+      - id: prettier-fix
+        name: Prettier fix (app/)
+        language: system
+        entry: bunx prettier --write
+        files: ^app/
+        types: [javascript, jsx, tsx, json, css, html, markdown, yaml]
+        stages: [pre-commit]
+        pass_filenames: true
+
+      - id: tsc-check
+        name: TypeScript type check (app/)
+        language: python
+        entry: |
+          python -c "
+          import subprocess, sys
+          sys.exit(subprocess.run(
+              ['bun', '--cwd', 'app', 'run', 'tsc', '--noEmit'],
+              shell=False
+          ).returncode)
+          "
+        files: ^app/
+        pass_filenames: false
+        stages: [pre-commit]

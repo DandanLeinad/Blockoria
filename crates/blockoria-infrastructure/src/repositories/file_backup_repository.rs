@@ -7,6 +7,7 @@
 //! `<backup_root>/<location>/<sanitized_folder_name>/<timestamp>/`
 
 use crate::config::Config;
+use crate::nbt::{LevelDatParser, extract_world_version};
 use blockoria_application::ports::BackupRepository;
 use blockoria_domain::{
     AccountId, Backup, BackupPath, BackupTimestamp, DomainError, WorldFolderName, WorldLocation,
@@ -71,6 +72,17 @@ impl FileBackupRepository {
             .join(location.as_path_segment())
             .join(safe_folder_name)
     }
+
+    fn read_backup_version(backup_path: &Path) -> WorldVersion {
+        let level_dat = backup_path.join("level.dat");
+        let version = fs::File::open(level_dat)
+            .ok()
+            .and_then(|file| LevelDatParser::new(file).ok())
+            .and_then(|parser| parser.parse().ok())
+            .and_then(|nbt| extract_world_version(&nbt));
+
+        version.unwrap_or_default()
+    }
 }
 
 impl BackupRepository for FileBackupRepository {
@@ -109,6 +121,7 @@ impl BackupRepository for FileBackupRepository {
             };
 
             let backup_path = BackupPath::new(entry.path())?;
+            let world_version = Self::read_backup_version(backup_path.as_path());
 
             let account_id = match location {
                 WorldLocation::Account(id) => id.clone(),
@@ -122,7 +135,7 @@ impl BackupRepository for FileBackupRepository {
             let backup = Backup::new(
                 folder_name.clone(),
                 account_id,
-                WorldVersion::default(),
+                world_version,
                 timestamp,
                 backup_path,
             );
@@ -158,6 +171,24 @@ mod tests {
         (temp, repo)
     }
 
+    fn write_level_dat_version(path: &Path, version: [u16; 5]) {
+        let name = b"lastOpenedWithVersion";
+        let mut nbt = vec![10, 0, 0, 11];
+        nbt.extend_from_slice(&(name.len() as u16).to_le_bytes());
+        nbt.extend_from_slice(name);
+        nbt.extend_from_slice(&5i32.to_le_bytes());
+        for component in version {
+            nbt.extend_from_slice(&(component as i32).to_le_bytes());
+        }
+        nbt.push(0);
+
+        let mut level_dat = Vec::new();
+        level_dat.extend_from_slice(&123i32.to_le_bytes());
+        level_dat.extend_from_slice(&(nbt.len() as i32).to_le_bytes());
+        level_dat.extend_from_slice(&nbt);
+        fs::write(path.join("level.dat"), level_dat).unwrap();
+    }
+
     #[test]
     fn given_empty_backup_root_when_list_by_world_then_returns_empty() {
         // Given
@@ -187,6 +218,7 @@ mod tests {
             .join("aaaaaaaaaaa_")
             .join("2024-01-01T00-00-00Z");
         fs::create_dir_all(&backup_dir).unwrap();
+        write_level_dat_version(&backup_dir, [1, 26, 45, 1, 0]);
 
         let backup = Backup::new(
             folder.clone(),
@@ -204,6 +236,7 @@ mod tests {
         let backups = result.unwrap();
         assert_eq!(backups.len(), 1);
         assert_eq!(backups[0].world_folder_name().as_str(), "aaaaaaaaaaa=");
+        assert_eq!(backups[0].world_version().as_array(), &[1, 26, 45, 1, 0]);
     }
 
     #[test]

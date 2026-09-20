@@ -15,8 +15,9 @@
 //! 5. Returns the created `Backup` aggregate
 
 use crate::util::copy_dir_all;
-use blockoria_domain::{Backup, BackupPath, BackupTimestamp, DomainError, World};
+use blockoria_domain::{AccountId, Backup, BackupPath, BackupTimestamp, DomainError, World};
 use std::fs;
+use std::path::Path;
 
 /// Creates a backup of the given world.
 ///
@@ -31,14 +32,16 @@ use std::fs;
 /// Returns `DomainError` if:
 /// - Filesystem operations fail (I/O errors)
 /// - Backup path validation fails
-pub fn create_backup(world: &World, backup_root: &BackupPath) -> Result<Backup, DomainError> {
+pub fn create_backup(world: &World, backup_root: &Path) -> Result<Backup, DomainError> {
+    // Validate the backup root path
+    let backup_root_path = BackupPath::new(backup_root)?;
     let timestamp = BackupTimestamp::now();
     let timestamp_dir_name = timestamp.to_filename_safe();
 
     // Sanitize folder name for filesystem (replace = with _ for Windows compatibility)
     let safe_folder_name = world.folder_name().as_str().replace('=', "_");
 
-    let backup_dir = backup_root
+    let backup_dir = backup_root_path
         .as_path()
         .join(&safe_folder_name)
         .join(&timestamp_dir_name);
@@ -52,8 +55,8 @@ pub fn create_backup(world: &World, backup_root: &BackupPath) -> Result<Backup, 
         world.folder_name().clone(),
         world
             .account_id()
-            .expect("world must have account_id for backup")
-            .clone(),
+            .cloned()
+            .unwrap_or_else(|| AccountId::new("shared").expect("static account ID is valid")),
         world.version().clone(),
         timestamp,
         BackupPath::new(&backup_dir)?,
@@ -103,10 +106,9 @@ mod tests {
         // Given
         let test_world = TestWorld::new();
         let backup_root = TempDir::new().unwrap();
-        let backup_path = BackupPath::new(backup_root.path()).unwrap();
 
         // When
-        let result = create_backup(&test_world.world, &backup_path);
+        let result = create_backup(&test_world.world, backup_root.path());
 
         // Then
         assert!(result.is_ok());
@@ -121,10 +123,9 @@ mod tests {
         // Given
         let test_world = TestWorld::new();
         let backup_root = TempDir::new().unwrap();
-        let backup_path = BackupPath::new(backup_root.path()).unwrap();
 
         // When
-        let backup = create_backup(&test_world.world, &backup_path).unwrap();
+        let backup = create_backup(&test_world.world, backup_root.path()).unwrap();
 
         // Then
         let backup_dir = backup.backup_path().as_path();
@@ -143,10 +144,9 @@ mod tests {
         fs::write(world_path.join("region").join("r.0.0.mca"), b"chunk").unwrap();
 
         let backup_root = TempDir::new().unwrap();
-        let backup_path = BackupPath::new(backup_root.path()).unwrap();
 
         // When
-        let backup = create_backup(&test_world.world, &backup_path).unwrap();
+        let backup = create_backup(&test_world.world, backup_root.path()).unwrap();
 
         // Then
         let backup_dir = backup.backup_path().as_path();
@@ -159,11 +159,10 @@ mod tests {
         // Given
         let test_world = TestWorld::new();
         let backup_root = TempDir::new().unwrap();
-        let backup_path = BackupPath::new(backup_root.path()).unwrap();
         let before = chrono::Utc::now();
 
         // When
-        let backup = create_backup(&test_world.world, &backup_path).unwrap();
+        let backup = create_backup(&test_world.world, backup_root.path()).unwrap();
 
         // Then
         let ts = backup.created_at();
@@ -176,10 +175,9 @@ mod tests {
         // Given
         let test_world = TestWorld::new();
         let backup_root = TempDir::new().unwrap();
-        let backup_path = BackupPath::new(backup_root.path()).unwrap();
 
         // When
-        let backup = create_backup(&test_world.world, &backup_path).unwrap();
+        let backup = create_backup(&test_world.world, backup_root.path()).unwrap();
 
         // Then
         let backup_dir = backup.backup_path().as_path();

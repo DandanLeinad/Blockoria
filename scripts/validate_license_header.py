@@ -1,17 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (C) 2026 DandanLeinad
 
-#!/usr/bin/env python3
 """Script to validate SPDX license headers in the Blockoria project.
 
-Este script valida headers SPDX nos arquivos Rust do workspace.
-
-Atualmente o projeto contém:
-- Cargo workspace
-- Crates Rust
-
-Quando o frontend React/TypeScript e Tauri forem adicionados,
-as extensões podem ser ampliadas.
+Este script valida headers SPDX nos arquivos do workspace (Rust + Frontend).
 
 Usage (manual):
     python scripts/validate_license_header.py file1.rs
@@ -29,27 +21,63 @@ from pathlib import Path
 logging.basicConfig(level=logging.WARNING, format="%(message)s")
 logger = logging.getLogger(__name__)
 
-
-SPDX_HEADER_START = "// SPDX-License-Identifier:"
-
-# Arquivos atualmente mantidos pelo workspace Rust
+# Arquivos mantidos pelo workspace (Rust + Frontend)
 SUPPORTED_EXTENSIONS = {
     ".rs",
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
+    ".css",
+    ".html",
 }
 
+# Mapeia extensão para prefixo de comentário SPDX
+SPDX_PREFIXES = {
+    ".rs": "//",
+    ".ts": "//",
+    ".tsx": "//",
+    ".js": "//",
+    ".jsx": "//",
+    ".css": "/* SPDX-License-Identifier:",
+    ".html": "<!-- SPDX-License-Identifier:",
+}
+
+# Mapeia extensão para sufixo de comentário (se necessário)
+SPDX_SUFFIXES = {
+    ".css": " */",
+    ".html": " -->",
+}
 
 IGNORE_DIRS = {
     ".git",
     "target",
     ".venv",
+    "node_modules",
+    "site",
 }
 
 
-def has_spdx_header(content: str) -> bool:
+def get_spdx_header_start(ext: str) -> str:
+    """Return the expected SPDX header start for a file extension."""
+    return SPDX_PREFIXES.get(ext, "// SPDX-License-Identifier:")
+
+
+def has_spdx_header(content: str, ext: str) -> bool:
     """Check if SPDX header exists in the first lines of the file."""
     first_lines = content.splitlines()[:10]
+    expected_start = get_spdx_header_start(ext)
 
-    return any(line.startswith(SPDX_HEADER_START) for line in first_lines)
+    if not any(line.strip().startswith(expected_start) for line in first_lines):
+        return False
+
+    if ext == ".css":
+        return any(line.strip().endswith("*/") for line in first_lines)
+
+    if ext == ".html":
+        return any(line.strip().endswith("-->") for line in first_lines)
+
+    return True
 
 
 def get_all_source_files() -> list[Path]:
@@ -82,11 +110,12 @@ def validate_files(file_paths: list[Path]) -> bool:
 
         try:
             content = path.read_text(encoding="utf-8")
+            ext = path.suffix
 
-            if not has_spdx_header(content):
+            if not has_spdx_header(content, ext):
                 missing_header.append(path)
 
-        except Exception as exc:
+        except (OSError, UnicodeDecodeError) as exc:
             logger.error(f"Error checking {path}: {exc}")
 
             missing_header.append(path)
@@ -114,13 +143,13 @@ def main() -> None:
     """Main function."""
 
     parser = argparse.ArgumentParser(
-        description=("Validate SPDX headers in Rust source files.")
+        description=("Validate SPDX headers in source files.")
     )
 
     parser.add_argument(
         "--all",
         action="store_true",
-        help=("Check all Rust files in repository."),
+        help=("Check all source files in repository."),
     )
 
     parser.add_argument(
@@ -147,7 +176,7 @@ def main() -> None:
     success = validate_files(source_files)
 
     if success:
-        print("All Rust files have SPDX header.")
+        print("All source files have SPDX header.")
 
     sys.exit(0 if success else 1)
 

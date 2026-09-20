@@ -1,11 +1,24 @@
 # deny.toml
 
 [advisories]
+ignore = [
+    # Required by the GTK/glib dependency tree used by Tauri on Linux.
+    # cargo-deny reports that no safe upgrade is currently available.
+    "RUSTSEC-2024-0370",
+    # Unmaintained Unicode crates from Tauri's dependency tree (open-i18n/rust-unic).
+    # No safe upgrade available; tracked at https://github.com/rustsec/advisory-db/issues/2414
+    "RUSTSEC-2025-0081",  # unic-char-property
+    "RUSTSEC-2025-0075",  # unic-char-range
+    "RUSTSEC-2025-0080",  # unic-common
+    "RUSTSEC-2025-0100",  # unic-ucd-ident
+    "RUSTSEC-2025-0098",  # unic-ucd-version
+]
 
 [licenses]
 allow = [
     "MIT",
     "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
     "BSD-2-Clause",
     "BSD-3-Clause",
     "ISC",
@@ -13,6 +26,7 @@ allow = [
     "AGPL-3.0-or-later",
     "MPL-2.0",
     "Unicode-3.0",
+    "Zlib",
 ]
 
 [bans]
