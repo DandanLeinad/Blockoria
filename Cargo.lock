@@ -294,7 +294,7 @@ dependencies = [
 
 [[package]]
 name = "blockoria-application"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "blockoria-domain",
  "chrono",
@@ -303,7 +303,7 @@ dependencies = [
 
 [[package]]
 name = "blockoria-domain"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "chrono",
  "serde",
@@ -312,7 +312,7 @@ dependencies = [
 
 [[package]]
 name = "blockoria-infrastructure"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "blockoria-application",
  "blockoria-domain",
@@ -329,7 +329,7 @@ dependencies = [
 
 [[package]]
 name = "blockoria-tauri"
-version = "0.6.0"
+version = "0.7.0"
 dependencies = [
  "base64 0.23.1",
  "blockoria-application",
