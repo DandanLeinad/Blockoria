@@ -4,6 +4,7 @@ import type { WorldSummaryDto } from './WorldList'
 
 interface CreateBackupProps {
   folderName: string
+  levelName?: string
   onClose: () => void
   onSuccess?: (world: WorldSummaryDto) => void
 }
@@ -25,7 +26,7 @@ function getErrorMessage(error: unknown): string {
   return 'Erro desconhecido'
 }
 
-export function CreateBackup({ folderName, onClose, onSuccess }: CreateBackupProps) {
+export function CreateBackup({ folderName, levelName, onClose, onSuccess }: CreateBackupProps) {
   const [status, setStatus] = useState<Status>('loadingWorld')
   const [world, setWorld] = useState<WorldSummaryDto | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -147,7 +148,7 @@ export function CreateBackup({ folderName, onClose, onSuccess }: CreateBackupPro
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
           </div>
-          <p className="text-muted-foreground text-sm">Carregando mundo...</p>
+          <p className="text-muted-foreground text-sm">Carregando mundo{folderName ? ` (${levelName ?? folderName})` : ''}...</p>
         </div>
       </div>
     )

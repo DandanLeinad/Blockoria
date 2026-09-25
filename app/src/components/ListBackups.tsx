@@ -11,6 +11,7 @@ interface BackupSummaryDto {
 
 interface ListBackupsProps {
   worldFolderName: string
+  levelName?: string
   accountId: string | null
   onClose: () => void
 }
@@ -34,7 +35,7 @@ function getErrorMessage(error: unknown): string {
   return 'Erro desconhecido'
 }
 
-export function ListBackups({ worldFolderName, accountId, onClose }: ListBackupsProps) {
+export function ListBackups({ worldFolderName, levelName, accountId, onClose }: ListBackupsProps) {
   const [backups, setBackups] = useState<BackupSummaryDto[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -160,12 +161,14 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
     )
   }
 
+  const displayName = levelName ?? worldFolderName
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Backups</h2>
-          <p className="text-muted-foreground mt-1">{worldFolderName}</p>
+          <p className="text-muted-foreground mt-1">{displayName}</p>
         </div>
         <button
           type="button"
@@ -290,8 +293,8 @@ export function ListBackups({ worldFolderName, accountId, onClose }: ListBackups
               </div>
               <h3 id="restore-modal-title" className="text-lg font-semibold text-foreground">Confirmar Restauração</h3>
             </div>
-            <p className="text-muted-foreground mb-4">
-              Isso substituirá <strong>TODOS os arquivos</strong> do mundo <strong className="text-foreground">{worldFolderName}</strong>
+<p className="text-muted-foreground mb-4">
+              Isso substituir\u00e1 <strong>TODOS os arquivos</strong> do mundo <strong className="text-foreground">{displayName}</strong>
               pelo backup de <strong className="text-foreground">{formatDate(restoreModal.timestamp)}</strong>.
             </p>
             <p className="text-sm text-destructive mb-6">

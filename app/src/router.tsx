@@ -1,4 +1,4 @@
-import { createBrowserRouter, Link, NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
+import { createBrowserRouter, Link, NavLink, Outlet, useNavigate, useParams, useLocation } from 'react-router-dom'
 import { CreateBackup } from './components/CreateBackup'
 import { ListBackups } from './components/ListBackups'
 import type { WorldSummaryDto } from './components/WorldList'
@@ -117,9 +117,9 @@ function WorldListPage() {
   return (
     <WorldList
       onWorldSelect={(world) => {
-        navigate(`/world/${encodeURIComponent(world.folder_name)}/backup/create`)
+        navigate(`/world/${encodeURIComponent(world.folder_name)}/backup/create`, { state: { levelName: world.level_name } })
       }}
-      onViewBackups={(world) => navigate(getBackupsPath(world))}
+      onViewBackups={(world) => navigate(getBackupsPath(world), { state: { levelName: world.level_name } })}
     />
   )
 }
@@ -127,12 +127,15 @@ function WorldListPage() {
 function CreateBackupPage() {
   const params = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const levelName = (location.state as { levelName?: string })?.levelName
 
   return (
     <CreateBackup
       folderName={params.folderName!}
+      levelName={levelName}
       onClose={() => navigate('/')}
-      onSuccess={(world) => navigate(`/world/${encodeURIComponent(world.folder_name)}/backups${world.account_id ? `?accountId=${encodeURIComponent(world.account_id)}` : ''}`)}
+      onSuccess={(world) => navigate(`/world/${encodeURIComponent(world.folder_name)}/backups${world.account_id ? `?accountId=${encodeURIComponent(world.account_id)}` : ''}`, { state: { levelName: world.level_name } })}
     />
   )
 }
@@ -140,11 +143,14 @@ function CreateBackupPage() {
 function ListBackupsPage() {
   const params = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const accountId = new URLSearchParams(window.location.search).get('accountId')
+  const levelName = (location.state as { levelName?: string })?.levelName
 
   return (
     <ListBackups
       worldFolderName={params.folderName!}
+      levelName={levelName}
       accountId={accountId}
       onClose={() => navigate('/')}
     />
