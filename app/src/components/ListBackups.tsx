@@ -259,12 +259,29 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
                       </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-muted border border-border">
-                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium">
+                      <svg
+                        className="h-3 w-3 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
                       </svg>
-                      Versão: <code className="font-mono text-foreground">{formatVersion(backup.world_version)}</code>
+
+                      <span className="inline-flex items-baseline gap-1 leading-none">
+                        <span>Versão:</span>
+                        <code className="font-mono leading-none text-foreground">
+                          {formatVersion(backup.world_version)}
+                        </code>
+                      </span>
                     </span>
                   </div>
                 </div>
