@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useState } from 'react'
+import { formatVersion } from '../utils/format'
 
 export interface WorldSummaryDto {
   folder_name: string
@@ -45,9 +46,6 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
       setWorlds(propsWorlds)
     }
   }, [propsWorlds])
-
-  const formatVersion = (v: [number, number, number, number, number]) =>
-    v.join('.')
 
   const truncateAccountId = (id: string) =>
     id.length > 8 ? `${id.slice(0, 8)}...` : id

@@ -1,6 +1,8 @@
 import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useState } from 'react'
 import type { WorldSummaryDto } from './WorldList'
+import { formatVersion } from '../utils/format'
+import { getErrorMessage } from '../utils/error'
 
 interface CreateBackupProps {
   folderName: string
@@ -16,15 +18,6 @@ interface CreateBackupResponseDto {
 }
 
 type Status = 'idle' | 'loading' | 'success' | 'error' | 'loadingWorld'
-
-function getErrorMessage(error: unknown): string {
-  if (typeof error === 'string') return error
-  if (error && typeof error === 'object' && 'message' in error) {
-    const message = (error as { message?: unknown }).message
-    if (typeof message === 'string') return message
-  }
-  return 'Erro desconhecido'
-}
 
 export function CreateBackup({ folderName, levelName, onClose, onSuccess }: CreateBackupProps) {
   const [status, setStatus] = useState<Status>('loadingWorld')
@@ -69,8 +62,6 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [status, onClose])
-
-  const formatVersion = (v: [number, number, number, number, number]) => v.join('.')
 
   const getBackupDirDisplay = () => {
     const base = '%USERPROFILE%\\AppData\\Roaming\\Blockoria\\backups'

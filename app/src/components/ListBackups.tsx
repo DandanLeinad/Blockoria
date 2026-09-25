@@ -1,6 +1,8 @@
 import { invoke } from '@tauri-apps/api/core'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { useEffect, useState } from 'react'
+import { getErrorMessage } from '../utils/error'
+import { formatDate, formatVersion } from '../utils/format'
 import { useToast } from './Toast'
 
 interface BackupSummaryDto {
@@ -26,15 +28,6 @@ interface RestoreBackupResponseDto {
 interface DeleteBackupResponseDto {
   success: boolean
   message: string
-}
-
-function getErrorMessage(error: unknown): string {
-  if (typeof error === 'string') return error
-  if (error && typeof error === 'object' && 'message' in error) {
-    const message = (error as { message?: unknown }).message
-    if (typeof message === 'string') return message
-  }
-  return 'Erro desconhecido'
 }
 
 export function ListBackups({ worldFolderName, levelName, accountId, onClose }: ListBackupsProps) {
@@ -92,20 +85,6 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
       setDeleteModal(null)
     }
   }
-
-  const formatDate = (iso: string) => {
-    const date = new Date(iso)
-    return date.toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-  }
-
-  const formatVersion = (v: [number, number, number, number, number]) => v.join('.')
 
   const handleRestore = async (backup: BackupSummaryDto) => {
     setRestoring(backup.backup_path)
@@ -349,7 +328,8 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
               <h3 id="restore-modal-title" className="text-lg font-semibold text-foreground">Confirmar Restauração</h3>
             </div>
 <p className="text-muted-foreground mb-4">
-              Isso substituir\u00e1 <strong>TODOS os arquivos</strong> do mundo <strong className="text-foreground">{displayName}</strong>
+              Isso substituirá <strong>TODOS os arquivos</strong> do mundo <strong className="text-foreground">{displayName}</strong>
+              <span> </span>
               pelo backup de <strong className="text-foreground">{formatDate(restoreModal.timestamp)}</strong>.
             </p>
             <p className="text-sm text-destructive mb-6">
