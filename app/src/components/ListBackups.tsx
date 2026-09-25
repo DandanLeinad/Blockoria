@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
+import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { useEffect, useState } from 'react'
 
 interface BackupSummaryDto {
@@ -220,14 +221,19 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
                         </svg>
                       </div>
                     )}
-                    <div>
+                    <div className="flex items-center gap-2">
                       <p className="font-medium text-foreground">{formatDate(backup.timestamp)}</p>
-                      <p
-                        className="text-xs sm:text-sm text-muted-foreground font-mono break-all line-clamp-2"
-                        title={backup.backup_path}
+                      <button
+                        type="button"
+                        onClick={() => revealItemInDir(backup.backup_path)}
+                        className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        aria-label="Abrir pasta do backup no Explorer"
                       >
-                        {backup.backup_path}
-                      </p>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 21v-6m0 0v-6m0 6H7m4 0h4" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
