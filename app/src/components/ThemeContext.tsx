@@ -10,4 +10,4 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-export { ThemeContext, type ThemeContextValue, type Theme }
+export { ThemeContext, type Theme, type ThemeContextValue }
