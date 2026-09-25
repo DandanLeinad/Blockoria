@@ -1,22 +1,6 @@
-import { createContext, type ReactNode, useCallback, useContext, useState } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-
-type ToastType = 'success' | 'error' | 'info'
-
-interface Toast {
-  id: number
-  message: string
-  type: ToastType
-}
-
-interface ToastContextValue {
-  toast: (message: string, type?: ToastType) => void
-  success: (message: string) => void
-  error: (message: string) => void
-  info: (message: string) => void
-}
-
-const ToastContext = createContext<ToastContextValue | null>(null)
+import { ToastContext, type Toast, type ToastType } from './ToastContext'
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -87,12 +71,4 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {portal}
     </ToastContext.Provider>
   )
-}
-
-export function useToast() {
-  const context = useContext(ToastContext)
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider')
-  }
-  return context
 }

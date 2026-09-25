@@ -1,9 +1,9 @@
 import { invoke } from '@tauri-apps/api/core'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { getErrorMessage } from '../utils/error'
 import { formatDate, formatVersion } from '../utils/format'
-import { useToast } from './Toast'
+import { useToast } from './useToast'
 
 interface BackupSummaryDto {
   backup_path: string
@@ -40,7 +40,7 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
   const [deleting, setDeleting] = useState<string | null>(null)
   const { success, error: toastError } = useToast()
 
-  const loadBackups = async () => {
+  const loadBackups = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -55,11 +55,12 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
     } finally {
       setLoading(false)
     }
-  }
+  }, [worldFolderName, accountId])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadBackups()
-  }, [worldFolderName, accountId])
+  }, [loadBackups])
 
   // Handle Escape key to close modals or go back
   useEffect(() => {

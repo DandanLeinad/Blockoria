@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { formatVersion } from '../utils/format'
 
 export interface WorldSummaryDto {
@@ -21,8 +21,9 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
   const [worlds, setWorlds] = useState<WorldSummaryDto[]>(propsWorlds || [])
   const [loading, setLoading] = useState(!propsWorlds)
   const [error, setError] = useState<string | null>(null)
+  const hasLoadedRef = useRef(false)
 
-  const loadWorlds = async () => {
+  const loadWorlds = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -33,16 +34,18 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    if (!propsWorlds) {
+    if (!propsWorlds && !hasLoadedRef.current) {
+      hasLoadedRef.current = true
       loadWorlds()
     }
-  }, [propsWorlds])
+  }, [propsWorlds, loadWorlds])
 
   useEffect(() => {
     if (propsWorlds) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setWorlds(propsWorlds)
     }
   }, [propsWorlds])
