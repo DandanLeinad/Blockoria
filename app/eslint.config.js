@@ -26,7 +26,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/components/ThemeContext.tsx', 'src/components/ToastContext.tsx'],
+    files: ['src/components/ThemeContext.tsx', 'src/components/ToastContext.tsx', 'src/components/ui/Icons.tsx'],
     rules: {
       'react-refresh/only-export-components': 'off',
     },

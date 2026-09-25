@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getErrorMessage } from '../utils/error'
 import { formatDate, formatVersion } from '../utils/format'
 import { useToast } from './useToast'
+import { Icon } from './ui/Icons'
 
 interface BackupSummaryDto {
   backup_path: string
@@ -136,10 +137,7 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
       <div className="flex items-center justify-center h-[calc(100vh-200px)]">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <svg className="animate-spin h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
+            <Icon name="loader" className="animate-spin h-10 w-10 text-primary" />
           </div>
           <p className="text-muted-foreground text-sm">Carregando backups...</p>
         </div>
@@ -150,10 +148,8 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] gap-4 text-center px-6">
-        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
-          <svg className="w-8 h-8 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+<div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+            <Icon name="alertTriangle" className="w-8 h-8 text-destructive" />
         </div>
         <div>
           <h3 className="text-lg font-semibold text-foreground">Erro ao carregar backups</h3>
@@ -186,9 +182,7 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
             className="p-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Atualizar lista de backups"
           >
-            <svg className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M20 11a8.1 8.1 0 0 0-14.9-3M4 5v3h3M4 13a8.1 8.1 0 0 0 14.9 3M20 19v-3h-3" />
-            </svg>
+            <Icon name="refreshCw" className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
           </button>
           <button
             type="button"
@@ -196,9 +190,7 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
             className="p-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label="Voltar"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <Icon name="arrowLeft" className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -206,10 +198,7 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
       {backups.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)] gap-4 text-center px-6">
           <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
-            <svg className="w-10 h-10 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 21v-6m0 0v-6m0 6H7m4 0h4" />
-            </svg>
+            <Icon name="folderOpen" className="w-10 h-10 text-muted-foreground" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-foreground">Nenhum backup encontrado</h3>
@@ -238,10 +227,7 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 002 2z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 21v-6m0 0v-6m0 6H7m4 0h4" />
-                        </svg>
+                        <Icon name="folderOpen" className="w-8 h-8 text-primary" />
                       </div>
                     )}
                     <div className="flex items-center gap-2">
@@ -252,29 +238,13 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
                         className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         aria-label="Abrir pasta do backup no Explorer"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 21v-6m0 0v-6m0 6H7m4 0h4" />
-                        </svg>
+                        <Icon name="externalLink" className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                   <div className="mt-2 text-sm text-muted-foreground">
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium">
-                      <svg
-                        className="h-3 w-3 shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
+                      <Icon name="fileText" className="h-3 w-3 shrink-0" />
 
                       <span className="inline-flex items-baseline gap-1 leading-none">
                         <span>Versão:</span>
@@ -294,17 +264,12 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
                     >
                       {restoring === backup.backup_path ? (
                         <span className="flex items-center gap-1.5">
-                          <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                          </svg>
+                          <Icon name="loader" className="animate-spin h-4 w-4" />
                           Restaurando...
                         </span>
                       ) : (
                         <span className="flex items-center gap-1.5">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                          </svg>
+                          <Icon name="rotateCcw" className="w-4 h-4" />
                           Restaurar
                         </span>
                       )}
@@ -316,9 +281,7 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
                       className="p-1.5 text-destructive hover:bg-destructive/15 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       aria-label={`Deletar backup de ${formatDate(backup.timestamp)}`}
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
+                      <Icon name="trash2" className="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -339,13 +302,11 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
           <div className="bg-card rounded-xl p-6 max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-warning/15 flex items-center justify-center">
-                <svg className="w-5 h-5 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+                <Icon name="alertTriangle" className="w-5 h-5 text-warning" />
               </div>
               <h3 id="restore-modal-title" className="text-lg font-semibold text-foreground">Confirmar Restauração</h3>
             </div>
-<p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-4">
               Isso substituirá <strong>TODOS os arquivos</strong> do mundo <strong className="text-foreground">{displayName}</strong>
               <span> </span>
               pelo backup de <strong className="text-foreground">{formatDate(restoreModal.timestamp)}</strong>.
@@ -387,9 +348,7 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
           <div className="bg-card rounded-xl p-6 max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-destructive/15 flex items-center justify-center">
-                <svg className="w-5 h-5 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
+                <Icon name="trash2" className="w-5 h-5 text-destructive" />
               </div>
               <h3 id="delete-modal-title" className="text-lg font-semibold text-foreground">Confirmar Exclusão</h3>
             </div>

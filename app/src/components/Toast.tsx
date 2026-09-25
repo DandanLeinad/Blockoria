@@ -1,6 +1,7 @@
 import { useCallback, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { ToastContext, type Toast, type ToastType } from './ToastContext'
+import { Icon } from './ui/Icons'
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -35,30 +36,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       role="alert"
       aria-live="polite"
     >
-      {t.type === 'success' && (
-        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      )}
-      {t.type === 'error' && (
-        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      )}
-      {t.type === 'info' && (
-        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      )}
+      {t.type === 'success' && <Icon name="check" className="w-5 h-5 flex-shrink-0" />}
+      {t.type === 'error' && <Icon name="x" className="w-5 h-5 flex-shrink-0" />}
+      {t.type === 'info' && <Icon name="info" className="w-5 h-5 flex-shrink-0" />}
       <p className="text-sm font-medium flex-1">{t.message}</p>
       <button
         onClick={() => removeToast(t.id)}
         className="flex-shrink-0 p-1 rounded hover:bg-black/10 transition-colors"
         aria-label="Fechar"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <Icon name="x" className="w-4 h-4" />
       </button>
     </div>
   ))
