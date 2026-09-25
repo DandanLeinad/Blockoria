@@ -3,11 +3,16 @@ import { CreateBackup } from './components/CreateBackup'
 import { ListBackups } from './components/ListBackups'
 import type { WorldSummaryDto } from './components/WorldList'
 import { WorldList } from './components/WorldList'
+import { ToastProvider } from './components/Toast'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <AppLayout />,
+    element: (
+      <ToastProvider>
+        <AppLayout />
+      </ToastProvider>
+    ),
     children: [
       {
         index: true,

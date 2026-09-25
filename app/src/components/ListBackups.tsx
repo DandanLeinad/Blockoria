@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { useEffect, useState } from 'react'
+import { useToast } from './Toast'
 
 interface BackupSummaryDto {
   backup_path: string
@@ -44,6 +45,7 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
   const [deleteModal, setDeleteModal] = useState<BackupSummaryDto | null>(null)
   const [restoring, setRestoring] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const { success, error: toastError } = useToast()
 
   const loadBackups = async () => {
     setLoading(true)
@@ -89,11 +91,11 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
         accountId,
       })
       setRestoreModal(null)
-      alert('Backup restaurado com sucesso!')
+      success('Backup restaurado com sucesso!')
       onClose()
     } catch (err) {
       const msg = getErrorMessage(err)
-      alert(`Erro ao restaurar: ${msg}`)
+      toastError(`Erro ao restaurar: ${msg}`)
     } finally {
       setRestoring(null)
     }
@@ -107,10 +109,10 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
       })
       setBackups(prev => prev.filter(b => b.backup_path !== backup.backup_path))
       setDeleteModal(null)
-      alert('Backup deletado com sucesso!')
+      success('Backup deletado com sucesso!')
     } catch (err) {
       const msg = getErrorMessage(err)
-      alert(`Erro ao deletar: ${msg}`)
+      toastError(`Erro ao deletar: ${msg}`)
     } finally {
       setDeleting(null)
     }

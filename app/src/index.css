@@ -110,8 +110,17 @@ body {
   to { transform: rotate(360deg); }
 }
 
+@keyframes slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
 }
 
 /* Utility classes for shadcn/ui compatibility */
