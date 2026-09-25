@@ -4,14 +4,17 @@ import { ListBackups } from './components/ListBackups'
 import type { WorldSummaryDto } from './components/WorldList'
 import { WorldList } from './components/WorldList'
 import { ToastProvider } from './components/Toast'
+import { ThemeProvider, useTheme } from './components/Theme'
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      <ToastProvider>
-        <AppLayout />
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <AppLayout />
+        </ToastProvider>
+      </ThemeProvider>
     ),
     children: [
       {
@@ -31,6 +34,7 @@ export const router = createBrowserRouter([
 ])
 
 function AppLayout() {
+  const { theme, setTheme } = useTheme()
 
   const navItems = [
     { path: '/', label: 'Mundos', icon: (
@@ -78,7 +82,20 @@ function AppLayout() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Tema</span>
+            <select
+              value={theme}
+              onChange={(e) => setTheme(e.target.value as 'light' | 'dark' | 'system')}
+              className="px-2 py-1 text-xs bg-muted border border-border rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label="Selecionar tema"
+            >
+              <option value="system">Sistema</option>
+              <option value="light">Claro</option>
+              <option value="dark">Escuro</option>
+            </select>
+          </div>
           <div className="text-xs text-muted-foreground text-center">
             v0.6.0
           </div>
