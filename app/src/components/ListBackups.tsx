@@ -68,6 +68,31 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
     loadBackups()
   }, [worldFolderName, accountId])
 
+  // Handle Escape key to close modals or go back
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        if (restoreModal) {
+          setRestoreModal(null)
+        } else if (deleteModal) {
+          setDeleteModal(null)
+        } else {
+          onClose()
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [restoreModal, deleteModal, onClose])
+
+  // Close modals on overlay click
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setRestoreModal(null)
+      setDeleteModal(null)
+    }
+  }
+
   const formatDate = (iso: string) => {
     const date = new Date(iso)
     return date.toLocaleString('pt-BR', {
@@ -173,13 +198,29 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
           <h2 className="text-2xl font-bold text-foreground">Backups</h2>
           <p className="text-muted-foreground mt-1">{displayName}</p>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
-        >
-          ← Voltar
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={loadBackups}
+            disabled={loading}
+            className="p-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Atualizar lista de backups"
+          >
+            <svg className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M20 11a8.1 8.1 0 0 0-14.9-3M4 5v3h3M4 13a8.1 8.1 0 0 0 14.9 3M20 19v-3h-3" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label="Voltar"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {backups.length === 0 ? (
@@ -291,7 +332,13 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
 
       {/* Modal Restaurar */}
       {restoreModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="restore-modal-title">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="restore-modal-title"
+          onClick={handleOverlayClick}
+        >
           <div className="bg-card rounded-xl p-6 max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-warning/15 flex items-center justify-center">
@@ -332,7 +379,13 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
 
       {/* Modal Deletar */}
       {deleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-modal-title"
+          onClick={handleOverlayClick}
+        >
           <div className="bg-card rounded-xl p-6 max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-destructive/15 flex items-center justify-center">

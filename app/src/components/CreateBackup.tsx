@@ -62,7 +62,7 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
   // Handle Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && (status === 'idle' || status === 'loadingWorld')) {
+      if ((e.key === 'Escape' || e.key === 'Esc') && (status === 'idle' || status === 'loadingWorld')) {
         onClose()
       }
     }
@@ -255,9 +255,12 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
         </div>
         <button
           onClick={onClose}
-          className="px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
+          className="p-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          aria-label="Voltar à lista"
         >
-          Voltar à lista
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
       </div>
     )
@@ -337,9 +340,12 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
         <button
           onClick={onClose}
           disabled={status === 'loading'}
-          className="flex-1 px-4 py-2.5 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 p-2.5 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Cancelar"
         >
-          Cancelar
+          <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
         <button
           onClick={handleCreateBackup}
