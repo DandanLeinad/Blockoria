@@ -174,7 +174,7 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
         <div className="flex gap-3 pt-2">
           <button
             onClick={() => onSuccess?.(world)}
-            className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
+            className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
           >
             Ver backups
           </button>
@@ -207,7 +207,7 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
         <div className="flex gap-3">
           <button
             onClick={handleRetry}
-            className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
+            className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
           >
             Tentar novamente
           </button>
@@ -313,7 +313,7 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
         <button
           onClick={handleCreateBackup}
           disabled={status === 'loading'}
-          className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {status === 'loading' ? (
             <span className="flex items-center justify-center gap-2">

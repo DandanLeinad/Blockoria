@@ -151,21 +151,7 @@ body {
   animation: slide-in 0.3s ease-out;
 }
 
-/* Custom utilities using @layer so Tailwind JIT processes them */
+/* Semantic utilities for modal overlay */
 @layer utilities {
-  /* Opacity variants for backgrounds */
-  .bg-destructive\/10 { background-color: color-mix(in srgb, var(--color-destructive) 10%, transparent); }
-  .bg-destructive\/15 { background-color: color-mix(in srgb, var(--color-destructive) 15%, transparent); }
-  .bg-destructive\/20 { background-color: color-mix(in srgb, var(--color-destructive) 20%, transparent); }
-  .bg-warning\/10 { background-color: color-mix(in srgb, var(--color-warning) 10%, transparent); }
-  .bg-warning\/15 { background-color: color-mix(in srgb, var(--color-warning) 15%, transparent); }
-  .bg-warning\/20 { background-color: color-mix(in srgb, var(--color-warning) 20%, transparent); }
-  .bg-destructive\/90 { background-color: color-mix(in srgb, var(--color-destructive) 90%, transparent); }
-
-  /* Hover states */
-  .hover\:bg-destructive\/15:hover { background-color: color-mix(in srgb, var(--color-destructive) 15%, transparent); }
-  .hover\:bg-warning\/15:hover { background-color: color-mix(in srgb, var(--color-warning) 15%, transparent); }
-
-  /* Focus states */
-  .focus-visible\:ring-destructive:focus-visible { box-shadow: 0 0 0 2px var(--color-destructive); }
+  .bg-overlay { background-color: color-mix(in srgb, var(--color-background) 50%, transparent); }
 }

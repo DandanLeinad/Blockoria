@@ -79,7 +79,7 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
         </div>
         <button
           onClick={loadWorlds}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           Tentar novamente
         </button>
@@ -106,7 +106,7 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
         </div>
         <button
           onClick={loadWorlds}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-2"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-2"
         >
           Atualizar
         </button>
@@ -195,7 +195,7 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
                     <button
                       type="button"
                       onClick={() => onWorldSelect(world)}
-                      className="inline-flex items-center justify-center gap-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors px-3 py-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      className="inline-flex items-center justify-center gap-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/80 transition-colors px-3 py-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       <Icon name="plus" className="w-4 h-4" />
                       Criar backup
@@ -205,7 +205,7 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
                   <button
                     type="button"
                     onClick={() => onViewBackups(world)}
-                    className="inline-flex items-center justify-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="inline-flex items-center justify-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     aria-label={`Ver backups de ${world.level_name}`}
                   >
                     <Icon name="folderOpen" className="w-4 h-4" />
