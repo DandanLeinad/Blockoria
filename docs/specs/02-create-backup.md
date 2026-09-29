@@ -85,6 +85,8 @@ interface CreateBackupResponseDto {
 └─────────────────────────────────────┘
 ```
 
+> **Nota**: O caminho base (`%APPDATA%\Blockoria\backups`) agora vem do backend via `cmd_get_backup_root`, respeitando o `config.toml` do usuário. O timestamp é gerado no frontend (preview) e no backend (real).
+
 ### Estados
 1. **Inicial** — mostra info do mundo + destino do backup
 2. **Loading** — spinner, botão desabilitado

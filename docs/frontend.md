@@ -132,7 +132,7 @@ Definidos em `src/index.css` via `@theme`:
 ### Classes Utilitárias Disponíveis
 
 ```css
-/* Backgrounds */
+/* Backgrounds (Tailwind v4 gera automaticamente do @theme) */
 .bg-background, .bg-foreground, .bg-card, .bg-card-foreground
 .bg-popover, .bg-popover-foreground
 .bg-primary, .bg-primary-foreground
@@ -143,6 +143,13 @@ Definidos em `src/index.css` via `@theme`:
 .bg-success, .bg-success-foreground
 .bg-warning, .bg-warning-foreground
 
+/* Opacidades semânticas (geradas automaticamente) */
+.bg-primary\/10, .bg-primary\/15, .bg-primary\/20, .bg-primary\/50, .bg-primary\/80
+.bg-destructive\/10, .bg-destructive\/15, .bg-destructive\/20
+.bg-warning\/10, .bg-warning\/15, .bg-warning\/20
+.bg-success\/10, .bg-success\/15, .bg-success\/20
+.bg-muted\/10, .bg-muted\/15, .bg-muted\/50
+
 /* Text */
 .text-foreground, .text-muted-foreground, .text-primary
 .text-primary-foreground, .text-secondary-foreground
@@ -151,22 +158,32 @@ Definidos em `src/index.css` via `@theme`:
 
 /* Borders */
 .border-border, .border-input, .border-ring
+.border-primary, .border-destructive, .border-success, .border-warning
 
 /* Radius */
 .rounded, .rounded-lg, .rounded-xl, .rounded-full
 
-/* Shadows */
+/* Shadows (adaptam automaticamente light/dark) */
 .shadow-sm, .shadow, .shadow-md, .shadow-lg, .shadow-xl
 
 /* Transitions */
 .transition-all, .transition-colors, .transition-shadow
 
-/* Hover/Focus states */
-.hover\:bg-primary\/90:hover
-.hover\:bg-secondary:hover
-.hover\:text-primary:hover
+/* Hover/Focus states (padronizados) */
+.hover\:bg-primary\/80:hover
+.hover\:bg-destructive\/15:hover
+.hover\:bg-success\/15:hover
+.hover\:bg-warning\/15:hover
+.hover\:bg-muted\/50:hover
+.hover\:border-primary:hover
 .focus-visible\:ring-2:focus-visible
+.focus-visible\:ring-ring:focus-visible
+.focus-visible\:ring-destructive:focus-visible
+.focus-visible\:ring-offset-2:focus-visible
 .disabled\:opacity-50:disabled
+
+/* Semantic utilities */
+.bg-overlay  /* Modal backdrop: 50% background, adapta light/dark */
 ```
 
 ---
@@ -272,10 +289,15 @@ interface CreateBackupProps {
 
 **Fluxo**:
 1. **Loading World** — `cmd_list_worlds` + filtra por `folderName`
-2. **Idle** — Exibe info do mundo, tipo, versão, diretório de destino
+2. **Idle** — Exibe info do mundo, tipo, versão, **diretório de destino real** (via `cmd_get_backup_root`)
 3. **Loading** — Spinner no botão, desabilita inputs
 4. **Success** — Toast verde, botões "Ver backups" / "Criar outro"
 5. **Error** — Toast vermelho, botão "Tentar novamente"
+
+**Direório de Destino**:
+- Busca o `backup_root` configurado via `cmd_get_backup_root` no mount
+- Compõe: `{backup_root}\{account_id|Shared}\{folderName}\{timestamp}\`
+- Fallback para `%APPDATA%\Blockoria\backups` se comando falhar
 
 **Erros tratados**:
 | Erro Backend | Mensagem UI |
@@ -345,6 +367,11 @@ async fn cmd_delete_backup(
     backup_path: String,
     state: State<'_, AppState>
 ) -> CommandResult<DeleteBackupResponseDto>
+
+#[tauri::command]
+async fn cmd_get_backup_root(
+    state: State<'_, AppState>
+) -> CommandResult<String>  // Retorna backup_root configurado (ex: %APPDATA%\Blockoria\backups)
 ```
 
 ### DTOs TypeScript (frontend)
