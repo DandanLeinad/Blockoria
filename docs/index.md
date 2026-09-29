@@ -208,12 +208,13 @@ app/
 
 ### Funcionalidades Implementadas
 
-- **WorldList**: Cards responsivos com ícones, badges (Compartilhado/Conta), versão, botão "Ver backups", estados loading/empty/error, navegação por teclado
-- **CreateBackup**: Carregamento do mundo, confirmação, loading spinner, toast sucesso/erro, retry, diretório de destino
-- **ListBackups**: Cards ordenados por data (recente primeiro), botões Restaurar/Deletar com modais de confirmação, estado vazio
+- **WorldList**: Cards responsivos com ícones, badges (Compartilhado/Conta), versão, botão "Ver backups", estados loading/empty/error, navegação por teclado, **hover visible em dark mode**
+- **CreateBackup**: Carregamento do mundo, confirmação, loading spinner, toast sucesso/erro, retry, **diretório de destino real via config**
+- **ListBackups**: Cards ordenados por data (recente primeiro), botões Restaurar/Deletar com modais de confirmação, estado vazio, **hover visible em dark mode**
 - **Navegação**: Sidebar fixa (desktop), header mobile, rotas aninhadas com loaders React Router v7
-- **Tema**: Light/Dark mode automático via `prefers-color-scheme`, tokens semânticos CSS (`bg-background`, `text-foreground`, `border-border`, `bg-card`, `bg-muted`, etc.)
+- **Tema**: Light/Dark mode automático via `prefers-color-scheme`, tokens semânticos CSS (`bg-background`, `text-foreground`, `border-border`, `bg-card`, `bg-muted`, etc.), **opacidades semânticas padronizadas**
 - **Acessibilidade**: ARIA labels, focus visible, navegação por teclado, roles semânticos
+- **Design System**: Tailwind v4 com tokens `@theme`, **sem `@layer utilities` redundante**, utility semântica `.bg-overlay` para modais
 
 ### Testes Frontend
 
@@ -237,6 +238,7 @@ cd app && bun run build         # TypeScript + Vite build OK
 | `cmd_list_backups` | Lista backups → `BackupSummaryDto[]` |
 | `cmd_restore_backup` | Restaura backup → `RestoreBackupResponseDto` |
 | `cmd_delete_backup` | Deleta backup → `DeleteBackupResponseDto` |
+| `cmd_get_backup_root` | Retorna backup_root configurado → `String` |
 
 ### Development
 

@@ -256,6 +256,16 @@ mod commands {
             message: "Backup deleted successfully".to_string(),
         })
     }
+
+    #[tauri::command]
+    pub async fn cmd_get_backup_root(state: State<'_, AppState>) -> CommandResult<String> {
+        let root = state
+            .backup_repo
+            .backup_root()
+            .to_string_lossy()
+            .to_string();
+        Ok(root)
+    }
 }
 
 /// Entry point called from main.rs with real repositories.
@@ -271,6 +281,7 @@ pub fn run_with_state(state: AppState) {
             commands::cmd_create_backup,
             commands::cmd_restore_backup,
             commands::cmd_delete_backup,
+            commands::cmd_get_backup_root,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Blockoria application");
