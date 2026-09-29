@@ -211,7 +211,7 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
             <article
               key={backup.backup_path}
               role="listitem"
-              className="bg-card border border-border rounded-xl p-4 hover:shadow-md hover:border-primary/50 transition-all duration-200"
+              className="bg-card border border-border rounded-xl p-4 hover:bg-muted/50 hover:border-primary transition-all duration-200"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">

@@ -140,7 +140,7 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
         <article
           key={world.folder_name}
           role="listitem"
-          className="group bg-card border border-border rounded-xl p-4 hover:shadow-lg hover:border-primary/50 transition-all duration-200"
+          className="group bg-card border border-border rounded-xl p-4 hover:bg-muted/50 hover:border-primary transition-all duration-200"
         >
           <div className="flex items-start gap-3 sm:gap-4">
             <div className="relative flex-shrink-0">
