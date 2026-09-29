@@ -25,6 +25,14 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
   const [world, setWorld] = useState<WorldSummaryDto | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [backupInfo, setBackupInfo] = useState<CreateBackupResponseDto | null>(null)
+  const [backupRoot, setBackupRoot] = useState<string>('')
+
+  // Fetch backup root from backend
+  useEffect(() => {
+    invoke<string>('cmd_get_backup_root')
+      .then(setBackupRoot)
+      .catch(() => setBackupRoot('%APPDATA%\\Blockoria\\backups'))
+  }, [])
 
   // Load world data on mount
   useEffect(() => {
@@ -65,7 +73,7 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
   }, [status, onClose])
 
   const getBackupDirDisplay = () => {
-    const base = '%USERPROFILE%\\AppData\\Roaming\\Blockoria\\backups'
+    const base = backupRoot || '%APPDATA%\\Blockoria\\backups'
     const location = world?.account_id || 'Shared'
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
     return `${base}\\${location}\\${folderName.replace('=', '_')}\\${timestamp}\\`
