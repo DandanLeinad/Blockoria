@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.8.0] - 2026-09-29
+
+### Features
+- feat(frontend): add `cmd_get_backup_root` Tauri command returning configured backup root from config.toml
+- feat(frontend): CreateBackup now shows real backup destination path from backend config
+
+### Improvements
+- refactor(ui): centralize color tokens in @theme, remove 18 lines redundant @layer utilities
+- refactor(ui): add semantic .bg-overlay utility for modal backdrops (adapts light/dark)
+- refactor(ui): fix dark mode card hover visibility (bg-muted/50 + border-primary instead of invisible shadows)
+- refactor(ui): migrate inline SVGs to Lucide icons via wrapper component (tree-shaken)
+- refactor(ui): update AppLayout logo text, remove version badge
+
+### Fixes
+- fix(frontend): eliminate 7 hardcoded color occurrences across Toast, ListBackups, CreateBackup, WorldList
+
+### Dependencies
+- deps(frontend): @tauri-apps/* 2.11/2.7/2.5 → 2.12/2.8/2.6
+- deps(frontend): React 19.2 → 19.3, React Router 7.18.3 → 7.18.4
+- deps(frontend): lucide-react 1.48 → 1.49, TypeScript 6.0.2 → 6.0.3
+- deps(docs): zensical 0.0.63 → 0.0.66
+
+### Documentation
+- docs(frontend): add semantic opacity utilities, cmd_get_backup_root, real backup path explanation
+- docs: update index.md with dark mode hover, real path, standardized tokens
+- docs(specs): note backup root comes from backend via cmd_get_backup_root
+
 ## [0.7.0] - 2026-09-20
 
 ### Features
