@@ -8,14 +8,17 @@
 
 [![License: AGPL-3.0-only](https://img.shields.io/badge/License-AGPL%203.0--only-blue.svg?style=for-the-badge)](LICENSE)
 [![Rust](https://img.shields.io/badge/Rust-1.80%2B-4f46e5?style=for-the-badge&logo=rust&logoColor=white)](https://rust-lang.org)
-[![Tauri](https://img.shields.io/badge/Tauri-2.0-4f46e5?style=for-the-badge&logo=tauri&logoColor=white)](https://tauri.app)
+[![Tauri](https://img.shields.io/badge/Tauri-2.12-4f46e5?style=for-the-badge&logo=tauri&logoColor=white)](https://tauri.app)
+[![React](https://img.shields.io/badge/React-19.3-61dafb?style=for-the-badge&logo=react&logoColor=white)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-8.3-646cff?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Windows](https://img.shields.io/badge/Windows-10%2F11-0078d6?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com/windows)
 
 ---
 
 ## 🏗️ Status Atual
 
-**Em desenvolvimento ativo** — **Domain, Application, Infrastructure e Frontend implementadas**.
+**v0.8.0 released** — **Domain, Application, Infrastructure e Frontend implementadas**.
 
 | Camada | Status |
 |--------|--------|
@@ -87,7 +90,7 @@ cd app && bun test                    # 24 frontend tests (Vitest + RTL)
 | Camada | Tecnologia |
 |--------|------------|
 | **Domain / Application / Infrastructure** | Rust 1.80+, Edition 2024, `thiserror`, `serde`, `tokio` |
-| **Frontend** | Tauri 2, React 19, TypeScript 6, Vite 8, Bun |
+| **Frontend** | Tauri 2.12, React 19.3, TypeScript 6.0, Vite 8.3, Bun |
 | **Routing** | React Router v7 (loaders, nested routes) |
 | **Styling** | Tailwind CSS v4 (CSS variables, dark mode) |
 | **Testes Backend** | `cargo test` (built-in) |
