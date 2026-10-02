@@ -15,20 +15,29 @@ use std::path::PathBuf;
 /// Application configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
-    /// Root directory for backups.
-    #[serde(default = "default_backup_root")]
-    pub backup_root: PathBuf,
+    /// UI theme: light, dark, or system
+    #[serde(default = "default_theme")]
+    pub theme: String,
+    /// Enable automatic backup
+    #[serde(default)]
+    pub auto_backup: bool,
+}
+
+fn default_theme() -> String {
+    "system".to_string()
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
-            backup_root: default_backup_root(),
+            theme: default_theme(),
+            auto_backup: false,
         }
     }
 }
 
-fn default_backup_root() -> PathBuf {
+/// Returns the default backup root path: `%APPDATA%\Blockoria\backups`
+pub fn default_backup_root() -> PathBuf {
     dirs::data_dir()
         .unwrap_or_else(|| PathBuf::from("."))
         .join("Blockoria")
@@ -99,6 +108,7 @@ mod tests {
     #[test]
     fn test_default_config() {
         let config = Config::default();
-        assert!(config.backup_root.ends_with("Blockoria/backups"));
+        assert_eq!(config.theme, "system");
+        assert!(!config.auto_backup);
     }
 }

@@ -73,7 +73,7 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
   }, [status, onClose])
 
   const getBackupDirDisplay = () => {
-    const base = backupRoot || '%APPDATA%\\Blockoria\\backups'
+    const base = backupRoot
     const location = world?.account_id || 'Shared'
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
     return `${base}\\${location}\\${folderName.replace('=', '_')}\\${timestamp}\\`

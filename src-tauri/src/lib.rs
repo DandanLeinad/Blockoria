@@ -9,7 +9,9 @@
 
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use blockoria_domain::DomainError;
-use blockoria_infrastructure::{FileBackupRepository, FileWorldRepository};
+use blockoria_infrastructure::{
+    Config, FileBackupRepository, FileWorldRepository, default_backup_root,
+};
 use std::fs;
 use std::path::Path;
 use std::sync::Arc;
@@ -57,15 +59,18 @@ pub struct AppState {
     world_repo: Arc<FileWorldRepository>,
     #[allow(dead_code)]
     backup_repo: Arc<FileBackupRepository>,
+    config: Arc<std::sync::RwLock<Config>>,
 }
 
 /// Create the application state with real repositories.
 pub fn create_state() -> Result<AppState, DomainError> {
     let world_repo = Arc::new(FileWorldRepository::new()?);
     let backup_repo = Arc::new(FileBackupRepository::with_default_path()?);
+    let config = Arc::new(std::sync::RwLock::new(Config::load()?));
     Ok(AppState {
         world_repo,
         backup_repo,
+        config,
     })
 }
 
@@ -82,7 +87,7 @@ mod commands {
         restore_backup as uc_restore_backup,
     };
     use blockoria_domain::{AccountId, BackupPath, WorldFolderName, WorldLocation};
-    use serde::Serialize;
+    use serde::{Deserialize, Serialize};
     use tauri::State;
 
     #[derive(Serialize)]
@@ -258,13 +263,44 @@ mod commands {
     }
 
     #[tauri::command]
-    pub async fn cmd_get_backup_root(state: State<'_, AppState>) -> CommandResult<String> {
-        let root = state
-            .backup_repo
-            .backup_root()
-            .to_string_lossy()
-            .to_string();
+    pub async fn cmd_get_backup_root(_state: State<'_, AppState>) -> CommandResult<String> {
+        let root = default_backup_root().to_string_lossy().to_string();
         Ok(root)
+    }
+
+    #[derive(Serialize, Deserialize)]
+    pub struct ConfigDto {
+        pub theme: String,
+        pub auto_backup: bool,
+    }
+
+    #[tauri::command]
+    pub async fn cmd_get_config(state: State<'_, AppState>) -> CommandResult<ConfigDto> {
+        let config = state.config.read().map_err(|_| {
+            CommandError::from(blockoria_domain::DomainError::InvalidBackupPath(
+                "Failed to read config lock".into(),
+            ))
+        })?;
+        Ok(ConfigDto {
+            theme: config.theme.clone(),
+            auto_backup: config.auto_backup,
+        })
+    }
+
+    #[tauri::command]
+    pub async fn cmd_save_config(
+        config: ConfigDto,
+        state: State<'_, AppState>,
+    ) -> CommandResult<()> {
+        let mut config_guard = state.config.write().map_err(|_| {
+            CommandError::from(blockoria_domain::DomainError::InvalidBackupPath(
+                "Failed to write config lock".into(),
+            ))
+        })?;
+        config_guard.theme = config.theme;
+        config_guard.auto_backup = config.auto_backup;
+        config_guard.save().map_err(CommandError::from)?;
+        Ok(())
     }
 }
 
@@ -282,6 +318,8 @@ pub fn run_with_state(state: AppState) {
             commands::cmd_restore_backup,
             commands::cmd_delete_backup,
             commands::cmd_get_backup_root,
+            commands::cmd_get_config,
+            commands::cmd_save_config,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Blockoria application");
