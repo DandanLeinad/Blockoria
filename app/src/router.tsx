@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { ToastProvider } from './components/Toast'
+import { ToastProvider } from './components/ToastContainer'
 import { ThemeProvider } from './components/Theme'
 import { WorldListPage } from './pages/WorldListPage'
 import { CreateBackupPage } from './pages/CreateBackupPage'
