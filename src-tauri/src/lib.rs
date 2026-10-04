@@ -64,7 +64,18 @@ pub struct AppState {
 
 /// Create the application state with real repositories.
 pub fn create_state() -> Result<AppState, DomainError> {
-    let world_repo = Arc::new(FileWorldRepository::new()?);
+    let world_repo = if let Ok(test_path) = std::env::var("BLOCKORIA_TEST_WORLDS_DIR") {
+        let path = std::path::PathBuf::from(test_path);
+        // Accept both: the dir containing Users/ OR the Users/ dir itself
+        let users_path = if path.file_name().and_then(|s| s.to_str()) == Some("Users") {
+            path
+        } else {
+            path.join("Users")
+        };
+        Arc::new(FileWorldRepository::with_path(users_path))
+    } else {
+        Arc::new(FileWorldRepository::new()?)
+    };
     let backup_repo = Arc::new(FileBackupRepository::with_default_path()?);
     let config = Arc::new(std::sync::RwLock::new(Config::load()?));
     Ok(AppState {
