@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { Icon } from './ui/Icons'
+import { Toaster } from './ui/toast'
 
 export function AppLayout() {
 
@@ -66,6 +67,7 @@ export function AppLayout() {
           <Outlet />
         </div>
       </main>
+      <Toaster position="top-right" richColors />
     </div>
   )
 }

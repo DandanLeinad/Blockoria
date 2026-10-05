@@ -3,7 +3,7 @@ import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { useCallback, useEffect, useState } from 'react'
 import { getErrorMessage } from '../utils/error'
 import { formatDate, formatVersion } from '../utils/format'
-import { useToast } from './useToast'
+import { toast } from 'sonner'
 import { Icon } from './ui/Icons'
 
 interface BackupSummaryDto {
@@ -39,7 +39,6 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
   const [deleteModal, setDeleteModal] = useState<BackupSummaryDto | null>(null)
   const [restoring, setRestoring] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
-  const { success, error: toastError } = useToast()
 
   const loadBackups = useCallback(async () => {
     setLoading(true)
@@ -97,11 +96,11 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
         accountId,
       })
       setRestoreModal(null)
-      success('Backup restaurado com sucesso!')
+      toast.success('Backup restaurado com sucesso!')
       onClose()
     } catch (err) {
       const msg = getErrorMessage(err)
-      toastError(`Erro ao restaurar: ${msg}`)
+      toast.error(`Erro ao restaurar: ${msg}`)
     } finally {
       setRestoring(null)
     }
@@ -115,10 +114,10 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
       })
       setBackups(prev => prev.filter(b => b.backup_path !== backup.backup_path))
       setDeleteModal(null)
-      success('Backup deletado com sucesso!')
+      toast.success('Backup deletado com sucesso!')
     } catch (err) {
       const msg = getErrorMessage(err)
-      toastError(`Erro ao deletar: ${msg}`)
+      toast.error(`Erro ao deletar: ${msg}`)
     } finally {
       setDeleting(null)
     }

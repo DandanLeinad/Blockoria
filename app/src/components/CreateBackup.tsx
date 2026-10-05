@@ -1,9 +1,10 @@
 import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useState } from 'react'
-import type { WorldSummaryDto } from './WorldList'
-import { formatVersion } from '../utils/format'
 import { getErrorMessage } from '../utils/error'
+import { formatVersion } from '../utils/format'
+import type { WorldSummaryDto } from './WorldList'
 import { Icon } from './ui/Icons'
+import { Button } from './ui/button'
 
 interface CreateBackupProps {
   folderName: string
@@ -180,21 +181,22 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
           </div>
         </div>
         <div className="flex gap-3 pt-2">
-          <button
+          <Button
             onClick={() => onSuccess?.(world)}
-            className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
+            className="flex-1"
           >
             Ver backups
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => {
               setStatus('idle')
               setBackupInfo(null)
             }}
-            className="flex-1 px-4 py-2.5 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
+            className="flex-1"
           >
             Criar outro
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -213,18 +215,12 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
           </div>
         </div>
         <div className="flex gap-3">
-          <button
-            onClick={handleRetry}
-            className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
-          >
+          <Button onClick={handleRetry} className="flex-1">
             Tentar novamente
-          </button>
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2.5 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
-          >
+          </Button>
+          <Button variant="outline" onClick={onClose} className="flex-1">
             Cancelar
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -240,13 +236,9 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
           <h2 className="text-xl font-bold text-foreground">Mundo não encontrado</h2>
           <p className="text-muted-foreground mt-1">Este mundo pode ter sido movido ou excluído.</p>
         </div>
-        <button
-          onClick={onClose}
-          className="p-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          aria-label="Voltar à lista"
-        >
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Voltar à lista">
           <Icon name="arrowLeft" className="w-5 h-5" />
-        </button>
+        </Button>
       </div>
     )
   }
@@ -310,18 +302,19 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 pt-2">
-        <button
+        <Button
+          variant="outline"
           onClick={onClose}
           disabled={status === 'loading'}
-          className="flex-1 p-2.5 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1"
           aria-label="Cancelar"
         >
           <Icon name="arrowLeft" className="w-5 h-5 mx-auto" />
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={handleCreateBackup}
           disabled={status === 'loading'}
-          className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1"
         >
           {status === 'loading' ? (
             <span className="flex items-center justify-center gap-2">
@@ -334,7 +327,7 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
               Criar Backup
             </span>
           )}
-        </button>
+        </Button>
       </div>
 
       {status === 'loading' && (
