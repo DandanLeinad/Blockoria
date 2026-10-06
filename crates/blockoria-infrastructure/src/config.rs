@@ -24,7 +24,7 @@ pub struct Config {
 }
 
 fn default_theme() -> String {
-    "system".to_string()
+    "light".to_string()
 }
 
 impl Default for Config {
@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn test_default_config() {
         let config = Config::default();
-        assert_eq!(config.theme, "system");
+        assert_eq!(config.theme, "light");
         assert!(!config.auto_backup);
     }
 }

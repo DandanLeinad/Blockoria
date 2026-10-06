@@ -3,8 +3,132 @@
 
 @import "tailwindcss";
 
+/* ============================================================
+   LIGHT MODE (classe .light) - Valores explícitos
+   ============================================================ */
+.light {
+  /* Base */
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0f172a;
+
+  /* Brand */
+  --color-primary: #1e3a8a;
+  --color-primary-foreground: #ffffff;
+
+  /* Secondary */
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #0f172a;
+
+  /* Muted */
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #475569;
+
+  /* Accent */
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #0f172a;
+
+  /* Destructive */
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+
+  /* Borders & Inputs */
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #1e3a8a;
+
+  /* Status */
+  --color-success: #059669;
+  --color-success-foreground: #ffffff;
+  --color-warning: #b45309;
+  --color-warning-foreground: #ffffff;
+}
+
+/* ============================================================
+   DARK MODE (classe .dark) - Valores explícitos
+   ============================================================ */
+.dark {
+  /* Base */
+  --color-background: #020617;
+  --color-foreground: #f8fafc;
+  --color-card: #0f172a;
+  --color-card-foreground: #f8fafc;
+  --color-popover: #0f172a;
+  --color-popover-foreground: #f8fafc;
+
+  /* Brand */
+  --color-primary: #60a5fa;
+  --color-primary-foreground: #0f172a;
+
+  /* Secondary */
+  --color-secondary: #1e293b;
+  --color-secondary-foreground: #f8fafc;
+
+  /* Muted */
+  --color-muted: #1e293b;
+  --color-muted-foreground: #cbd5e1;
+
+  /* Accent */
+  --color-accent: #1e293b;
+  --color-accent-foreground: #f8fafc;
+
+  /* Destructive */
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
+  /* Borders & Inputs */
+  --color-border: #1e293b;
+  --color-input: #1e293b;
+  --color-ring: #60a5fa;
+
+  /* Status */
+  --color-success: #34d399;
+  --color-success-foreground: #0f172a;
+  --color-warning: #fbbf24;
+  --color-warning-foreground: #0f172a;
+}
+
+/* ============================================================
+   FALLBACK SISTEMA (apenas quando NÃO há .light nem .dark)
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) {
+    --color-background: #020617;
+    --color-foreground: #f8fafc;
+    --color-card: #0f172a;
+    --color-card-foreground: #f8fafc;
+    --color-popover: #0f172a;
+    --color-popover-foreground: #f8fafc;
+    --color-primary: #60a5fa;
+    --color-primary-foreground: #0f172a;
+    --color-secondary: #1e293b;
+    --color-secondary-foreground: #f8fafc;
+    --color-muted: #1e293b;
+    --color-muted-foreground: #cbd5e1;
+    --color-accent: #1e293b;
+    --color-accent-foreground: #f8fafc;
+    --color-destructive: #ef4444;
+    --color-destructive-foreground: #ffffff;
+    --color-border: #1e293b;
+    --color-input: #1e293b;
+    --color-ring: #60a5fa;
+    --color-success: #34d399;
+    --color-success-foreground: #0f172a;
+    --color-warning: #fbbf24;
+    --color-warning-foreground: #0f172a;
+  }
+}
+
+/* ============================================================
+   TAILWIND THEME TOKENS (para utilitários do Tailwind)
+   ============================================================ */
 @theme {
-  /* Cores base - Light mode */
+  /* ============================================================
+     COLOR PALETTE (Light mode base - Dark mode via .dark class)
+     ============================================================ */
   --color-background: #ffffff;
   --color-foreground: #0f172a;
   --color-card: #ffffff;
@@ -16,7 +140,7 @@
   --color-secondary: #f1f5f9;
   --color-secondary-foreground: #0f172a;
   --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
+  --color-muted-foreground: #475569;
   --color-accent: #f1f5f9;
   --color-accent-foreground: #0f172a;
   --color-destructive: #dc2626;
@@ -26,8 +150,32 @@
   --color-ring: #1e3a8a;
   --color-success: #059669;
   --color-success-foreground: #ffffff;
-  --color-warning: #d97706;
+  --color-warning: #b45309;
   --color-warning-foreground: #ffffff;
+
+  /* Radius */
+  --radius: 0.5rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Semantic Interactive States */
+  --color-hover: var(--color-accent);
+  --color-hover-foreground: var(--color-accent-foreground);
+  --color-active: var(--color-secondary);
+  --color-active-foreground: var(--color-secondary-foreground);
+  --color-focus-ring: var(--color-ring);
+  --color-focus-ring-offset: var(--color-background);
+  --color-disabled: var(--color-muted);
+  --color-disabled-foreground: var(--color-muted-foreground);
+
+  /* Transition Tokens */
+  --transition-theme: 0.2s ease;
+  --transition-colors: 0.15s ease;
 
   /* Radius */
   --radius: 0.5rem;
@@ -40,63 +188,9 @@
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
-/* Dark mode via class strategy (toggleable) */
-.dark {
-  --color-background: #020617;
-  --color-foreground: #f8fafc;
-  --color-card: #0f172a;
-  --color-card-foreground: #f8fafc;
-  --color-popover: #0f172a;
-  --color-popover-foreground: #f8fafc;
-  --color-primary: #3b82f6;
-  --color-primary-foreground: #0f172a;
-  --color-secondary: #1e293b;
-  --color-secondary-foreground: #f8fafc;
-  --color-muted: #1e293b;
-  --color-muted-foreground: #94a3b8;
-  --color-accent: #1e293b;
-  --color-accent-foreground: #f8fafc;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
-  --color-border: #1e293b;
-  --color-input: #1e293b;
-  --color-ring: #3b82f6;
-  --color-success: #10b981;
-  --color-success-foreground: #0f172a;
-  --color-warning: #f59e0b;
-  --color-warning-foreground: #0f172a;
-}
-
-/* System preference fallback (when no class is set) */
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    --color-background: #020617;
-    --color-foreground: #f8fafc;
-    --color-card: #0f172a;
-    --color-card-foreground: #f8fafc;
-    --color-popover: #0f172a;
-    --color-popover-foreground: #f8fafc;
-    --color-primary: #3b82f6;
-    --color-primary-foreground: #0f172a;
-    --color-secondary: #1e293b;
-    --color-secondary-foreground: #f8fafc;
-    --color-muted: #1e293b;
-    --color-muted-foreground: #94a3b8;
-    --color-accent: #1e293b;
-    --color-accent-foreground: #f8fafc;
-    --color-destructive: #ef4444;
-    --color-destructive-foreground: #ffffff;
-    --color-border: #1e293b;
-    --color-input: #1e293b;
-    --color-ring: #3b82f6;
-    --color-success: #10b981;
-    --color-success-foreground: #0f172a;
-    --color-warning: #f59e0b;
-    --color-warning-foreground: #0f172a;
-  }
-}
-
-/* Base styles */
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
 * {
   border-color: var(--color-border);
 }
@@ -169,7 +263,39 @@ body {
   animation: fade-out 0.2s ease-in forwards;
 }
 
-/* Semantic utilities for modal overlay */
+/* ============================================================
+   THEME TRANSITIONS & REDUCED MOTION
+   ============================================================ */
+* {
+  transition: background-color var(--transition-theme),
+              border-color var(--transition-theme),
+              color var(--transition-theme);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .animate-spin,
+  .animate-slide-in,
+  .animate-slide-out,
+  .animate-fade-out {
+    animation: none !important;
+  }
+}
+
+.theme-transition * {
+  transition: none !important;
+}
+
 @layer utilities {
+  .theme-smooth {
+    transition: background-color var(--transition-colors),
+                border-color var(--transition-colors),
+                color var(--transition-colors);
+  }
+
   .bg-overlay { background-color: color-mix(in srgb, var(--color-background) 50%, transparent); }
 }

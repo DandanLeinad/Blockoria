@@ -1,15 +1,18 @@
 'use client'
 
 import { Toaster as Sonner } from 'sonner'
+import { useTheme } from '../useTheme'
 import { cn } from '@/lib/utils'
 
 export function Toaster({ position = 'top-right', richColors = false, ...props }: {
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center'
   richColors?: boolean
 }) {
+  const { resolvedTheme } = useTheme()
+
   return (
     <Sonner
-      theme="system"
+      theme={resolvedTheme}
       position={position}
       richColors={richColors}
       className={cn('toaster group')}

@@ -4,9 +4,9 @@ import { ThemeContext } from './ThemeContext'
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'system'
+      return (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'light'
     }
-    return 'system'
+    return 'light'
   })
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light')
 
@@ -19,8 +19,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
     setResolvedTheme(resolved)
     const root = document.documentElement
+    // Disable transitions during theme switch to prevent flash
+    root.classList.add('theme-transition')
     root.classList.remove('light', 'dark')
     root.classList.add(resolved)
+    // Re-enable transitions after a brief moment
+    requestAnimationFrame(() => {
+      root.classList.remove('theme-transition')
+    })
   }
 
   // Initial setup - runs once on mount

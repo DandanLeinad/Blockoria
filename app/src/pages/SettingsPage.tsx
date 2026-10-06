@@ -15,7 +15,7 @@ interface ConfigDto {
 export function SettingsPage() {
   const { setTheme } = useTheme()
   const [config, setConfig] = useState<ConfigDto>({
-    theme: 'system',
+    theme: 'light',
     auto_backup: false,
   })
   const [loading, setLoading] = useState(true)
