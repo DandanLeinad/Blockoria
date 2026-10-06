@@ -9,14 +9,12 @@ import { Label } from '../components/ui/label'
 
 interface ConfigDto {
   theme: 'light' | 'dark' | 'system'
-  auto_backup: boolean
 }
 
 export function SettingsPage() {
   const { setTheme } = useTheme()
   const [config, setConfig] = useState<ConfigDto>({
     theme: 'light',
-    auto_backup: false,
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -102,10 +100,10 @@ export function SettingsPage() {
                   </Button>
                 ))}
               </div>
-            </div>
-          </div>
+</div>
+        </div>
 
-          <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={reloadConfig} disabled={saving}>
               Descartar alterações
             </Button>

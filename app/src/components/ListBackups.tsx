@@ -5,6 +5,15 @@ import { getErrorMessage } from '../utils/error'
 import { formatDate, formatVersion } from '../utils/format'
 import { toast } from 'sonner'
 import { Icon } from './ui/Icons'
+import { Button } from './ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from './ui/dialog'
 
 interface BackupSummaryDto {
   backup_path: string
@@ -79,13 +88,7 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [restoreModal, deleteModal, onClose])
 
-  // Close modals on overlay click
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      setRestoreModal(null)
-      setDeleteModal(null)
-    }
-  }
+
 
   const handleRestore = async (backup: BackupSummaryDto) => {
     setRestoring(backup.backup_path)
@@ -129,6 +132,11 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
 
   const openDeleteModal = (backup: BackupSummaryDto) => {
     setDeleteModal(backup)
+  }
+
+  const closeModals = () => {
+    setRestoreModal(null)
+    setDeleteModal(null)
   }
 
   if (loading) {
@@ -290,94 +298,62 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
       )}
 
       {/* Modal Restaurar */}
-      {restoreModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="restore-modal-title"
-          onClick={handleOverlayClick}
-        >
-          <div className="bg-card rounded-xl p-6 max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto shadow-xl">
+      <Dialog open={!!restoreModal} onOpenChange={closeModals}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-warning/15 flex items-center justify-center">
                 <Icon name="alertTriangle" className="w-5 h-5 text-warning" />
               </div>
-              <h3 id="restore-modal-title" className="text-lg font-semibold text-foreground">Confirmar Restauração</h3>
+              <DialogTitle>Confirmar Restauração</DialogTitle>
             </div>
-            <p className="text-muted-foreground mb-4">
+            <DialogDescription>
               Isso substituirá <strong>TODOS os arquivos</strong> do mundo <strong className="text-foreground">{displayName}</strong>
               <span> </span>
-              pelo backup de <strong className="text-foreground">{formatDate(restoreModal.timestamp)}</strong>.
-            </p>
-            <p className="text-sm text-destructive mb-6">
+              pelo backup de <strong className="text-foreground">{formatDate(restoreModal?.timestamp ?? '')}</strong>.
+            </DialogDescription>
+            <p className="text-sm text-destructive mt-4">
               Esta ação <strong>NÃO PODE</strong> ser desfeita.
             </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                type="button"
-                onClick={() => setRestoreModal(null)}
-                disabled={restoring === restoreModal.backup_path}
-                className="px-4 py-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => handleRestore(restoreModal)}
-                disabled={restoring === restoreModal.backup_path}
-                className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 font-medium disabled:opacity-50"
-              >
-                {restoring === restoreModal.backup_path ? 'Restaurando...' : 'Restaurar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeModals} disabled={restoring === restoreModal?.backup_path}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={() => handleRestore(restoreModal!)} disabled={restoring === restoreModal?.backup_path}>
+              {restoring === restoreModal?.backup_path ? 'Restaurando...' : 'Restaurar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal Deletar */}
-      {deleteModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="delete-modal-title"
-          onClick={handleOverlayClick}
-        >
-          <div className="bg-card rounded-xl p-6 max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto shadow-xl">
+      <Dialog open={!!deleteModal} onOpenChange={closeModals}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-destructive/15 flex items-center justify-center">
                 <Icon name="trash2" className="w-5 h-5 text-destructive" />
               </div>
-              <h3 id="delete-modal-title" className="text-lg font-semibold text-foreground">Confirmar Exclusão</h3>
+              <DialogTitle>Confirmar Exclusão</DialogTitle>
             </div>
-            <p className="text-muted-foreground mb-4">
-              Tem certeza que deseja deletar o backup de <strong className="text-foreground">{formatDate(deleteModal.timestamp)}</strong>?
-            </p>
-            <p className="text-sm text-destructive mb-6">
+            <DialogDescription>
+              Tem certeza que deseja deletar o backup de <strong className="text-foreground">{formatDate(deleteModal?.timestamp ?? '')}</strong>?
+            </DialogDescription>
+            <p className="text-sm text-destructive mt-4">
               Esta ação <strong>NÃO PODE</strong> ser desfeita.
             </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                type="button"
-                onClick={() => setDeleteModal(null)}
-                disabled={deleting === deleteModal.backup_path}
-                className="px-4 py-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDelete(deleteModal)}
-                disabled={deleting === deleteModal.backup_path}
-                className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/15 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 font-medium disabled:opacity-50"
-              >
-                {deleting === deleteModal.backup_path ? 'Deletando...' : 'Deletar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeModals} disabled={deleting === deleteModal?.backup_path}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={() => handleDelete(deleteModal!)} disabled={deleting === deleteModal?.backup_path}>
+              {deleting === deleteModal?.backup_path ? 'Deletando...' : 'Deletar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

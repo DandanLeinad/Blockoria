@@ -282,7 +282,6 @@ mod commands {
     #[derive(Serialize, Deserialize)]
     pub struct ConfigDto {
         pub theme: String,
-        pub auto_backup: bool,
     }
 
     #[tauri::command]
@@ -294,7 +293,6 @@ mod commands {
         })?;
         Ok(ConfigDto {
             theme: config.theme.clone(),
-            auto_backup: config.auto_backup,
         })
     }
 
@@ -309,7 +307,6 @@ mod commands {
             ))
         })?;
         config_guard.theme = config.theme;
-        config_guard.auto_backup = config.auto_backup;
         config_guard.save().map_err(CommandError::from)?;
         Ok(())
     }

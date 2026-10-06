@@ -5,6 +5,7 @@ import { formatVersion } from '../utils/format'
 import type { WorldSummaryDto } from './WorldList'
 import { Icon } from './ui/Icons'
 import { Button } from './ui/button'
+import { Card, CardContent } from './ui/card'
 
 interface CreateBackupProps {
   folderName: string
@@ -105,7 +106,6 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
     } else if (status === 'error' && !world) {
       setStatus('loadingWorld')
       setErrorMessage(null)
-      // Reload world
       const loadWorld = async () => {
         try {
           const worlds = await invoke<WorldSummaryDto[]>('cmd_list_worlds')
@@ -164,37 +164,29 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
             <p className="text-muted-foreground mt-1">{world.level_name}</p>
           </div>
         </div>
-        <div className="bg-card border border-border rounded-xl p-6 space-y-3">
-          <div className="flex items-center gap-3">
-            <Icon name="folderOpen" className="w-5 h-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">Pasta do backup</p>
-              <p className="font-mono text-sm text-foreground break-all">{backupInfo.backup_path}</p>
+        <Card>
+          <CardContent className="p-6 space-y-3">
+            <div className="flex items-center gap-3">
+              <Icon name="folderOpen" className="w-5 h-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Pasta do backup</p>
+                <p className="font-mono text-sm text-foreground break-all">{backupInfo.backup_path}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Icon name="clock" className="w-5 h-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">Data e hora</p>
-              <p className="text-sm text-foreground">{new Date(backupInfo.timestamp).toLocaleString('pt-BR')}</p>
+            <div className="flex items-center gap-3">
+              <Icon name="clock" className="w-5 h-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Data e hora</p>
+                <p className="text-sm text-foreground">{new Date(backupInfo.timestamp).toLocaleString('pt-BR')}</p>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
         <div className="flex gap-3 pt-2">
-          <Button
-            onClick={() => onSuccess?.(world)}
-            className="flex-1"
-          >
+          <Button onClick={() => onSuccess?.(world)} className="flex-1">
             Ver backups
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setStatus('idle')
-              setBackupInfo(null)
-            }}
-            className="flex-1"
-          >
+          <Button variant="outline" onClick={() => { setStatus('idle'); setBackupInfo(null); }} className="flex-1">
             Criar outro
           </Button>
         </div>
@@ -215,12 +207,8 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
           </div>
         </div>
         <div className="flex gap-3">
-          <Button onClick={handleRetry} className="flex-1">
-            Tentar novamente
-          </Button>
-          <Button variant="outline" onClick={onClose} className="flex-1">
-            Cancelar
-          </Button>
+          <Button onClick={handleRetry} className="flex-1">Tentar novamente</Button>
+          <Button variant="outline" onClick={onClose} className="flex-1">Cancelar</Button>
         </div>
       </div>
     )
@@ -229,8 +217,8 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
   if (!world) {
     return (
       <div className="max-w-md mx-auto space-y-6 text-center" role="alert">
-<div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
-            <Icon name="alertTriangle" className="w-8 h-8 text-destructive" />
+        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+          <Icon name="alertTriangle" className="w-8 h-8 text-destructive" />
         </div>
         <div>
           <h2 className="text-xl font-bold text-foreground">Mundo não encontrado</h2>
@@ -252,70 +240,64 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-        <div className="flex items-center gap-3">
-          <Icon name="folderOpen" className="w-5 h-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm text-muted-foreground">Mundo</p>
-            <p className="font-medium text-foreground">{world.level_name}</p>
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <Icon name="folderOpen" className="w-5 h-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">Mundo</p>
+              <p className="font-medium text-foreground">{world.level_name}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Icon name="user" className="w-5 h-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm text-muted-foreground">Tipo</p>
-            <span className={world.is_shared
-              ? 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20'
-              : 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20'
-            }>
-              {world.is_shared ? (
-                <>
-                  <Icon name="users" className="w-3 h-3 mr-1" />
-                  Compartilhado
-                </>
-              ) : (
-                <>
-                  <Icon name="user" className="w-3 h-3 mr-1" />
-                  Conta: {world.account_id?.slice(0, 8)}...
-                </>
-              )}
-            </span>
+          <div className="flex items-center gap-3">
+            <Icon name="user" className="w-5 h-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">Tipo</p>
+              <span className={world.is_shared
+                ? 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20'
+                : 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20'
+              }>
+                {world.is_shared ? (
+                  <>
+                    <Icon name="users" className="w-3 h-3 mr-1" />
+                    Compartilhado
+                  </>
+                ) : (
+                  <>
+                    <Icon name="user" className="w-3 h-3 mr-1" />
+                    Conta: {world.account_id?.slice(0, 8)}...
+                  </>
+                )}
+              </span>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Icon name="fileText" className="w-5 h-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm text-muted-foreground">Versão</p>
-            <p className="font-mono text-foreground">{formatVersion(world.version)}</p>
+          <div className="flex items-center gap-3">
+            <Icon name="fileText" className="w-5 h-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">Versão</p>
+              <p className="font-mono text-foreground">{formatVersion(world.version)}</p>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="bg-muted/50 border border-border rounded-xl p-6 space-y-2">
-        <div className="flex items-center gap-3">
-          <Icon name="externalLink" className="w-5 h-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm text-muted-foreground">O backup será salvo em:</p>
-            <p className="font-mono text-sm text-foreground break-all">{getBackupDirDisplay()}</p>
+      <Card>
+        <CardContent className="p-6 space-y-2">
+          <div className="flex items-center gap-3">
+            <Icon name="externalLink" className="w-5 h-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">O backup será salvo em:</p>
+              <p className="font-mono text-sm text-foreground break-all">{getBackupDirDisplay()}</p>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <div className="flex flex-col sm:flex-row gap-3 pt-2">
-        <Button
-          variant="outline"
-          onClick={onClose}
-          disabled={status === 'loading'}
-          className="flex-1"
-          aria-label="Cancelar"
-        >
+        <Button variant="outline" onClick={onClose} disabled={status === 'loading'} className="flex-1" aria-label="Cancelar">
           <Icon name="arrowLeft" className="w-5 h-5 mx-auto" />
         </Button>
-        <Button
-          onClick={handleCreateBackup}
-          disabled={status === 'loading'}
-          className="flex-1"
-        >
+        <Button onClick={handleCreateBackup} disabled={status === 'loading'} className="flex-1">
           {status === 'loading' ? (
             <span className="flex items-center justify-center gap-2">
               <Icon name="loader" className="animate-spin h-5 w-5" />

@@ -18,9 +18,6 @@ pub struct Config {
     /// UI theme: light, dark, or system
     #[serde(default = "default_theme")]
     pub theme: String,
-    /// Enable automatic backup
-    #[serde(default)]
-    pub auto_backup: bool,
 }
 
 fn default_theme() -> String {
@@ -31,7 +28,6 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             theme: default_theme(),
-            auto_backup: false,
         }
     }
 }
@@ -109,6 +105,5 @@ mod tests {
     fn test_default_config() {
         let config = Config::default();
         assert_eq!(config.theme, "light");
-        assert!(!config.auto_backup);
     }
 }
