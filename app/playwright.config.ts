@@ -25,17 +25,14 @@ export default defineConfig({
       name: 'tauri-chromium',
       use: {
         ...devices['Desktop Chrome'],
-        connectOptions: {
-          wsEndpoint: `ws://localhost:${tauriPort}/devtools/browser`,
-        },
       },
     },
   ],
   webServer: isCI ? {
-    command: 'cargo tauri build --manifest-path ../src-tauri/Cargo.toml',
-    url: tauriUrl,
+    command: 'cargo tauri dev --no-watch',
+    url: `http://localhost:${tauriPort}/json/version`,
     reuseExistingServer: false,
-    timeout: 300_000,
+    timeout: 600_000,
     cwd: '..',
     env: {
       BLOCKORIA_TEST_WORLDS_DIR: process.env.BLOCKORIA_TEST_WORLDS_DIR || '',

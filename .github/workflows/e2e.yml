@@ -48,12 +48,17 @@ jobs:
       - name: Generate test fixtures to project (for copy step)
         shell: pwsh
         env:
-          BLOCKORIA_TEST_FIXTURES_DIR: >
-            ${{ github.workspace }}/app/e2e/fixtures/worlds
+          BLOCKORIA_TEST_FIXTURES_DIR: >-
+            ${{ github.workspace }}\app\e2e\fixtures\worlds
         run: |
           Write-Host "FIXTURES_DIR=[$env:BLOCKORIA_TEST_FIXTURES_DIR]"
           cargo run --release --example gen_test_worlds `
             --manifest-path crates/blockoria-infrastructure/Cargo.toml
+
+      - name: Install Tauri CLI
+        uses: taiki-e/install-action@v2
+        with:
+          tool: tauri-cli
 
       - name: Install Playwright Chromium
         working-directory: app
