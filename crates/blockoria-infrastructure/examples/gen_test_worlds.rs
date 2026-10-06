@@ -29,6 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create the full Minecraft Bedrock Users directory structure
     let users_dir = out_dir.join("Users");
     fs::create_dir_all(&users_dir)?;
+    println!("Created Users dir: {}", users_dir.display());
 
     // World 1: Xbox account world (version 1.21.0.0)
     create_account_world(

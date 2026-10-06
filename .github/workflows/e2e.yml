@@ -61,13 +61,20 @@ jobs:
       - name: Copy test fixtures to temp directory
         shell: pwsh
         run: |
+          $fixtures = Join-Path $env:GITHUB_WORKSPACE 'app/e2e/fixtures/worlds'
+          $source = Join-Path $fixtures 'Users'
           $destination = Join-Path $env:RUNNER_TEMP 'blockoria-test-worlds'
+
+          if (-not (Test-Path $source -PathType Container)) {
+            Write-Error "Source directory not found: $source"
+            Write-Host "Checking what was generated:"
+            Get-ChildItem $fixtures `
+              -Recurse -Force -ErrorAction SilentlyContinue
+            exit 1
+          }
+
           New-Item -ItemType Directory -Force -Path $destination | Out-Null
-          Copy-Item `
-            -Path 'app/e2e/fixtures/worlds/Users' `
-            -Destination $destination `
-            -Recurse `
-            -Force
+          Copy-Item -Path $source -Destination $destination -Recurse -Force
 
       - name: Run E2E tests
         env:
