@@ -5,8 +5,8 @@
 //! Minecraft Bedrock directory structure.
 //!
 //! Run with: `cargo run --example gen_test_worlds`
-//! Output: `../../app/e2e/fixtures/worlds/` (for local dev)
-//!         or uses `BLOCKORIA_TEST_FIXTURES_DIR` env var for CI
+//! Output: uses `BLOCKORIA_TEST_FIXTURES_DIR` env var (CI)
+//!         or falls back to `CARGO_MANIFEST_DIR/../../app/e2e/fixtures/worlds` (local dev)
 
 use blockoria_infrastructure::nbt::{LevelDatHeader, NbtTagType, NbtValue};
 use std::collections::BTreeMap;
@@ -16,14 +16,11 @@ use std::io::Write;
 use std::path::Path;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Default to temp dir to avoid polluting project
-    // Set GEN_FIXTURES_TO_PROJECT=1 to write to ../../app/e2e/fixtures/worlds (local dev)
-    let out_dir = if env::var("GEN_FIXTURES_TO_PROJECT").is_ok() {
-        Path::new("../../app/e2e/fixtures/worlds").to_path_buf()
-    } else if let Ok(dir) = env::var("BLOCKORIA_TEST_FIXTURES_DIR") {
+    // Priority: BLOCKORIA_TEST_FIXTURES_DIR (CI) > CARGO_MANIFEST_DIR fallback (local dev)
+    let out_dir = if let Ok(dir) = env::var("BLOCKORIA_TEST_FIXTURES_DIR") {
         Path::new(&dir).to_path_buf()
     } else {
-        std::env::temp_dir().join("blockoria-test-fixtures")
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../app/e2e/fixtures/worlds")
     };
 
     fs::create_dir_all(&out_dir)?;
