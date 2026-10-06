@@ -48,6 +48,8 @@ jobs:
       - name: Generate test fixtures to project (for copy step)
         env:
           GEN_FIXTURES_TO_PROJECT: '1'
+          BLOCKORIA_TEST_FIXTURES_DIR: >
+            ${{ github.workspace }}/app/e2e/fixtures/worlds
         run: |
           cargo run --release `
             --example gen_test_worlds `
