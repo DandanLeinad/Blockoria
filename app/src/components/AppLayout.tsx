@@ -1,12 +1,12 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { Icon } from './ui/Icons'
-import { useTheme } from './useTheme'
+import { Toaster } from './ui/toast'
 
 export function AppLayout() {
-  const { theme, setTheme } = useTheme()
 
   const navItems = [
     { path: '/', label: 'Mundos', icon: <Icon name="folderOpen" className="w-5 h-5" /> },
+    { path: '/settings', label: 'Configurações', icon: <Icon name="settings" className="w-5 h-5" /> },
   ]
 
   return (
@@ -17,7 +17,7 @@ export function AppLayout() {
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <svg className="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 110 4m-6 8a2 2 0 110-4m0 4a2 2 0 110-4m0 4a2 2 0 110-4m0 4a2 2 0 110-4m0 4a2 2 0 110-4m0 4a2 2 0 110-4m0 4a2 2 0 110-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 110-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
             </div>
             <div>
@@ -45,22 +45,6 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-
-        <div className="p-4 border-t border-border space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Tema</span>
-            <select
-              value={theme}
-              onChange={(e) => setTheme(e.target.value as 'light' | 'dark' | 'system')}
-              className="px-2 py-1 text-xs bg-muted border border-border rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              aria-label="Selecionar tema"
-            >
-              <option value="system">Sistema</option>
-              <option value="light">Claro</option>
-              <option value="dark">Escuro</option>
-            </select>
-          </div>
-        </div>
       </aside>
 
       {/* Mobile header */}
@@ -69,7 +53,7 @@ export function AppLayout() {
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <svg className="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m0-4a2 2 0 110-4m0 4a2 2 0 110-4m0 4a2 2 0 110-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 110-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
             </div>
             <div className="font-bold text-lg text-foreground">Blockoria</div>
@@ -83,6 +67,7 @@ export function AppLayout() {
           <Outlet />
         </div>
       </main>
+      <Toaster position="top-right" richColors />
     </div>
   )
 }

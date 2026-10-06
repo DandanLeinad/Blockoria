@@ -11,6 +11,6 @@ pub mod nbt;
 pub mod repositories;
 pub mod test_contract;
 
-pub use config::Config;
+pub use config::{Config, default_backup_root};
 pub use nbt::NbtError;
 pub use repositories::{FileBackupRepository, FileWorldRepository};

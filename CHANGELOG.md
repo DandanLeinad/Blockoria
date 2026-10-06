@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.9.0] - 2026-10-05
+
+### Features
+- feat(frontend): shadcn/ui design system migration (Button, Card, Dialog, Toast, Switch, Label, Separator, Icons)
+- feat(frontend): Toast Notifications v2 — stack (5 max), animations, progress bar, hover pause, action buttons, rich content, persist, 6 positions, full a11y
+- feat(frontend): Settings page with theme selector (Light/Dark/System), persisted to config.toml
+- feat(frontend): Playwright E2E tests (6 scenarios: list worlds, create backup, list backups, restore, delete, full flow)
+- feat(frontend): Tauri commands `cmd_get_config` / `cmd_save_config` for theme persistence
+- feat(infrastructure): `gen_test_worlds` example generating valid level.dat fixtures for E2E
+
+### Improvements
+- refactor(frontend): migrate from custom UI to shadcn/ui (Radix + Tailwind), remove inline SVGs
+- refactor(frontend): replace `alert()` with toast notifications across all screens
+- refactor(frontend): ThemeContext + ThemeProvider for instant light/dark switching via CSS variables
+- refactor(frontend): AppLayout sidebar adds Settings navigation link
+- test: frontend unit tests 24 → 40 (add ToastContainer, ToastContext, useToast, useTheme)
+- test: add 6 Playwright E2E tests with `cargo tauri dev` webServer
+
+### Fixes
+- fix(frontend): dark mode hover visibility on cards (bg-muted/50 + border-primary)
+- fix(frontend): toast auto-dismiss race conditions, proper cleanup on unmount
+
+### Dependencies
+- deps(frontend): add @radix-ui/react-*, class-variance-authority, clsx, tailwind-merge, sonner, lucide-react
+- deps(frontend): @playwright/test for E2E
+- deps(frontend): React 19.3, React Router 7.18, TypeScript 6.0, Tailwind 4.3
+
+### Documentation
+- docs: update index.md, frontend.md, application.md with all new features
+- docs: add specs/05-toast-notifications.md (SDD spec)
+- docs: add features/toast_notifications.feature (BDD Gherkin)
+
 ## [0.8.0] - 2026-09-29
 
 ### Features
