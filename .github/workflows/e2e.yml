@@ -46,9 +46,11 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Generate test fixtures to project (for copy step)
+        env:
+          GEN_FIXTURES_TO_PROJECT: '1'
         run: |
-          GEN_FIXTURES_TO_PROJECT=1 cargo run --release \
-            --example gen_test_worlds \
+          cargo run --release `
+            --example gen_test_worlds `
             --manifest-path crates/blockoria-infrastructure/Cargo.toml
 
       - name: Install Playwright Chromium
@@ -56,10 +58,15 @@ jobs:
         run: bunx playwright install --with-deps chromium
 
       - name: Copy test fixtures to temp directory
+        shell: pwsh
         run: |
-          mkdir -p "${{ runner.temp }}/blockoria-test-worlds"
-          cp -r app/e2e/fixtures/worlds/Users \
-            "${{ runner.temp }}/blockoria-test-worlds/"
+          $destination = Join-Path $env:RUNNER_TEMP 'blockoria-test-worlds'
+          New-Item -ItemType Directory -Force -Path $destination | Out-Null
+          Copy-Item `
+            -Path 'app/e2e/fixtures/worlds/Users' `
+            -Destination $destination `
+            -Recurse `
+            -Force
 
       - name: Run E2E tests
         env:
