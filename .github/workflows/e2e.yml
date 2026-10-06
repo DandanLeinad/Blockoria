@@ -46,12 +46,13 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Generate test fixtures to project (for copy step)
+        shell: pwsh
         env:
           BLOCKORIA_TEST_FIXTURES_DIR: >
             ${{ github.workspace }}/app/e2e/fixtures/worlds
         run: |
-          cargo run --release `
-            --example gen_test_worlds `
+          Write-Host "FIXTURES_DIR=[$env:BLOCKORIA_TEST_FIXTURES_DIR]"
+          cargo run --release --example gen_test_worlds `
             --manifest-path crates/blockoria-infrastructure/Cargo.toml
 
       - name: Install Playwright Chromium
@@ -61,20 +62,25 @@ jobs:
       - name: Copy test fixtures to temp directory
         shell: pwsh
         run: |
-          $fixtures = Join-Path $env:GITHUB_WORKSPACE 'app/e2e/fixtures/worlds'
-          $source = Join-Path $fixtures 'Users'
+          $source = Join-Path $env:GITHUB_WORKSPACE 'app/e2e/fixtures/worlds'
+          $usersSource = Join-Path $source 'Users'
           $destination = Join-Path $env:RUNNER_TEMP 'blockoria-test-worlds'
 
-          if (-not (Test-Path $source -PathType Container)) {
-            Write-Error "Source directory not found: $source"
-            Write-Host "Checking what was generated:"
-            Get-ChildItem $fixtures `
-              -Recurse -Force -ErrorAction SilentlyContinue
-            exit 1
+          if (-not (Test-Path -LiteralPath $source -PathType Container)) {
+            throw "Generated fixture directory does not exist: $source"
+          }
+
+          if (-not (Test-Path -LiteralPath $usersSource -PathType Container)) {
+            Write-Host "Generated fixture contents:"
+            Get-ChildItem -LiteralPath $source -Recurse -Force
+            throw "Expected Users fixture directory does not exist: "
+              + "$usersSource"
           }
 
           New-Item -ItemType Directory -Force -Path $destination | Out-Null
-          Copy-Item -Path $source -Destination $destination -Recurse -Force
+
+          Get-ChildItem -LiteralPath $source -Force |
+            Copy-Item -Destination $destination -Recurse -Force
 
       - name: Run E2E tests
         env:

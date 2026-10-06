@@ -15,20 +15,35 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 
+fn mkdir(p: &Path) -> Result<(), Box<dyn std::error::Error>> {
+    fs::create_dir_all(p).map_err(|e| format!("create_dir_all({:?}) falhou: {e}", p))?;
+    Ok(())
+}
+
+fn write_file(p: &Path, data: impl AsRef<[u8]>) -> Result<(), Box<dyn std::error::Error>> {
+    fs::write(p, data).map_err(|e| format!("write({:?}) falhou: {e}", p))?;
+    Ok(())
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Priority: BLOCKORIA_TEST_FIXTURES_DIR (CI) > CARGO_MANIFEST_DIR fallback (local dev)
     let out_dir = if let Ok(dir) = env::var("BLOCKORIA_TEST_FIXTURES_DIR") {
-        Path::new(&dir).to_path_buf()
+        let dir = dir.trim();
+        if dir.is_empty() {
+            return Err("BLOCKORIA_TEST_FIXTURES_DIR está vazia".into());
+        }
+        println!("Env dir (debug): {:?}", dir);
+        Path::new(dir).to_path_buf()
     } else {
         Path::new(env!("CARGO_MANIFEST_DIR")).join("../../app/e2e/fixtures/worlds")
     };
 
-    fs::create_dir_all(&out_dir)?;
+    mkdir(&out_dir)?;
     println!("Generating fixtures in: {}", out_dir.display());
 
     // Create the full Minecraft Bedrock Users directory structure
     let users_dir = out_dir.join("Users");
-    fs::create_dir_all(&users_dir)?;
+    mkdir(&users_dir)?;
     println!("Created Users dir: {}", users_dir.display());
 
     // World 1: Xbox account world (version 1.21.0.0)
@@ -97,7 +112,7 @@ fn create_world_files(
     level_name: &str,
     version: [u16; 5],
 ) -> Result<(), Box<dyn std::error::Error>> {
-    fs::create_dir_all(world_dir)?;
+    mkdir(world_dir)?;
 
     // Build NBT structure: root Compound("Data") -> IntArray("lastOpenedWithVersion")
     let mut data_compound = BTreeMap::new();
@@ -126,10 +141,10 @@ fn create_world_files(
     level_dat.write_all(&nbt_bytes)?;
 
     // Write level.dat
-    fs::write(world_dir.join("level.dat"), level_dat)?;
+    write_file(&world_dir.join("level.dat"), level_dat)?;
 
     // Write levelname.txt
-    fs::write(world_dir.join("levelname.txt"), level_name)?;
+    write_file(&world_dir.join("levelname.txt"), level_name)?;
 
     // Create a dummy world_icon.jpeg (1x1 pixel JPEG)
     let jpeg_bytes = vec![
@@ -157,7 +172,7 @@ fn create_world_files(
         0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFF, 0xDA, 0x00, 0x0C, 0x03, 0x01,
         0x00, 0x02, 0x11, 0x03, 0x11, 0x00, 0x3F, 0x00, 0xF9, 0xFF, 0xD9,
     ];
-    fs::write(world_dir.join("world_icon.jpeg"), jpeg_bytes)?;
+    write_file(&world_dir.join("world_icon.jpeg"), jpeg_bytes)?;
 
     Ok(())
 }
