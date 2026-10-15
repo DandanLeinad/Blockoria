@@ -2,6 +2,8 @@ import { invoke } from '@tauri-apps/api/core'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { formatVersion } from '../utils/format'
 import { Icon } from './ui/Icons'
+import { Button } from './ui/button'
+import { Card, CardContent } from './ui/card'
 
 export interface WorldSummaryDto {
   folder_name: string
@@ -77,12 +79,12 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
           <h3 className="text-lg font-semibold text-foreground">Erro ao carregar mundos</h3>
           <p className="text-muted-foreground text-sm mt-1">{error}</p>
         </div>
-        <button
+        <Button
           onClick={loadWorlds}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="mt-2"
         >
           Tentar novamente
-        </button>
+        </Button>
       </div>
     )
   }
@@ -104,12 +106,12 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
           <p>ou na pasta Shared:</p>
           <p><code className="bg-muted px-1.5 py-0.5 rounded">{'%APPDATA%\\Minecraft Bedrock\\Users\\Shared\\games\\com.mojang\\minecraftWorlds\\'}</code></p>
         </div>
-        <button
+        <Button
           onClick={loadWorlds}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-2"
+          className="mt-2"
         >
           Atualizar
-        </button>
+        </Button>
       </div>
     )
   }
@@ -124,25 +126,26 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
             Selecione um mundo para criar um backup ou consultar os existentes.
           </p>
         </div>
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="sm"
           onClick={loadWorlds}
           disabled={loading}
-          className="inline-flex items-center justify-center gap-2 px-3 py-2 border border-border bg-card text-foreground rounded-lg hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Icon name="refreshCw" className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Atualizar
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 gap-4" role="list" aria-label="Lista de mundos do Minecraft Bedrock">
         {worlds.map((world) => (
-        <article
+        <Card
           key={world.folder_name}
-          role="listitem"
-          className="group bg-card border border-border rounded-xl p-4 hover:bg-muted/50 hover:border-primary transition-all duration-200"
+          className="group hover:bg-muted/50 hover:border-primary transition-all duration-200"
         >
-          <div className="flex items-start gap-3 sm:gap-4">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3 sm:gap-4">
             <div className="relative flex-shrink-0">
               {world.icon_path ? (
                 <>
@@ -191,32 +194,36 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
                   <span>Versão: <code className="font-mono text-foreground">{formatVersion(world.version)}</code></span>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 sm:ml-auto">
-                  {onWorldSelect && (
-                    <button
+{onWorldSelect && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => onWorldSelect(world)}
+                        className="gap-1.5"
+                      >
+                        <Icon name="plus" className="w-4 h-4" />
+                        Criar backup
+                      </Button>
+                    )}
+                    {onViewBackups && (
+                    <Button
                       type="button"
-                      onClick={() => onWorldSelect(world)}
-                      className="inline-flex items-center justify-center gap-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/80 transition-colors px-3 py-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onViewBackups(world)}
+                      className="gap-1.5"
+                      aria-label={`Ver backups de ${world.level_name}`}
                     >
-                      <Icon name="plus" className="w-4 h-4" />
-                      Criar backup
-                    </button>
-                  )}
-                  {onViewBackups && (
-                  <button
-                    type="button"
-                    onClick={() => onViewBackups(world)}
-                    className="inline-flex items-center justify-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    aria-label={`Ver backups de ${world.level_name}`}
-                  >
-                    <Icon name="folderOpen" className="w-4 h-4" />
-                    Ver backups
-                  </button>
-                  )}
+                      <Icon name="folderOpen" className="w-4 h-4" />
+                      Ver backups
+                    </Button>
+                    )}
                 </div>
               </div>
             </div>
           </div>
-        </article>
+          </CardContent>
+        </Card>
         ))}
       </div>
     </div>

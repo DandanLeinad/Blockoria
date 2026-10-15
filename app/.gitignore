@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# E2E test fixtures (generated, not committed)
+e2e/fixtures/
+playwright-report/
+test-results/

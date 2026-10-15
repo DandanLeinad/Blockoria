@@ -1,9 +1,11 @@
 import { invoke } from '@tauri-apps/api/core'
 import { useEffect, useState } from 'react'
-import type { WorldSummaryDto } from './WorldList'
-import { formatVersion } from '../utils/format'
 import { getErrorMessage } from '../utils/error'
+import { formatVersion } from '../utils/format'
+import type { WorldSummaryDto } from './WorldList'
 import { Icon } from './ui/Icons'
+import { Button } from './ui/button'
+import { Card, CardContent } from './ui/card'
 
 interface CreateBackupProps {
   folderName: string
@@ -73,7 +75,7 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
   }, [status, onClose])
 
   const getBackupDirDisplay = () => {
-    const base = backupRoot || '%APPDATA%\\Blockoria\\backups'
+    const base = backupRoot
     const location = world?.account_id || 'Shared'
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
     return `${base}\\${location}\\${folderName.replace('=', '_')}\\${timestamp}\\`
@@ -104,7 +106,6 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
     } else if (status === 'error' && !world) {
       setStatus('loadingWorld')
       setErrorMessage(null)
-      // Reload world
       const loadWorld = async () => {
         try {
           const worlds = await invoke<WorldSummaryDto[]>('cmd_list_worlds')
@@ -163,38 +164,31 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
             <p className="text-muted-foreground mt-1">{world.level_name}</p>
           </div>
         </div>
-        <div className="bg-card border border-border rounded-xl p-6 space-y-3">
-          <div className="flex items-center gap-3">
-            <Icon name="folderOpen" className="w-5 h-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">Pasta do backup</p>
-              <p className="font-mono text-sm text-foreground break-all">{backupInfo.backup_path}</p>
+        <Card>
+          <CardContent className="p-6 space-y-3">
+            <div className="flex items-center gap-3">
+              <Icon name="folderOpen" className="w-5 h-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Pasta do backup</p>
+                <p className="font-mono text-sm text-foreground break-all">{backupInfo.backup_path}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Icon name="clock" className="w-5 h-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm text-muted-foreground">Data e hora</p>
-              <p className="text-sm text-foreground">{new Date(backupInfo.timestamp).toLocaleString('pt-BR')}</p>
+            <div className="flex items-center gap-3">
+              <Icon name="clock" className="w-5 h-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Data e hora</p>
+                <p className="text-sm text-foreground">{new Date(backupInfo.timestamp).toLocaleString('pt-BR')}</p>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
         <div className="flex gap-3 pt-2">
-          <button
-            onClick={() => onSuccess?.(world)}
-            className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
-          >
+          <Button onClick={() => onSuccess?.(world)} className="flex-1">
             Ver backups
-          </button>
-          <button
-            onClick={() => {
-              setStatus('idle')
-              setBackupInfo(null)
-            }}
-            className="flex-1 px-4 py-2.5 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
-          >
+          </Button>
+          <Button variant="outline" onClick={() => { setStatus('idle'); setBackupInfo(null); }} className="flex-1">
             Criar outro
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -213,18 +207,8 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
           </div>
         </div>
         <div className="flex gap-3">
-          <button
-            onClick={handleRetry}
-            className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
-          >
-            Tentar novamente
-          </button>
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2.5 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium"
-          >
-            Cancelar
-          </button>
+          <Button onClick={handleRetry} className="flex-1">Tentar novamente</Button>
+          <Button variant="outline" onClick={onClose} className="flex-1">Cancelar</Button>
         </div>
       </div>
     )
@@ -233,20 +217,16 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
   if (!world) {
     return (
       <div className="max-w-md mx-auto space-y-6 text-center" role="alert">
-<div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
-            <Icon name="alertTriangle" className="w-8 h-8 text-destructive" />
+        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+          <Icon name="alertTriangle" className="w-8 h-8 text-destructive" />
         </div>
         <div>
           <h2 className="text-xl font-bold text-foreground">Mundo não encontrado</h2>
           <p className="text-muted-foreground mt-1">Este mundo pode ter sido movido ou excluído.</p>
         </div>
-        <button
-          onClick={onClose}
-          className="p-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          aria-label="Voltar à lista"
-        >
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Voltar à lista">
           <Icon name="arrowLeft" className="w-5 h-5" />
-        </button>
+        </Button>
       </div>
     )
   }
@@ -260,69 +240,64 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-        <div className="flex items-center gap-3">
-          <Icon name="folderOpen" className="w-5 h-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm text-muted-foreground">Mundo</p>
-            <p className="font-medium text-foreground">{world.level_name}</p>
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <Icon name="folderOpen" className="w-5 h-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">Mundo</p>
+              <p className="font-medium text-foreground">{world.level_name}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Icon name="user" className="w-5 h-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm text-muted-foreground">Tipo</p>
-            <span className={world.is_shared
-              ? 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20'
-              : 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20'
-            }>
-              {world.is_shared ? (
-                <>
-                  <Icon name="users" className="w-3 h-3 mr-1" />
-                  Compartilhado
-                </>
-              ) : (
-                <>
-                  <Icon name="user" className="w-3 h-3 mr-1" />
-                  Conta: {world.account_id?.slice(0, 8)}...
-                </>
-              )}
-            </span>
+          <div className="flex items-center gap-3">
+            <Icon name="user" className="w-5 h-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">Tipo</p>
+              <span className={world.is_shared
+                ? 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20'
+                : 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20'
+              }>
+                {world.is_shared ? (
+                  <>
+                    <Icon name="users" className="w-3 h-3 mr-1" />
+                    Compartilhado
+                  </>
+                ) : (
+                  <>
+                    <Icon name="user" className="w-3 h-3 mr-1" />
+                    Conta: {world.account_id?.slice(0, 8)}...
+                  </>
+                )}
+              </span>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Icon name="fileText" className="w-5 h-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm text-muted-foreground">Versão</p>
-            <p className="font-mono text-foreground">{formatVersion(world.version)}</p>
+          <div className="flex items-center gap-3">
+            <Icon name="fileText" className="w-5 h-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">Versão</p>
+              <p className="font-mono text-foreground">{formatVersion(world.version)}</p>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="bg-muted/50 border border-border rounded-xl p-6 space-y-2">
-        <div className="flex items-center gap-3">
-          <Icon name="externalLink" className="w-5 h-5 text-muted-foreground" />
-          <div>
-            <p className="text-sm text-muted-foreground">O backup será salvo em:</p>
-            <p className="font-mono text-sm text-foreground break-all">{getBackupDirDisplay()}</p>
+      <Card>
+        <CardContent className="p-6 space-y-2">
+          <div className="flex items-center gap-3">
+            <Icon name="externalLink" className="w-5 h-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground">O backup será salvo em:</p>
+              <p className="font-mono text-sm text-foreground break-all">{getBackupDirDisplay()}</p>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <div className="flex flex-col sm:flex-row gap-3 pt-2">
-        <button
-          onClick={onClose}
-          disabled={status === 'loading'}
-          className="flex-1 p-2.5 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          aria-label="Cancelar"
-        >
+        <Button variant="outline" onClick={onClose} disabled={status === 'loading'} className="flex-1" aria-label="Cancelar">
           <Icon name="arrowLeft" className="w-5 h-5 mx-auto" />
-        </button>
-        <button
-          onClick={handleCreateBackup}
-          disabled={status === 'loading'}
-          className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        </Button>
+        <Button onClick={handleCreateBackup} disabled={status === 'loading'} className="flex-1">
           {status === 'loading' ? (
             <span className="flex items-center justify-center gap-2">
               <Icon name="loader" className="animate-spin h-5 w-5" />
@@ -334,7 +309,7 @@ export function CreateBackup({ folderName, levelName, onClose, onSuccess }: Crea
               Criar Backup
             </span>
           )}
-        </button>
+        </Button>
       </div>
 
       {status === 'loading' && (
