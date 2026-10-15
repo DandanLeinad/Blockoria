@@ -5,8 +5,10 @@ declare const process: {
 };
 
 const isCI = !!process.env.CI;
+const tauriHost = '127.0.0.1';
 const tauriPort = 9222;
-const tauriUrl = `http://localhost:${tauriPort}`;
+const tauriUrl = `http://${tauriHost}:${tauriPort}`;
+const cdpUrl = `http://${tauriHost}:${tauriPort}`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -28,24 +30,18 @@ export default defineConfig({
       },
     },
   ],
-  webServer: isCI ? {
+  webServer: {
     command: 'cargo tauri dev --no-watch',
-    url: `http://localhost:${tauriPort}/json/version`,
+    url: `${tauriUrl}/json/version`,
     reuseExistingServer: false,
     timeout: 600_000,
     cwd: '..',
-    env: {
+    stdout: 'pipe',
+    stderr: 'pipe',
+env: {
       BLOCKORIA_TEST_WORLDS_DIR: process.env.BLOCKORIA_TEST_WORLDS_DIR || '',
-      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${tauriPort}`,
+      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-address=${tauriHost} --remote-debugging-port=${tauriPort}`,
     },
-  } : {
-    command: 'cargo tauri dev --manifest-path ../src-tauri/Cargo.toml',
-    url: tauriUrl,
-    reuseExistingServer: !process.env.CI_FORCE_REBUILD,
-    timeout: 180_000,
-    env: {
-      WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${tauriPort}`,
-      BLOCKORIA_TEST_WORLDS_DIR: process.env.BLOCKORIA_TEST_WORLDS_DIR || '',
-    },
+  },
   },
 });

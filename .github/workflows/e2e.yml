@@ -87,10 +87,35 @@ jobs:
           Get-ChildItem -LiteralPath $source -Force |
             Copy-Item -Destination $destination -Recurse -Force
 
+      - name: Diagnostic WebView2 port
+        if: always()
+        shell: pwsh
+        run: |
+          Write-Host "== Waiting 30s for WebView2 to start =="
+          Start-Sleep -Seconds 30
+          Write-Host "== Listeners on port 9222 =="
+          netstat -ano | findstr 9222
+          Write-Host "== WebView2 processes =="
+          Get-CimInstance Win32_Process |
+            Where-Object Name -like 'msedgewebview2*' |
+            Select-Object ProcessId, CommandLine | Format-List
+          Write-Host "== Tauri process =="
+          Get-Process blockoria-tauri -ErrorAction SilentlyContinue |
+            Format-List Id, ProcessName, StartTime
+          Write-Host "== Test CDP endpoint =="
+          try {
+            Invoke-RestMethod -Uri "http://127.0.0.1:9222/json/version"
+              -TimeoutSec 5
+          } catch {
+            Write-Host "CDP endpoint not responding: $($_.Exception.Message)"
+          }
+
       - name: Run E2E tests
         env:
           BLOCKORIA_TEST_WORLDS_DIR: ${{ runner.temp }}/blockoria-test-worlds
-          WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: --remote-debugging-port=9222
+          WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: >-
+            --remote-debugging-address=127.0.0.1
+            --remote-debugging-port=9222
         working-directory: app
         run: bun run test:e2e
 
