@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.9.1] - 2026-10-18
+
+### Security
+- fix(security): bump virtualenv to 21.14.8 via pre-commit 4.7.0, closing Dependabot alerts 2-5 (three high, one medium; vulnerable ranges <= 21.7.12)
+
+### CI/CD
+- fix(ci): ignore unmaintained zbus family advisories in deny.toml — RUSTSEC-2026-0370 (`zvariant`), RUSTSEC-2026-0371 (`zbus_names`), RUSTSEC-2026-0372 (`zvariant_derive`); merged into zbus 6.0, but latest stable tauri-plugin-opener (2.7.2) still requires zbus ^5.9 on Linux targets — no safe upgrade until opener 3.0 is stable; Linux-only transitives of a Windows-only binary
+
+### Fixes
+- fix(release): sync workspace version fields with the released 0.9.0 — the v0.9.0 release squash missed the version-bump commit, leaving main at 0.8.0
+
+### Dependencies
+- deps(tooling): pre-commit 4.6.2 -> 4.7.0
+- deps(tooling): commitlint pre-commit hook v9.26.0 -> v9.27.0
+- deps(docs): zensical 0.0.68 -> 0.0.70
+
+### Chores
+- chore: remove orphaned scripts/run-e2e.ps1 (runner for the Playwright E2E infrastructure removed in 0.9.0)
+
 ## [0.9.0] - 2026-10-05
 
 ### Features
