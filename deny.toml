@@ -12,6 +12,13 @@ ignore = [
     "RUSTSEC-2025-0080",  # unic-common
     "RUSTSEC-2025-0100",  # unic-ucd-ident
     "RUSTSEC-2025-0098",  # unic-ucd-version
+    # zbus/zvariant family merged into zbus 6.0 (z-galaxy/zbus#2043) — unmaintained as
+    # standalone crates. Latest stable tauri-plugin-opener (2.7.2) still requires zbus ^5.9
+    # on Linux targets, so no safe upgrade until opener 3.0 goes stable.
+    # Linux-only transitive of a Windows-only binary.
+    "RUSTSEC-2026-0370",  # zvariant
+    "RUSTSEC-2026-0371",  # zbus_names
+    "RUSTSEC-2026-0372",  # zvariant_derive
 ]
 
 [licenses]
