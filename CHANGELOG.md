@@ -48,8 +48,8 @@
 
 ### Documentation
 - docs: update index.md, frontend.md, application.md with all new features
-- docs: add specs/05-toast-notifications.md (SDD spec)
-- docs: add features/toast_notifications.feature (BDD Gherkin)
+- docs: add specs/06-toast-notifications.md (SDD spec)
+- docs: add tests/features/06-toast-notifications.feature (BDD Gherkin)
 
 ## [0.8.0] - 2026-09-29
 
@@ -118,8 +118,8 @@
 - feat(infrastructure): integrate NBT parser in FileWorldRepository::parse_level_dat_version (was stub)
 
 ### Documentation
-- docs: add SDD spec for LE-NBT level.dat parser (docs/specs/nbt-leveldat-parser.md)
-- docs: add BDD scenarios in Gherkin (tests/features/nbt_leveldat_parser.feature)
+- docs: add SDD spec for LE-NBT level.dat parser (docs/specs/05-nbt-leveldat-parser.md)
+- docs: add BDD scenarios in Gherkin (tests/features/05-nbt-leveldat-parser.feature)
 - docs: update Infrastructure layer status to include NBT Parser (115 tests)
 - docs: update README.md and docs/index.md with NBT Parser section and test counts (208 total)
 - docs: update domain.md with NBT integration section

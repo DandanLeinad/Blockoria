@@ -1,4 +1,4 @@
-# Spec: Tratamento de Erros — Taxonomia, Contrato IPC e UX (06)
+# Spec: Tratamento de Erros — Taxonomia, Contrato IPC e UX (07)
 
 ## Visão Geral
 

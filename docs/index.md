@@ -141,8 +141,8 @@ fn parse_level_dat_version(path: &Path) -> Option<WorldVersion> {
 
 ### Especificação
 
-- **SDD Spec:** [`docs/specs/nbt-leveldat-parser.md`](specs/nbt-leveldat-parser.md)
-- **BDD Scenarios:** [`tests/features/nbt_leveldat_parser.feature`](../tests/features/nbt_leveldat_parser.feature)
+- **SDD Spec:** [`docs/specs/05-nbt-leveldat-parser.md`](specs/05-nbt-leveldat-parser.md)
+- **BDD Scenarios:** [`tests/features/05-nbt-leveldat-parser.feature`](../tests/features/05-nbt-leveldat-parser.feature)
 
 ### Limites de Segurança
 

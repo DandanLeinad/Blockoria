@@ -339,7 +339,7 @@ fn test_level_dat_version_parsing<R: WorldRepository>(repo: &R, ctx: &ContractTe
 
 ## 15. Próximos Passos (Pós-Spec)
 
-1. **BDD:** Criar `tests/features/nbt_leveldat_parser.feature` com cenários Gherkin
+1. **BDD:** Criar `tests/features/05-nbt-leveldat-parser.feature` com cenários Gherkin
 2. **TDD:** Testes unitários → implementação por módulo (error → tag_type → value → reader → parser → level_dat → json)
 3. **Integração:** Atualizar `FileWorldRepository` + testes de contrato
 4. **Verificação:** `cargo test`, `fmt`, `clippy`, `deny`
