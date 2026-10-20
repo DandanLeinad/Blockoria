@@ -39,7 +39,10 @@ impl FileWorldRepository {
         if !path.exists() {
             return Err(ApplicationError::Storage(io::Error::new(
                 io::ErrorKind::NotFound,
-                "Minecraft Bedrock Users directory not found",
+                format!(
+                    "Minecraft Bedrock Users directory not found: {}",
+                    path.display()
+                ),
             )));
         }
 
