@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.10.0] - 2026-10-20
+
+### Features
+- feat(application): add `ApplicationError` taxonomy (spec 07) — `NotFound { World|Backup }`, `Validation`, `Storage`, `Config` replace `DomainError` as the ports' and use cases' error type
+- feat(adapter): structured IPC error contract — `CommandError` serializes as `{ "code", "message" }` with codes `not_found|validation|storage|config|unknown` (was a debug string "Domain error: ...")
+- feat(front): PT-BR human error messages via `tauriError.ts` — `getTauriError` never discards the payload, `humanMessage` maps each code to a human message
+- feat(front): ErrorBoundary + router `errorElement` (ErrorScreen/RouteError) — render crashes show a fallback with "Recarregar" instead of a white screen
+- feat(adapter): native startup dialog (`rfd`) when `create_state` fails, showing the expected Minecraft Bedrock path before exiting with code 1 — no more silent death in console-less release builds
+
+### Improvements
+- refactor(application+infra): all ports, use cases, repositories and `Config` return `ApplicationError`; config failures stop masquerading as `InvalidBackupPath`
+- refactor(front): every error surface shows the mapped cause — ListBackups, CreateBackup, and Settings catches no longer swallow the error
+- refactor(domain): `DomainError` is purely validation — `From<io::Error>` removed; I/O only enters the system as `ApplicationError::Storage`
+
+### Fixes
+- fix(front): WorldList always showed "Erro desconhecido" (`instanceof Error` is always false for Tauri rejections) — now shows the mapped message with the raw payload as a detail line
+- fix(front): CreateBackup stops leaking hardcoded English ("InvalidWorldPath: World not found") to the user — "Mundo não encontrado"
+- fix(front): vitest was missing the `@/` alias (ui/* components were untestable) and vite.config.ts built it Windows-broken (`URL.pathname` → `/C:/...`) — both via `fileURLToPath`
+- fix(build): tauri.conf.json bundle version was stuck at 0.6.0 since v0.6.0 — now follows the release version
+
+### Testing
+- test(application): 15 -> 21 (taxonomy unit tests, Given/When/Then)
+- test(adapter): +3 IPC contract tests (structured serialization, code mapping)
+- test(front): 33 -> 47 across 6 files (+10 tauriError, +2 WorldList regression, +2 ErrorBoundary)
+- test: backend total 237 (domain 66 + 12 doctests, application 21, infra 115 + 20 integration, adapter 3); full suite 284 passing
+
+### Documentation
+- docs: add spec 07 SDD (`docs/specs/07-error-handling.md`) + 17 BDD Gherkin scenarios (`tests/features/07-error-handling.feature`)
+- docs: add ADR-0001 (error taxonomy decision) — first ADR, with the 0000 template
+- docs: reorganize specs and BDD into a numbered paired layout (`docs/specs/NN-name.md` ↔ `tests/features/NN-name.feature`); BDD scenarios consolidated into `tests/features/` (`docs/features/` removed)
+- docs: full update for the taxonomy (index, application, domain); frontend.md rewritten ~950 -> ~270 lines — file/config dumps replaced with pointers to the real files
+
 ## [0.9.1] - 2026-10-18
 
 ### Security
