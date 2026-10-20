@@ -28,9 +28,9 @@ hide:
 | Camada | Status |
 |--------|--------|
 | **Domain** (`blockoria-domain`) | ✅ Completo — VOs, Entities, Aggregates, 66 testes + 12 doctests |
-| **Application** (`blockoria-application`) | ✅ Completo — 5 use cases, 15 testes |
+| **Application** (`blockoria-application`) | ✅ Completo — 5 use cases, **taxonomia `ApplicationError`** (spec 07), 21 testes |
 | **Infrastructure** (`blockoria-infrastructure`) | ✅ Completo — FileWorldRepository, FileBackupRepository, Config, **NBT Parser** (115 testes), Test Contracts |
-| **Frontend (Tauri + React)** | ✅ Implementado — 4 telas MVP (incl. Settings), 24 testes unitários, 6 testes E2E, React Router v7, Tailwind v4, **shadcn/ui** |
+| **Frontend (Tauri + React)** | ✅ Implementado — 4 telas MVP (incl. Settings), 47 testes unitários, React Router v7, Tailwind v4, **shadcn/ui**, **ErrorBoundary + mensagens PT-BR** |
 
 ---
 
@@ -58,7 +58,8 @@ A camada de domínio pura, sem dependências externas, contendo:
 - `BackupTimestamp: Ord` — Ordenação para listar backups mais recentes primeiro
 - `WorldVersion: Default` — Versão padrão [0,0,0,0,0]
 - `AccountId: Hash` — Para uso como chave em HashMap
-- `From<io::Error> for DomainError` — Conversão automática de erros de I/O
+
+> O `From<io::Error> for DomainError` foi **removido** (spec 07): `DomainError` é puramente validação; I/O vive na aplicação como `ApplicationError::Storage`.
 
 ### Entities / Aggregates
 
@@ -88,26 +89,46 @@ A camada de domínio pura, sem dependências externas, contendo:
 |---------|-------|
 | Testes unitários (domain) | 66 |
 | Doctests (domain) | 12 |
-| Testes unitários (application) | 15 |
-| Testes unitários (infrastructure) | 95 |
-| Testes integração (infrastructure) | 20 |
-| Testes contract (infrastructure) | 15 (WorldRepository + BackupRepository) |
-| Testes frontend (Vitest + RTL) | 24 |
-| Testes E2E (Playwright) | 6 |
-| **Total** | **253 passando** |
+| Testes unitários (application) | 21 |
+| Testes unitários (infrastructure) | 115 |
+| Testes integração (infrastructure) | 20 (inclui bateria de contratos dos ports) |
+| Testes unitários (adapter Tauri) | 3 |
+| Testes frontend (Vitest + RTL) | 47 |
+| **Total** | **284 passando** |
 
 ```bash
 # Backend
-cargo test                        # 223 passed (unit + integration + contract + doc)
-cargo test -p blockoria-domain    # 66 passed
-cargo test -p blockoria-domain --doc   # 12 passed
-cargo test -p blockoria-application    # 15 passed
-cargo test -p blockoria-infrastructure # 130 passed
+cargo test                        # 237 passed (unit + integration + adapter + doc)
+cargo test -p blockoria-domain    # 66 passed + 12 doctests
+cargo test -p blockoria-application    # 21 passed
+cargo test -p blockoria-infrastructure # 135 passed (115 unit + 20 integration)
 
 # Frontend
-cd app && bun test                # 24 passed (Vitest + React Testing Library)
-cd app && bun run test:e2e        # 6 passed (Playwright)
+cd app && bun run test            # 47 passed (Vitest + React Testing Library)
 ```
+
+---
+
+## 🛡️ Tratamento de Erros (spec 07)
+
+Taxonomia honesta por camada — "não achei", "entrada inválida" e "o disco falhou" são categorias distintas:
+
+| Camada | Tipo | Categorias |
+|--------|------|-----------|
+| Application | `ApplicationError` | `NotFound { what: World\|Backup }`, `Validation(DomainError)`, `Storage(io::Error)`, `Config` |
+| Domain | `DomainError` | 8 variants de validação, **puro** (sem conversão de I/O) |
+| IPC (Tauri) | `CommandError` | objeto `{ "code", "message" }` — `not_found\|validation\|storage\|config\|unknown` |
+| Frontend | `tauriError.ts` | `getTauriError` (nunca descarta o payload) + `humanMessage` (mapa PT-BR por `code`) |
+
+- **Startup**: falha no `create_state()` → message box nativo (`rfd`) com o caminho procurado antes de encerrar (RF-08) — fim da morte silenciosa em release sem console.
+- **Render**: `ErrorBoundary` global (main.tsx) + `errorElement` no router (`RouteError`) — fim da tela branca (RF-06).
+- **Degradação de dados parciais**: NBT ilegível → versão default; levelname ilegível → "Unknown World"; ícone ausente → sem ícone. Contrato canônico na spec 07 (RF-09).
+
+### Especificação
+
+- **SDD Spec:** [`docs/specs/07-error-handling.md`](specs/07-error-handling.md)
+- **BDD Scenarios:** [`tests/features/07-error-handling.feature`](../tests/features/07-error-handling.feature)
+- **ADR:** [`docs/adr/0001-error-taxonomy.md`](adr/0001-error-taxonomy.md)
 
 ---
 
@@ -166,7 +187,7 @@ const MAX_STRING_LENGTH: usize = 1_000_000;
 
 ## 🎨 Frontend (Tauri + React + TypeScript)
 
-Implementado com **shadcn/ui** design system, **Toast Notifications v2**, **Settings page** e **Playwright E2E tests**.
+Implementado com **shadcn/ui** design system, **Toast Notifications v2**, **Settings page** e **tratamento de erros completo** (spec 07).
 
 ### Tech Stack
 
@@ -179,7 +200,6 @@ Implementado com **shadcn/ui** design system, **Toast Notifications v2**, **Sett
 | Routing | React Router v7 |
 | Styling | Tailwind CSS v4 + shadcn/ui |
 | Testes Unitários | Vitest + React Testing Library |
-| Testes E2E | Playwright |
 
 ### Estrutura
 
@@ -188,13 +208,12 @@ app/
 ├── package.json
 ├── vite.config.ts
 ├── vitest.config.ts
-├── playwright.config.ts
 ├── tsconfig.json
 ├── components.json          # shadcn/ui config
 ├── src/
-│   ├── main.tsx                    # Entry point
+│   ├── main.tsx                    # Entry point + ErrorBoundary global
 │   ├── App.tsx                     # RouterProvider + ToastProvider
-│   ├── router.tsx                  # React Router v7 + loaders
+│   ├── router.tsx                  # React Router v7 + errorElement (RouteError)
 │   ├── index.css                   # Tailwind v4 theme (CSS variables)
 │   ├── lib/utils.ts                # cn() utility (clsx + tailwind-merge)
 │   ├── components/
@@ -207,6 +226,9 @@ app/
 │   │   ├── Theme.tsx               # Theme provider + toggle
 │   │   ├── ThemeContext.tsx        # Theme context
 │   │   ├── AppLayout.tsx           # Layout com sidebar/header
+│   │   ├── ErrorBoundary.tsx       # Boundary global de render (spec 07)
+│   │   ├── ErrorScreen.tsx         # Fallback compartilhado "Algo deu errado"
+│   │   ├── RouteError.tsx          # errorElement do router
 │   │   ├── ui/                     # shadcn/ui components
 │   │   │   ├── button.tsx
 │   │   │   ├── card.tsx
@@ -225,14 +247,7 @@ app/
 │   │   └── setup.ts                # Vitest setup (mocks Tauri)
 │   └── utils/
 │       ├── format.ts               # formatDate, formatVersion
-│       └── error.ts                # getErrorMessage
-├── e2e/                            # Playwright E2E tests
-│   ├── list-worlds.spec.ts
-│   ├── create-backup.spec.ts
-│   ├── list-backups.spec.ts
-│   ├── restore-backup.spec.ts
-│   ├── delete-backup.spec.ts
-│   └── full-flow.spec.ts
+│       └── tauriError.ts           # getTauriError + humanMessage (mapa PT-BR por code)
 └── public/
 ```
 
@@ -284,34 +299,20 @@ Sistema completo substituindo `alert()` nativo:
 
 ### Testes Frontend
 
-| Componente | Testes Unitários | Cobertura |
-|------------|------------------|-----------|
-| WorldList | 6 | Loading, lista, empty, error, retry, keyboard nav |
-| CreateBackup | 10 | Load world, create, success, errors (not found, permission, disk full), retry, keyboard |
-| ListBackups | 8 | Load, list, empty, error, restore modal, delete modal, ordering, close |
-| ToastContainer | 6 | Stack, animations, progress, hover pause, action, persist |
-| ToastContext | 5 | Create, dismiss, dismissAll, types, options |
-| useToast | 3 | Hook usage, provider check |
-| useTheme | 2 | Theme toggle, persistence |
-| **Total** | **40** | |
+| Arquivo | Testes | Cobre |
+|---------|--------|-------|
+| ToastContainer.test.tsx | 20 | Stack, animações, progress, hover pause, action, persist |
+| ToastContext.test.tsx | 9 | Create, dismiss, dismissAll, types, options |
+| useToast.test.tsx | 4 | Hook usage, provider check |
+| tauriError.test.ts | 10 | Extração `{code, message}`, nunca descartar payload, mapa PT-BR (spec 07) |
+| WorldList.test.tsx | 2 | Regressão RF-05: mensagem real mapeada + payload nunca perdido |
+| ErrorBoundary.test.tsx | 2 | RF-06: throw de filho → fallback com Recarregar; filho são passa |
+| **Total** | **47** | |
 
 ```bash
-cd app && bun test              # 24 passed (Vitest unit - original components)
-cd app && bun test              # 40 passed (com novos componentes shadcn/ui)
-cd app && bun run test:e2e      # 6 passed (Playwright E2E)
-cd app && bun run build         # TypeScript + Vite build OK
+cd app && bun run test      # 47 passed (Vitest + React Testing Library)
+cd app && bun run build     # TypeScript + Vite build OK
 ```
-
-### E2E Tests (Playwright)
-
-| Teste | Cenário |
-|-------|---------|
-| `list-worlds.spec.ts` | Carrega lista, navega para criar backup, navega para ver backups |
-| `create-backup.spec.ts` | Cria backup, valida sucesso, valida erro mundo não encontrado |
-| `list-backups.spec.ts` | Lista backups, ordenação, empty state |
-| `restore-backup.spec.ts` | Restaura backup, confirmação modal, toast sucesso |
-| `delete-backup.spec.ts` | Deleta backup, confirmação modal, idempotência |
-| `full-flow.spec.ts` | Fluxo completo: listar → criar → listar → restaurar → deletar |
 
 ### Integração Tauri
 
@@ -325,6 +326,8 @@ cd app && bun run build         # TypeScript + Vite build OK
 | `cmd_get_backup_root` | Retorna backup_root configurado → `String` |
 | `cmd_get_config` | **NOVO** Retorna config (theme) → `ConfigDto` |
 | `cmd_save_config` | **NOVO** Salva config (theme) → `()` |
+
+> **Erros**: todo command que falha rejeita com objeto `{ "code": "not_found|validation|storage|config|unknown", "message": "..." }` (spec 07, RF-03). O frontend mapeia `code` para mensagens PT-BR via `tauriError.ts`.
 
 ### Development
 
@@ -340,9 +343,8 @@ cd app && bun run build      # dist/ gerado para Tauri
 cargo tauri build            # Build completo (Rust + frontend)
 
 # Testes
-cd app && bun test              # Vitest unit
-cd app && bun run test:e2e      # Playwright E2E (requer cargo tauri build antes)
-cargo test                      # Backend
+cd app && bun run test         # Vitest unit (47 passed)
+cargo test                      # Backend (237 passed)
 ```
 
 ---
@@ -365,16 +367,15 @@ blockoria/
 │   └── blockoria-infrastructure/       # Repositories + NBT parser + Config + Test Contracts
 ├── app/                                # Frontend React + TypeScript
 │   ├── src/
-│   │   ├── components/                 # WorldList, CreateBackup, ListBackups, Toast, Theme, UI
+│   │   ├── components/                 # WorldList, CreateBackup, ListBackups, Toast, Theme, ErrorBoundary, UI
 │   │   ├── pages/                      # WorldListPage, CreateBackupPage, ListBackupsPage, SettingsPage
 │   │   ├── router.tsx                  # React Router v7
 │   │   ├── index.css                   # Tailwind v4 theme
 │   │   └── test/setup.ts               # Vitest mocks
-│   ├── e2e/                            # Playwright E2E tests
 │   └── ...
 ├── docs/
-│   ├── specs/                          # SDD specs (4 telas + NBT + Toast)
-│   ├── features/                       # BDD Gherkin scenarios
+│   ├── specs/                          # SDD specs (4 telas + NBT + Toast + Erros)
+│   ├── adr/                            # Architecture Decision Records
 │   ├── index.md                        # Esta página
 │   ├── domain.md
 │   ├── application.md
@@ -395,11 +396,10 @@ blockoria/
 | **Infrastructure** | Rust, `tokio` (fs), NBT parser custom (zero deps), `toml`, `dirs` |
 | **Frontend** | Tauri 2, React 19, TypeScript 6, Vite 8, Bun |
 | **UI Components** | shadcn/ui (Radix UI + Tailwind) |
-| **Routing** | React Router v7 (loaders, nested routes) |
+| **Routing** | React Router v7 (nested routes, errorElement) |
 | **Styling** | Tailwind CSS v4 (CSS variables, dark mode) |
 | **Testes Backend** | `cargo test` (built-in) |
 | **Testes Frontend Unit** | Vitest + React Testing Library + jsdom |
-| **Testes Frontend E2E** | Playwright |
 | **CI/CD** | GitHub Actions (`cargo test`, `cargo deny`, `cargo fmt`, `pre-commit`) |
 
 ---
