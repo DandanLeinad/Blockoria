@@ -1,119 +1,147 @@
-import { invoke } from '@tauri-apps/api/core'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { formatVersion } from '../utils/format'
-import { Icon } from './ui/Icons'
-import { Button } from './ui/button'
-import { Card, CardContent } from './ui/card'
+import { invoke } from "@tauri-apps/api/core";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { formatVersion } from "../utils/format";
+import { getTauriError, humanMessage } from "../utils/tauriError";
+import { Icon } from "./ui/Icons";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
 
 export interface WorldSummaryDto {
-  folder_name: string
-  level_name: string
-  version: [number, number, number, number, number]
-  is_shared: boolean
-  account_id: string | null
-  icon_path: string | null
+  folder_name: string;
+  level_name: string;
+  version: [number, number, number, number, number];
+  is_shared: boolean;
+  account_id: string | null;
+  icon_path: string | null;
 }
 
 interface WorldListProps {
-  worlds?: WorldSummaryDto[]
-  onWorldSelect?: (world: WorldSummaryDto) => void
-  onViewBackups?: (world: WorldSummaryDto) => void
+  worlds?: WorldSummaryDto[];
+  onWorldSelect?: (world: WorldSummaryDto) => void;
+  onViewBackups?: (world: WorldSummaryDto) => void;
 }
 
-export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }: WorldListProps) {
-  const [worlds, setWorlds] = useState<WorldSummaryDto[]>(propsWorlds || [])
-  const [loading, setLoading] = useState(!propsWorlds)
-  const [error, setError] = useState<string | null>(null)
-  const hasLoadedRef = useRef(false)
+export function WorldList({
+  worlds: propsWorlds,
+  onWorldSelect,
+  onViewBackups,
+}: WorldListProps) {
+  const [worlds, setWorlds] = useState<WorldSummaryDto[]>(propsWorlds || []);
+  const [loading, setLoading] = useState(!propsWorlds);
+  const [error, setError] = useState<string | null>(null);
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
+  const hasLoadedRef = useRef(false);
 
   const loadWorlds = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
+    setErrorDetail(null);
     try {
-      const data = await invoke<WorldSummaryDto[]>('cmd_list_worlds')
-      setWorlds(data)
+      const data = await invoke<WorldSummaryDto[]>("cmd_list_worlds");
+      setWorlds(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido')
+      const tauriError = getTauriError(err);
+      setError(humanMessage(tauriError));
+      setErrorDetail(tauriError.code === "unknown" ? tauriError.message : null);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (!propsWorlds && !hasLoadedRef.current) {
-      hasLoadedRef.current = true
-      loadWorlds()
+      hasLoadedRef.current = true;
+      loadWorlds();
     }
-  }, [propsWorlds, loadWorlds])
+  }, [propsWorlds, loadWorlds]);
 
   useEffect(() => {
     if (propsWorlds) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setWorlds(propsWorlds)
+      setWorlds(propsWorlds);
     }
-  }, [propsWorlds])
+  }, [propsWorlds]);
 
   const truncateAccountId = (id: string) =>
-    id.length > 8 ? `${id.slice(0, 8)}...` : id
+    id.length > 8 ? `${id.slice(0, 8)}...` : id;
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-200px)]">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <Icon name="loader" className="animate-spin h-10 w-10 text-primary" />
+            <Icon
+              name="loader"
+              className="animate-spin h-10 w-10 text-primary"
+            />
           </div>
           <p className="text-muted-foreground text-sm">Carregando mundos...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] gap-4 text-center px-6">
-<div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
-            <Icon name="alertTriangle" className="w-8 h-8 text-destructive" />
+        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+          <Icon name="alertTriangle" className="w-8 h-8 text-destructive" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Erro ao carregar mundos</h3>
+          <h3 className="text-lg font-semibold text-foreground">
+            Erro ao carregar mundos
+          </h3>
           <p className="text-muted-foreground text-sm mt-1">{error}</p>
+          {errorDetail && (
+            <p className="text-muted-foreground/70 text-xs mt-1 font-mono break-all">
+              {errorDetail}
+            </p>
+          )}
         </div>
-        <Button
-          onClick={loadWorlds}
-          className="mt-2"
-        >
+        <Button onClick={loadWorlds} className="mt-2">
           Tentar novamente
         </Button>
       </div>
-    )
+    );
   }
 
   if (worlds.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] gap-4 text-center px-6">
-<div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
-            <Icon name="folderOpen" className="w-10 h-10 text-muted-foreground" />
+        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
+          <Icon name="folderOpen" className="w-10 h-10 text-muted-foreground" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Nenhum mundo encontrado</h3>
+          <h3 className="text-lg font-semibold text-foreground">
+            Nenhum mundo encontrado
+          </h3>
           <p className="text-muted-foreground text-sm mt-1 max-w-md">
-            Verifique se o Minecraft Bedrock está instalado e tem mundos criados.
+            Verifique se o Minecraft Bedrock está instalado e tem mundos
+            criados.
           </p>
         </div>
         <div className="text-xs text-muted-foreground space-y-1 max-w-md px-4">
-          <p><code className="bg-muted px-1.5 py-0.5 rounded">{'%APPDATA%\\Minecraft Bedrock\\Users\\<seu_id>\\games\\com.mojang\\minecraftWorlds\\'}</code></p>
+          <p>
+            <code className="bg-muted px-1.5 py-0.5 rounded">
+              {
+                "%APPDATA%\\Minecraft Bedrock\\Users\\<seu_id>\\games\\com.mojang\\minecraftWorlds\\"
+              }
+            </code>
+          </p>
           <p>ou na pasta Shared:</p>
-          <p><code className="bg-muted px-1.5 py-0.5 rounded">{'%APPDATA%\\Minecraft Bedrock\\Users\\Shared\\games\\com.mojang\\minecraftWorlds\\'}</code></p>
+          <p>
+            <code className="bg-muted px-1.5 py-0.5 rounded">
+              {
+                "%APPDATA%\\Minecraft Bedrock\\Users\\Shared\\games\\com.mojang\\minecraftWorlds\\"
+              }
+            </code>
+          </p>
         </div>
-        <Button
-          onClick={loadWorlds}
-          className="mt-2"
-        >
+        <Button onClick={loadWorlds} className="mt-2">
           Atualizar
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -133,99 +161,126 @@ export function WorldList({ worlds: propsWorlds, onWorldSelect, onViewBackups }:
           onClick={loadWorlds}
           disabled={loading}
         >
-          <Icon name="refreshCw" className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <Icon
+            name="refreshCw"
+            className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+          />
           Atualizar
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4" role="list" aria-label="Lista de mundos do Minecraft Bedrock">
+      <div
+        className="grid grid-cols-1 gap-4"
+        role="list"
+        aria-label="Lista de mundos do Minecraft Bedrock"
+      >
         {worlds.map((world) => (
-        <Card
-          key={world.folder_name}
-          className="group hover:bg-muted/50 hover:border-primary transition-all duration-200"
-        >
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3 sm:gap-4">
-            <div className="relative flex-shrink-0">
-              {world.icon_path ? (
-                <>
-                  <img
-                    src={world.icon_path}
-                    alt={`Ícone do mundo ${world.level_name}`}
-                    className="w-24 h-24 rounded-xl object-cover"
-                    onError={(e) => {
-                      e.currentTarget.classList.add('hidden')
-                      e.currentTarget.nextElementSibling?.classList.remove('hidden')
-                    }}
-                  />
-                  <div className="hidden w-24 h-24 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 items-center justify-center">
-                    <Icon name="folderOpen" className="w-8 h-8 text-primary" />
-                  </div>
-                </>
-              ) : (
-                <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center">
-                  <Icon name="folderOpen" className="w-8 h-8 text-primary" />
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <h3 className="font-semibold text-foreground truncate">{world.level_name}</h3>
-                  <p className="text-sm text-muted-foreground font-mono">{world.folder_name}</p>
-                </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0 self-start">
-                  {world.is_shared ? (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
-                      <Icon name="users" className="w-3 h-3 mr-1" />
-                      Compartilhado
-                    </span>
+          <Card
+            key={world.folder_name}
+            className="group hover:bg-muted/50 hover:border-primary transition-all duration-200"
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="relative flex-shrink-0">
+                  {world.icon_path ? (
+                    <>
+                      <img
+                        src={world.icon_path}
+                        alt={`Ícone do mundo ${world.level_name}`}
+                        className="w-24 h-24 rounded-xl object-cover"
+                        onError={(e) => {
+                          e.currentTarget.classList.add("hidden");
+                          e.currentTarget.nextElementSibling?.classList.remove(
+                            "hidden",
+                          );
+                        }}
+                      />
+                      <div className="hidden w-24 h-24 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 items-center justify-center">
+                        <Icon
+                          name="folderOpen"
+                          className="w-8 h-8 text-primary"
+                        />
+                      </div>
+                    </>
                   ) : (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-                      <Icon name="user" className="w-3 h-3 mr-1" />
-                      Conta: {truncateAccountId(world.account_id || 'desconhecida')}
-                    </span>
+                    <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center">
+                      <Icon
+                        name="folderOpen"
+                        className="w-8 h-8 text-primary"
+                      />
+                    </div>
                   )}
                 </div>
-              </div>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 mt-3 pt-3 border-t border-border">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Icon name="fileText" className="w-4 h-4" />
-                  <span>Versão: <code className="font-mono text-foreground">{formatVersion(world.version)}</code></span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h3 className="font-semibold text-foreground truncate">
+                        {world.level_name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground font-mono">
+                        {world.folder_name}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-shrink-0 self-start">
+                      {world.is_shared ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
+                          <Icon name="users" className="w-3 h-3 mr-1" />
+                          Compartilhado
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                          <Icon name="user" className="w-3 h-3 mr-1" />
+                          Conta:{" "}
+                          {truncateAccountId(
+                            world.account_id || "desconhecida",
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 mt-3 pt-3 border-t border-border">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Icon name="fileText" className="w-4 h-4" />
+                      <span>
+                        Versão:{" "}
+                        <code className="font-mono text-foreground">
+                          {formatVersion(world.version)}
+                        </code>
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:ml-auto">
+                      {onWorldSelect && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => onWorldSelect(world)}
+                          className="gap-1.5"
+                        >
+                          <Icon name="plus" className="w-4 h-4" />
+                          Criar backup
+                        </Button>
+                      )}
+                      {onViewBackups && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onViewBackups(world)}
+                          className="gap-1.5"
+                          aria-label={`Ver backups de ${world.level_name}`}
+                        >
+                          <Icon name="folderOpen" className="w-4 h-4" />
+                          Ver backups
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 sm:ml-auto">
-{onWorldSelect && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => onWorldSelect(world)}
-                        className="gap-1.5"
-                      >
-                        <Icon name="plus" className="w-4 h-4" />
-                        Criar backup
-                      </Button>
-                    )}
-                    {onViewBackups && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onViewBackups(world)}
-                      className="gap-1.5"
-                      aria-label={`Ver backups de ${world.level_name}`}
-                    >
-                      <Icon name="folderOpen" className="w-4 h-4" />
-                      Ver backups
-                    </Button>
-                    )}
-                </div>
               </div>
-            </div>
-          </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
-  )
+  );
 }
