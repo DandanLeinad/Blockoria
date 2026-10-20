@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { ToastProvider } from "./components/ToastContainer";
 import { ThemeProvider } from "./components/Theme";
+import { RouteError } from "./components/RouteError";
 import { WorldListPage } from "./pages/WorldListPage";
 import { CreateBackupPage } from "./pages/CreateBackupPage";
 import { ListBackupsPage } from "./pages/ListBackupsPage";
@@ -17,6 +18,7 @@ export const router = createBrowserRouter([
         </ToastProvider>
       </ThemeProvider>
     ),
+    errorElement: <RouteError />,
     children: [
       {
         index: true,
