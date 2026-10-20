@@ -299,6 +299,7 @@ dependencies = [
  "blockoria-domain",
  "chrono",
  "tempfile",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
