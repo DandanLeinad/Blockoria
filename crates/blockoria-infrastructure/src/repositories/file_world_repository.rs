@@ -8,11 +8,13 @@
 
 use crate::nbt::{LevelDatParser, extract_world_version};
 use blockoria_application::ports::WorldRepository;
+use blockoria_application::{ApplicationError, Result};
 use blockoria_domain::{
-    AccountId, DomainError, LevelName, World, WorldFolderName, WorldIconPath, WorldLocation,
-    WorldPath, WorldVersion,
+    AccountId, LevelName, World, WorldFolderName, WorldIconPath, WorldLocation, WorldPath,
+    WorldVersion,
 };
 use std::fs;
+use std::io;
 use std::path::{Path, PathBuf};
 
 /// Filesystem-based world repository for Minecraft Bedrock Edition.
@@ -28,18 +30,17 @@ impl FileWorldRepository {
     /// Creates a new repository using the default Minecraft Bedrock path.
     ///
     /// Default path: `%APPDATA%\Minecraft Bedrock\Users\`
-    pub fn new() -> Result<Self, DomainError> {
+    pub fn new() -> Result<Self> {
         let path = dirs::data_dir()
-            .ok_or_else(|| {
-                DomainError::InvalidWorldPath("Could not find APPDATA directory".into())
-            })?
+            .ok_or_else(|| ApplicationError::Config("Could not find APPDATA directory".into()))?
             .join("Minecraft Bedrock")
             .join("Users");
 
         if !path.exists() {
-            return Err(DomainError::InvalidWorldPath(
-                "Minecraft Bedrock Users directory not found".into(),
-            ));
+            return Err(ApplicationError::Storage(io::Error::new(
+                io::ErrorKind::NotFound,
+                "Minecraft Bedrock Users directory not found",
+            )));
         }
 
         Ok(Self {
@@ -61,7 +62,7 @@ impl FileWorldRepository {
 }
 
 impl WorldRepository for FileWorldRepository {
-    fn list_all(&self) -> Result<Vec<World>, DomainError> {
+    fn list_all(&self) -> Result<Vec<World>> {
         let mut worlds = Vec::new();
 
         // Iterate over entries in Users/ (account_ids + "Shared")
@@ -112,10 +113,7 @@ impl WorldRepository for FileWorldRepository {
         Ok(worlds)
     }
 
-    fn find_by_folder_name(
-        &self,
-        folder_name: &WorldFolderName,
-    ) -> Result<Option<World>, DomainError> {
+    fn find_by_folder_name(&self, folder_name: &WorldFolderName) -> Result<Option<World>> {
         // Search across all account directories + Shared
         let entries = fs::read_dir(&self.bedrock_users_path)?;
         for entry in entries {
@@ -158,7 +156,7 @@ impl FileWorldRepository {
         world_dir: PathBuf,
         folder_name: WorldFolderName,
         location: WorldLocation,
-    ) -> Result<World, DomainError> {
+    ) -> Result<World> {
         // Parse level.dat for version (simplified - real impl would parse NBT)
         let level_dat = world_dir.join("level.dat");
         let version = Self::parse_level_dat_version(&level_dat).unwrap_or_default();

@@ -8,7 +8,7 @@
 //! calls to use cases in `blockoria-application`.
 
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
-use blockoria_domain::DomainError;
+use blockoria_application::{ApplicationError, What};
 use blockoria_infrastructure::{
     Config, FileBackupRepository, FileWorldRepository, default_backup_root,
 };
@@ -26,13 +26,68 @@ fn icon_data_url(path: &Path) -> Option<String> {
 // ============================================================================
 
 mod error {
+    use blockoria_application::ApplicationError;
     use blockoria_domain::DomainError;
+    use serde::Serialize;
+    use serde::ser::SerializeStruct;
     use thiserror::Error;
 
+    /// Machine-readable IPC error codes (spec 07, RF-03).
+    ///
+    /// Serialized as `snake_case` strings; the frontend maps each code to a
+    /// human-friendly PT-BR message (RF-04).
+    #[derive(Debug, Serialize)]
+    #[serde(rename_all = "snake_case")]
+    pub enum ErrorCode {
+        NotFound,
+        Validation,
+        Storage,
+        Config,
+        Unknown,
+    }
+
+    /// Structured IPC error — serializes as `{ "code": "...", "message": "..." }`.
     #[derive(Debug, Error)]
+    #[error("[{code:?}] {message}")]
     pub enum CommandError {
-        #[error("Domain error: {0}")]
-        Domain(#[from] DomainError),
+        Structured { code: ErrorCode, message: String },
+    }
+
+    impl CommandError {
+        /// Wraps an out-of-taxonomy failure (e.g. a poisoned lock) as `unknown`.
+        pub fn unknown(message: impl Into<String>) -> Self {
+            CommandError::Structured {
+                code: ErrorCode::Unknown,
+                message: message.into(),
+            }
+        }
+    }
+
+    impl From<ApplicationError> for CommandError {
+        fn from(err: ApplicationError) -> Self {
+            let code = match &err {
+                ApplicationError::NotFound { .. } => ErrorCode::NotFound,
+                ApplicationError::Validation(_) => ErrorCode::Validation,
+                ApplicationError::Storage(_) => ErrorCode::Storage,
+                ApplicationError::Config(_) => ErrorCode::Config,
+            };
+            CommandError::Structured {
+                code,
+                message: err.to_string(),
+            }
+        }
+    }
+
+    impl From<DomainError> for CommandError {
+        fn from(err: DomainError) -> Self {
+            ApplicationError::Validation(err).into()
+        }
+    }
+
+    impl From<std::io::Error> for CommandError {
+        fn from(err: std::io::Error) -> Self {
+            ApplicationError::Storage(err).into()
+        }
     }
 
     impl serde::Serialize for CommandError {
@@ -40,14 +95,18 @@ mod error {
         where
             S: serde::Serializer,
         {
-            serializer.serialize_str(&self.to_string())
+            let CommandError::Structured { code, message } = self;
+            let mut state = serializer.serialize_struct("CommandError", 2)?;
+            state.serialize_field("code", code)?;
+            state.serialize_field("message", message)?;
+            state.end()
         }
     }
 
     pub type CommandResult<T> = Result<T, CommandError>;
 }
 
-pub use error::{CommandError, CommandResult};
+pub use error::{CommandError, CommandResult, ErrorCode};
 
 // ============================================================================
 // Application State
@@ -63,7 +122,7 @@ pub struct AppState {
 }
 
 /// Create the application state with real repositories.
-pub fn create_state() -> Result<AppState, DomainError> {
+pub fn create_state() -> Result<AppState, ApplicationError> {
     let world_repo = if let Ok(test_path) = std::env::var("BLOCKORIA_TEST_WORLDS_DIR") {
         let path = std::path::PathBuf::from(test_path);
         // Accept both: the dir containing Users/ OR the Users/ dir itself
@@ -198,17 +257,9 @@ mod commands {
         let world = world_repo
             .find_by_folder_name(&folder_name)
             .map_err(CommandError::from)?
-            .ok_or_else(|| {
-                CommandError::from(blockoria_domain::DomainError::InvalidWorldPath(
-                    "World not found".into(),
-                ))
-            })?;
+            .ok_or_else(|| CommandError::from(ApplicationError::NotFound { what: What::World }))?;
         let backup_root = backup_repo.backup_root().join(location.as_path_segment());
-        fs::create_dir_all(&backup_root).map_err(|error| {
-            CommandError::from(blockoria_domain::DomainError::InvalidBackupPath(
-                error.to_string(),
-            ))
-        })?;
+        fs::create_dir_all(&backup_root)?;
         let backup =
             uc_create_backup::create_backup(&world, &backup_root).map_err(CommandError::from)?;
         Ok(CreateBackupResponseDto {
@@ -286,11 +337,10 @@ mod commands {
 
     #[tauri::command]
     pub async fn cmd_get_config(state: State<'_, AppState>) -> CommandResult<ConfigDto> {
-        let config = state.config.read().map_err(|_| {
-            CommandError::from(blockoria_domain::DomainError::InvalidBackupPath(
-                "Failed to read config lock".into(),
-            ))
-        })?;
+        let config = state
+            .config
+            .read()
+            .map_err(|_| CommandError::unknown("Failed to read config lock"))?;
         Ok(ConfigDto {
             theme: config.theme.clone(),
         })
@@ -301,11 +351,10 @@ mod commands {
         config: ConfigDto,
         state: State<'_, AppState>,
     ) -> CommandResult<()> {
-        let mut config_guard = state.config.write().map_err(|_| {
-            CommandError::from(blockoria_domain::DomainError::InvalidBackupPath(
-                "Failed to write config lock".into(),
-            ))
-        })?;
+        let mut config_guard = state
+            .config
+            .write()
+            .map_err(|_| CommandError::unknown("Failed to write config lock"))?;
         config_guard.theme = config.theme;
         config_guard.save().map_err(CommandError::from)?;
         Ok(())
@@ -331,4 +380,51 @@ pub fn run_with_state(state: AppState) {
         ])
         .run(tauri::generate_context!())
         .expect("error while running Blockoria application");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn given_not_found_when_serialized_then_code_and_message() {
+        // Given
+        let err = CommandError::from(ApplicationError::NotFound { what: What::Backup });
+
+        // When
+        let value = serde_json::to_value(err).unwrap();
+
+        // Then
+        assert_eq!(
+            value,
+            json!({ "code": "not_found", "message": "not found: backup" })
+        );
+    }
+
+    #[test]
+    fn given_domain_error_when_converted_then_validation_code() {
+        // Given
+        let err = CommandError::from(blockoria_domain::DomainError::InvalidWorldFolderName(
+            "empty".into(),
+        ));
+
+        // When
+        let value = serde_json::to_value(err).unwrap();
+
+        // Then
+        assert_eq!(value["code"], "validation");
+    }
+
+    #[test]
+    fn given_io_error_when_converted_then_storage_code() {
+        // Given
+        let io_err = std::io::Error::new(std::io::ErrorKind::PermissionDenied, "denied");
+
+        // When
+        let value = serde_json::to_value(CommandError::from(io_err)).unwrap();
+
+        // Then
+        assert_eq!(value["code"], "storage");
+    }
 }

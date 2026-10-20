@@ -7,15 +7,16 @@
 // folder name and location) by delegating to the
 // `BackupRepository::list_by_world` method.
 
+use crate::error::Result;
 use crate::ports::BackupRepository;
-use blockoria_domain::{Backup, DomainError, WorldFolderName, WorldLocation};
+use blockoria_domain::{Backup, WorldFolderName, WorldLocation};
 
 /// Returns all backups for a given world.
 pub fn list_backups(
     repo: &dyn BackupRepository,
     folder_name: &WorldFolderName,
     location: &WorldLocation,
-) -> Result<Vec<Backup>, DomainError> {
+) -> Result<Vec<Backup>> {
     repo.list_by_world(folder_name, location)
 }
 
@@ -23,8 +24,8 @@ pub fn list_backups(
 mod tests {
     use super::*;
     use blockoria_domain::{
-        AccountId, Backup, BackupPath, BackupTimestamp, DomainError, WorldFolderName,
-        WorldLocation, WorldVersion,
+        AccountId, Backup, BackupPath, BackupTimestamp, WorldFolderName, WorldLocation,
+        WorldVersion,
     };
     use std::path::Path;
     use tempfile::TempDir;
@@ -40,7 +41,7 @@ mod tests {
     }
 
     impl BackupRepository for MockBackupRepo {
-        fn save(&self, _backup: &Backup) -> Result<(), DomainError> {
+        fn save(&self, _backup: &Backup) -> Result<()> {
             Ok(())
         }
 
@@ -48,7 +49,7 @@ mod tests {
             &self,
             folder_name: &WorldFolderName,
             location: &WorldLocation,
-        ) -> Result<Vec<Backup>, DomainError> {
+        ) -> Result<Vec<Backup>> {
             Ok(self
                 .backups
                 .iter()
@@ -65,7 +66,7 @@ mod tests {
                 .collect())
         }
 
-        fn delete(&self, _backup_path: &Path) -> Result<(), DomainError> {
+        fn delete(&self, _backup_path: &Path) -> Result<()> {
             Ok(())
         }
     }

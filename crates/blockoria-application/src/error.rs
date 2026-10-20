@@ -3,21 +3,21 @@
 
 //! Error handling for the application layer.
 //!
-//! Provides the `Result<T>` type alias currently used by ports and use cases
-//! (`DomainError`), and — per `docs/specs/07-error-handling.md` (RF-01) — the
-//! `ApplicationError` taxonomy that will replace it: honest categories
-//! (NotFound, Validation, Storage, Config) instead of validation variants
+//! Provides the `ApplicationError` taxonomy — per
+//! `docs/specs/07-error-handling.md` (RF-01) — and the `Result<T>` alias
+//! used by all ports and use cases: honest categories (`NotFound`,
+//! `Validation`, `Storage`, `Config`) instead of validation variants
 //! reused for everything.
 
 use blockoria_domain::DomainError;
 use thiserror::Error;
 
-/// Application result type — `std::result::Result<T, DomainError>`.
+/// Application result type — `std::result::Result<T, ApplicationError>`.
 ///
-/// All use cases and repository operations return this result type.
-/// The error type is always `DomainError` from the domain layer,
-/// ensuring consistent error handling across the application layer.
-pub type Result<T> = std::result::Result<T, DomainError>;
+/// All ports and use cases return this result type. The error type is
+/// `ApplicationError`, the honest taxonomy from
+/// `docs/specs/07-error-handling.md` (RF-01).
+pub type Result<T> = std::result::Result<T, ApplicationError>;
 
 /// Which aggregate a `NotFound` refers to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
