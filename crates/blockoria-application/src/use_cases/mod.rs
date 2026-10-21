@@ -10,7 +10,7 @@
 //! Use cases are pure functions that:
 //! - Take repositories (ports) as dependencies
 //! - Orchestrate domain logic
-//! - Return `Result<T, DomainError>`
+//! - Return `Result<T, ApplicationError>`
 //!
 //! # Use Cases
 //!

@@ -7,16 +7,14 @@
 // aggregates. The infrastructure layer must implement this trait to provide
 // world data from any storage backend (filesystem, database, etc.).
 
-use blockoria_domain::{DomainError, World, WorldFolderName};
+use crate::error::Result;
+use blockoria_domain::{World, WorldFolderName};
 
 /// Port for reading World aggregates.
 pub trait WorldRepository: Send + Sync {
     /// Returns all worlds known to the repository.
-    fn list_all(&self) -> Result<Vec<World>, DomainError>;
+    fn list_all(&self) -> Result<Vec<World>>;
 
     /// Finds a world by its folder name.
-    fn find_by_folder_name(
-        &self,
-        folder_name: &WorldFolderName,
-    ) -> Result<Option<World>, DomainError>;
+    fn find_by_folder_name(&self, folder_name: &WorldFolderName) -> Result<Option<World>>;
 }

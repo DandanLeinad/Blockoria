@@ -6,11 +6,12 @@
 //! This use case retrieves all worlds known to the repository.
 //! It simply delegates to the `WorldRepository::list_all` method.
 
+use crate::error::Result;
 use crate::ports::WorldRepository;
-use blockoria_domain::{DomainError, World};
+use blockoria_domain::World;
 
 /// Returns all worlds known to the repository.
-pub fn list_worlds(repo: &dyn WorldRepository) -> Result<Vec<World>, DomainError> {
+pub fn list_worlds(repo: &dyn WorldRepository) -> Result<Vec<World>> {
     repo.list_all()
 }
 
@@ -35,14 +36,11 @@ mod tests {
     }
 
     impl WorldRepository for MockWorldRepo {
-        fn list_all(&self) -> Result<Vec<World>, DomainError> {
+        fn list_all(&self) -> Result<Vec<World>> {
             Ok(self.worlds.clone())
         }
 
-        fn find_by_folder_name(
-            &self,
-            folder_name: &WorldFolderName,
-        ) -> Result<Option<World>, DomainError> {
+        fn find_by_folder_name(&self, folder_name: &WorldFolderName) -> Result<Option<World>> {
             Ok(self
                 .worlds
                 .iter()

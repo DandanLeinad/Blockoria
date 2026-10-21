@@ -1,11 +1,11 @@
-import { invoke } from '@tauri-apps/api/core'
-import { revealItemInDir } from '@tauri-apps/plugin-opener'
-import { useCallback, useEffect, useState } from 'react'
-import { getErrorMessage } from '../utils/error'
-import { formatDate, formatVersion } from '../utils/format'
-import { toast } from 'sonner'
-import { Icon } from './ui/Icons'
-import { Button } from './ui/button'
+import { invoke } from "@tauri-apps/api/core";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
+import { useCallback, useEffect, useState } from "react";
+import { getTauriError, humanMessage } from "../utils/tauriError";
+import { formatDate, formatVersion } from "../utils/format";
+import { toast } from "sonner";
+import { Icon } from "./ui/Icons";
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -13,153 +13,166 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from './ui/dialog'
+} from "./ui/dialog";
 
 interface BackupSummaryDto {
-  backup_path: string
-  icon_path: string | null
-  timestamp: string
-  world_folder_name: string
-  world_version: [number, number, number, number, number]
+  backup_path: string;
+  icon_path: string | null;
+  timestamp: string;
+  world_folder_name: string;
+  world_version: [number, number, number, number, number];
 }
 
 interface ListBackupsProps {
-  worldFolderName: string
-  levelName?: string
-  accountId: string | null
-  onClose: () => void
+  worldFolderName: string;
+  levelName?: string;
+  accountId: string | null;
+  onClose: () => void;
 }
 
 interface RestoreBackupResponseDto {
-  success: boolean
-  message: string
+  success: boolean;
+  message: string;
 }
 
 interface DeleteBackupResponseDto {
-  success: boolean
-  message: string
+  success: boolean;
+  message: string;
 }
 
-export function ListBackups({ worldFolderName, levelName, accountId, onClose }: ListBackupsProps) {
-  const [backups, setBackups] = useState<BackupSummaryDto[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [restoreModal, setRestoreModal] = useState<BackupSummaryDto | null>(null)
-  const [deleteModal, setDeleteModal] = useState<BackupSummaryDto | null>(null)
-  const [restoring, setRestoring] = useState<string | null>(null)
-  const [deleting, setDeleting] = useState<string | null>(null)
+export function ListBackups({
+  worldFolderName,
+  levelName,
+  accountId,
+  onClose,
+}: ListBackupsProps) {
+  const [backups, setBackups] = useState<BackupSummaryDto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [restoreModal, setRestoreModal] = useState<BackupSummaryDto | null>(
+    null,
+  );
+  const [deleteModal, setDeleteModal] = useState<BackupSummaryDto | null>(null);
+  const [restoring, setRestoring] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const loadBackups = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const data = await invoke<BackupSummaryDto[]>('cmd_list_backups', {
+      const data = await invoke<BackupSummaryDto[]>("cmd_list_backups", {
         worldFolderName,
         accountId,
-      })
-      data.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      setBackups(data)
+      });
+      data.sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      );
+      setBackups(data);
     } catch (err) {
-      setError(getErrorMessage(err))
+      setError(humanMessage(getTauriError(err)));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [worldFolderName, accountId])
+  }, [worldFolderName, accountId]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadBackups()
-  }, [loadBackups])
+    loadBackups();
+  }, [loadBackups]);
 
   // Handle Escape key to close modals or go back
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' || e.key === 'Esc') {
+      if (e.key === "Escape" || e.key === "Esc") {
         if (restoreModal) {
-          setRestoreModal(null)
+          setRestoreModal(null);
         } else if (deleteModal) {
-          setDeleteModal(null)
+          setDeleteModal(null);
         } else {
-          onClose()
+          onClose();
         }
       }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [restoreModal, deleteModal, onClose])
-
-
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [restoreModal, deleteModal, onClose]);
 
   const handleRestore = async (backup: BackupSummaryDto) => {
-    setRestoring(backup.backup_path)
+    setRestoring(backup.backup_path);
     try {
-      await invoke<RestoreBackupResponseDto>('cmd_restore_backup', {
+      await invoke<RestoreBackupResponseDto>("cmd_restore_backup", {
         backupPath: backup.backup_path,
         worldFolderName: backup.world_folder_name,
         accountId,
-      })
-      setRestoreModal(null)
-      toast.success('Backup restaurado com sucesso!')
-      onClose()
+      });
+      setRestoreModal(null);
+      toast.success("Backup restaurado com sucesso!");
+      onClose();
     } catch (err) {
-      const msg = getErrorMessage(err)
-      toast.error(`Erro ao restaurar: ${msg}`)
+      toast.error(`Erro ao restaurar: ${humanMessage(getTauriError(err))}`);
     } finally {
-      setRestoring(null)
+      setRestoring(null);
     }
-  }
+  };
 
   const handleDelete = async (backup: BackupSummaryDto) => {
-    setDeleting(backup.backup_path)
+    setDeleting(backup.backup_path);
     try {
-      await invoke<DeleteBackupResponseDto>('cmd_delete_backup', {
+      await invoke<DeleteBackupResponseDto>("cmd_delete_backup", {
         backupPath: backup.backup_path,
-      })
-      setBackups(prev => prev.filter(b => b.backup_path !== backup.backup_path))
-      setDeleteModal(null)
-      toast.success('Backup deletado com sucesso!')
+      });
+      setBackups((prev) =>
+        prev.filter((b) => b.backup_path !== backup.backup_path),
+      );
+      setDeleteModal(null);
+      toast.success("Backup deletado com sucesso!");
     } catch (err) {
-      const msg = getErrorMessage(err)
-      toast.error(`Erro ao deletar: ${msg}`)
+      toast.error(`Erro ao deletar: ${humanMessage(getTauriError(err))}`);
     } finally {
-      setDeleting(null)
+      setDeleting(null);
     }
-  }
+  };
 
   const openRestoreModal = (backup: BackupSummaryDto) => {
-    setRestoreModal(backup)
-  }
+    setRestoreModal(backup);
+  };
 
   const openDeleteModal = (backup: BackupSummaryDto) => {
-    setDeleteModal(backup)
-  }
+    setDeleteModal(backup);
+  };
 
   const closeModals = () => {
-    setRestoreModal(null)
-    setDeleteModal(null)
-  }
+    setRestoreModal(null);
+    setDeleteModal(null);
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-200px)]">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <Icon name="loader" className="animate-spin h-10 w-10 text-primary" />
+            <Icon
+              name="loader"
+              className="animate-spin h-10 w-10 text-primary"
+            />
           </div>
           <p className="text-muted-foreground text-sm">Carregando backups...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] gap-4 text-center px-6">
-<div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
-            <Icon name="alertTriangle" className="w-8 h-8 text-destructive" />
+        <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+          <Icon name="alertTriangle" className="w-8 h-8 text-destructive" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Erro ao carregar backups</h3>
+          <h3 className="text-lg font-semibold text-foreground">
+            Erro ao carregar backups
+          </h3>
           <p className="text-muted-foreground text-sm mt-1">{error}</p>
         </div>
         <button
@@ -169,10 +182,10 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
           Tentar novamente
         </button>
       </div>
-    )
+    );
   }
 
-  const displayName = levelName ?? worldFolderName
+  const displayName = levelName ?? worldFolderName;
 
   return (
     <div className="space-y-6">
@@ -189,7 +202,10 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
             className="p-2 border border-border bg-background hover:bg-muted rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Atualizar lista de backups"
           >
-            <Icon name="refreshCw" className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+            <Icon
+              name="refreshCw"
+              className={`w-5 h-5 ${loading ? "animate-spin" : ""}`}
+            />
           </button>
           <button
             type="button"
@@ -205,11 +221,18 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
       {backups.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)] gap-4 text-center px-6">
           <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
-            <Icon name="folderOpen" className="w-10 h-10 text-muted-foreground" />
+            <Icon
+              name="folderOpen"
+              className="w-10 h-10 text-muted-foreground"
+            />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-foreground">Nenhum backup encontrado</h3>
-            <p className="text-muted-foreground text-sm mt-1">Crie o primeiro backup para este mundo na tela principal.</p>
+            <h3 className="text-lg font-semibold text-foreground">
+              Nenhum backup encontrado
+            </h3>
+            <p className="text-muted-foreground text-sm mt-1">
+              Crie o primeiro backup para este mundo na tela principal.
+            </p>
           </div>
         </div>
       ) : (
@@ -229,16 +252,21 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
                         alt=""
                         className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
                         onError={(event) => {
-                          event.currentTarget.style.display = 'none'
+                          event.currentTarget.style.display = "none";
                         }}
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Icon name="folderOpen" className="w-8 h-8 text-primary" />
+                        <Icon
+                          name="folderOpen"
+                          className="w-8 h-8 text-primary"
+                        />
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-foreground">{formatDate(backup.timestamp)}</p>
+                      <p className="font-medium text-foreground">
+                        {formatDate(backup.timestamp)}
+                      </p>
                       <button
                         type="button"
                         onClick={() => revealItemInDir(backup.backup_path)}
@@ -262,33 +290,33 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
                     </span>
                   </div>
                 </div>
-                    <div className="flex items-center gap-2 flex-shrink-0 self-stretch sm:self-auto">
-                    <button
-                      type="button"
-                      onClick={() => openRestoreModal(backup)}
-                      disabled={restoring === backup.backup_path}
-                      className="flex-1 sm:flex-none px-3 py-1.5 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {restoring === backup.backup_path ? (
-                        <span className="flex items-center gap-1.5">
-                          <Icon name="loader" className="animate-spin h-4 w-4" />
-                          Restaurando...
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1.5">
-                          <Icon name="rotateCcw" className="w-4 h-4" />
-                          Restaurar
-                        </span>
-                      )}
+                <div className="flex items-center gap-2 flex-shrink-0 self-stretch sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => openRestoreModal(backup)}
+                    disabled={restoring === backup.backup_path}
+                    className="flex-1 sm:flex-none px-3 py-1.5 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {restoring === backup.backup_path ? (
+                      <span className="flex items-center gap-1.5">
+                        <Icon name="loader" className="animate-spin h-4 w-4" />
+                        Restaurando...
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5">
+                        <Icon name="rotateCcw" className="w-4 h-4" />
+                        Restaurar
+                      </span>
+                    )}
                   </button>
-                    <button
-                      type="button"
-                      onClick={() => openDeleteModal(backup)}
-                      disabled={deleting === backup.backup_path}
-                      className="p-1.5 text-destructive hover:bg-destructive/15 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      aria-label={`Deletar backup de ${formatDate(backup.timestamp)}`}
-                    >
-                      <Icon name="trash2" className="w-5 h-5" />
+                  <button
+                    type="button"
+                    onClick={() => openDeleteModal(backup)}
+                    disabled={deleting === backup.backup_path}
+                    className="p-1.5 text-destructive hover:bg-destructive/15 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label={`Deletar backup de ${formatDate(backup.timestamp)}`}
+                  >
+                    <Icon name="trash2" className="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -308,20 +336,35 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
               <DialogTitle>Confirmar Restauração</DialogTitle>
             </div>
             <DialogDescription>
-              Isso substituirá <strong>TODOS os arquivos</strong> do mundo <strong className="text-foreground">{displayName}</strong>
+              Isso substituirá <strong>TODOS os arquivos</strong> do mundo{" "}
+              <strong className="text-foreground">{displayName}</strong>
               <span> </span>
-              pelo backup de <strong className="text-foreground">{formatDate(restoreModal?.timestamp ?? '')}</strong>.
+              pelo backup de{" "}
+              <strong className="text-foreground">
+                {formatDate(restoreModal?.timestamp ?? "")}
+              </strong>
+              .
             </DialogDescription>
             <p className="text-sm text-destructive mt-4">
               Esta ação <strong>NÃO PODE</strong> ser desfeita.
             </p>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={closeModals} disabled={restoring === restoreModal?.backup_path}>
+            <Button
+              variant="outline"
+              onClick={closeModals}
+              disabled={restoring === restoreModal?.backup_path}
+            >
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={() => handleRestore(restoreModal!)} disabled={restoring === restoreModal?.backup_path}>
-              {restoring === restoreModal?.backup_path ? 'Restaurando...' : 'Restaurar'}
+            <Button
+              variant="destructive"
+              onClick={() => handleRestore(restoreModal!)}
+              disabled={restoring === restoreModal?.backup_path}
+            >
+              {restoring === restoreModal?.backup_path
+                ? "Restaurando..."
+                : "Restaurar"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -338,22 +381,36 @@ export function ListBackups({ worldFolderName, levelName, accountId, onClose }: 
               <DialogTitle>Confirmar Exclusão</DialogTitle>
             </div>
             <DialogDescription>
-              Tem certeza que deseja deletar o backup de <strong className="text-foreground">{formatDate(deleteModal?.timestamp ?? '')}</strong>?
+              Tem certeza que deseja deletar o backup de{" "}
+              <strong className="text-foreground">
+                {formatDate(deleteModal?.timestamp ?? "")}
+              </strong>
+              ?
             </DialogDescription>
             <p className="text-sm text-destructive mt-4">
               Esta ação <strong>NÃO PODE</strong> ser desfeita.
             </p>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={closeModals} disabled={deleting === deleteModal?.backup_path}>
+            <Button
+              variant="outline"
+              onClick={closeModals}
+              disabled={deleting === deleteModal?.backup_path}
+            >
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={() => handleDelete(deleteModal!)} disabled={deleting === deleteModal?.backup_path}>
-              {deleting === deleteModal?.backup_path ? 'Deletando...' : 'Deletar'}
+            <Button
+              variant="destructive"
+              onClick={() => handleDelete(deleteModal!)}
+              disabled={deleting === deleteModal?.backup_path}
+            >
+              {deleting === deleteModal?.backup_path
+                ? "Deletando..."
+                : "Deletar"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

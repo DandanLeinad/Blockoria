@@ -26,7 +26,8 @@ Camada de domínio pura, sem dependências externas.
 - `BackupTimestamp: Ord` — Ordenação para listar backups mais recentes primeiro
 - `WorldVersion: Default` — Versão padrão `[0,0,0,0,0]`
 - `AccountId: Hash` — Para uso como chave em `HashMap`
-- `From<io::Error> for DomainError` — Conversão automática de erros de I/O
+
+> A conversão automática `From<io::Error> for DomainError` foi **removida** (spec 07, RF-02): `DomainError` é agora puramente validação. Erros de I/O vivem na camada de aplicação, como `ApplicationError::Storage`.
 
 ## Entities / Aggregates
 
@@ -36,6 +37,8 @@ Camada de domínio pura, sem dependências externas.
 | `Backup` | Aggregate Root | Backup com world_folder_name, world_account_id, world_version, created_at, backup_path |
 
 ## DomainError (8 variants)
+
+Puramente **validação** — cada variante é uma regra de value object violada. I/O não entra aqui (veja `ApplicationError` na aplicação).
 
 | Variant | Quando ocorre |
 |---------|---------------|

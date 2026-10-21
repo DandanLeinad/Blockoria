@@ -8,10 +8,10 @@
 
 use crate::config::default_backup_root;
 use crate::nbt::{LevelDatParser, extract_world_version};
+use blockoria_application::Result;
 use blockoria_application::ports::BackupRepository;
 use blockoria_domain::{
-    AccountId, Backup, BackupPath, BackupTimestamp, DomainError, WorldFolderName, WorldLocation,
-    WorldVersion,
+    AccountId, Backup, BackupPath, BackupTimestamp, WorldFolderName, WorldLocation, WorldVersion,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -36,7 +36,7 @@ impl FileBackupRepository {
     /// Creates a repository with the default backup path.
     ///
     /// Uses `%APPDATA%\Blockoria\backups\`
-    pub fn with_default_path() -> Result<Self, DomainError> {
+    pub fn with_default_path() -> Result<Self> {
         let root = default_backup_root();
         fs::create_dir_all(&root).ok();
         Ok(Self { backup_root: root })
@@ -69,7 +69,7 @@ impl FileBackupRepository {
 }
 
 impl BackupRepository for FileBackupRepository {
-    fn save(&self, backup: &Backup) -> Result<(), DomainError> {
+    fn save(&self, backup: &Backup) -> Result<()> {
         // The backup directory should already exist (created by use case)
         // This method is a no-op for filesystem implementation since the use case
         // handles the actual file copying. Kept for interface completeness.
@@ -81,7 +81,7 @@ impl BackupRepository for FileBackupRepository {
         &self,
         folder_name: &WorldFolderName,
         location: &WorldLocation,
-    ) -> Result<Vec<Backup>, DomainError> {
+    ) -> Result<Vec<Backup>> {
         let world_backup_dir = self.world_backup_dir(location, folder_name);
 
         if !world_backup_dir.exists() {
@@ -132,7 +132,7 @@ impl BackupRepository for FileBackupRepository {
         Ok(backups)
     }
 
-    fn delete(&self, backup_path: &Path) -> Result<(), DomainError> {
+    fn delete(&self, backup_path: &Path) -> Result<()> {
         if backup_path.exists() {
             fs::remove_dir_all(backup_path)?;
         }

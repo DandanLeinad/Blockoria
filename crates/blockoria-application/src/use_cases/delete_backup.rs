@@ -6,21 +6,19 @@
 //! This use case deletes a backup by delegating to the
 //! `BackupRepository::delete` method with the provided backup path.
 
+use crate::error::Result;
 use crate::ports::BackupRepository;
-use blockoria_domain::{BackupPath, DomainError};
+use blockoria_domain::BackupPath;
 
 /// Deletes a backup by its backup path.
-pub fn delete_backup(
-    repo: &dyn BackupRepository,
-    backup_path: &BackupPath,
-) -> Result<(), DomainError> {
+pub fn delete_backup(repo: &dyn BackupRepository, backup_path: &BackupPath) -> Result<()> {
     repo.delete(backup_path.as_path())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use blockoria_domain::{Backup, BackupPath, DomainError, WorldFolderName, WorldLocation};
+    use blockoria_domain::{Backup, BackupPath, WorldFolderName, WorldLocation};
     use tempfile::TempDir;
 
     struct MockBackupRepo {
@@ -36,7 +34,7 @@ mod tests {
     }
 
     impl BackupRepository for MockBackupRepo {
-        fn save(&self, _backup: &Backup) -> Result<(), DomainError> {
+        fn save(&self, _backup: &Backup) -> Result<()> {
             Ok(())
         }
 
@@ -44,11 +42,11 @@ mod tests {
             &self,
             _folder_name: &WorldFolderName,
             _location: &WorldLocation,
-        ) -> Result<Vec<Backup>, DomainError> {
+        ) -> Result<Vec<Backup>> {
             Ok(vec![])
         }
 
-        fn delete(&self, backup_path: &std::path::Path) -> Result<(), DomainError> {
+        fn delete(&self, backup_path: &std::path::Path) -> Result<()> {
             // Convert Path to BackupPath for storage
             let bp = BackupPath::new(backup_path).unwrap();
             self.deleted.lock().unwrap().push(bp);

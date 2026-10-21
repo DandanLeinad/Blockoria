@@ -12,36 +12,42 @@
 //! 3. Recursively copies all files from backup to world directory
 //! 4. Returns success or error
 
+use crate::error::{ApplicationError, Result, What};
 use crate::ports::{BackupRepository, WorldRepository};
 use crate::util::copy_dir_all;
-use blockoria_domain::{BackupPath, DomainError, WorldFolderName, WorldLocation};
+use blockoria_domain::{BackupPath, WorldFolderName, WorldLocation};
 
 /// Restores a world from a backup.
 ///
 /// Copies all files from the backup directory to the world directory,
 /// overwriting existing files.
+///
+/// # Errors
+/// Returns `ApplicationError` if:
+/// - The backup or world does not exist (`NotFound`)
+/// - A value object validation fails (`Validation`)
+/// - The copy operation fails (`Storage`)
 pub fn restore_backup(
     backup_repo: &dyn BackupRepository,
     world_repo: &dyn WorldRepository,
     folder_name: &WorldFolderName,
     location: &WorldLocation,
     backup_path: &BackupPath,
-) -> Result<(), DomainError> {
+) -> Result<()> {
     // Verify backup exists and belongs to this world/location
     let backups = backup_repo.list_by_world(folder_name, location)?;
     let backup = backups
         .iter()
         .find(|b| b.backup_path() == backup_path)
-        .ok_or(DomainError::InvalidBackupPath("Backup not found".into()))?;
+        .ok_or(ApplicationError::NotFound { what: What::Backup })?;
 
     // Get world to find destination path
     let world = world_repo
         .find_by_folder_name(folder_name)?
-        .ok_or(DomainError::InvalidWorldPath("World not found".into()))?;
+        .ok_or(ApplicationError::NotFound { what: What::World })?;
 
     // Copy backup contents to world path (overwrite)
-    copy_dir_all(backup.backup_path().as_path(), world.path().as_path())
-        .map_err(|e| DomainError::InvalidBackupPath(e.to_string()))?;
+    copy_dir_all(backup.backup_path().as_path(), world.path().as_path())?;
 
     Ok(())
 }
@@ -50,8 +56,8 @@ pub fn restore_backup(
 mod tests {
     use super::*;
     use blockoria_domain::{
-        AccountId, Backup, BackupPath, BackupTimestamp, DomainError, LevelName, World,
-        WorldFolderName, WorldIconPath, WorldLocation, WorldPath, WorldVersion,
+        AccountId, Backup, BackupPath, BackupTimestamp, LevelName, World, WorldFolderName,
+        WorldIconPath, WorldLocation, WorldPath, WorldVersion,
     };
     use std::fs;
     use std::path::{Path, PathBuf};
@@ -68,7 +74,7 @@ mod tests {
     }
 
     impl WorldRepository for MockWorldRepo {
-        fn list_all(&self) -> Result<Vec<World>, DomainError> {
+        fn list_all(&self) -> Result<Vec<World>> {
             Ok(self
                 .world
                 .as_ref()
@@ -76,10 +82,7 @@ mod tests {
                 .unwrap_or_default())
         }
 
-        fn find_by_folder_name(
-            &self,
-            folder_name: &WorldFolderName,
-        ) -> Result<Option<World>, DomainError> {
+        fn find_by_folder_name(&self, folder_name: &WorldFolderName) -> Result<Option<World>> {
             if self.world.as_ref().map(|w| w.folder_name()) == Some(folder_name) {
                 Ok(self.world.clone())
             } else {
@@ -99,7 +102,7 @@ mod tests {
     }
 
     impl BackupRepository for MockBackupRepo {
-        fn save(&self, _backup: &Backup) -> Result<(), DomainError> {
+        fn save(&self, _backup: &Backup) -> Result<()> {
             Ok(())
         }
 
@@ -107,7 +110,7 @@ mod tests {
             &self,
             folder_name: &WorldFolderName,
             location: &WorldLocation,
-        ) -> Result<Vec<Backup>, DomainError> {
+        ) -> Result<Vec<Backup>> {
             Ok(self
                 .backups
                 .iter()
@@ -124,7 +127,7 @@ mod tests {
                 .collect())
         }
 
-        fn delete(&self, _backup_path: &Path) -> Result<(), DomainError> {
+        fn delete(&self, _backup_path: &Path) -> Result<()> {
             Ok(())
         }
     }

@@ -1,4 +1,4 @@
-import * as Lucide from 'lucide-react'
+import * as Lucide from "lucide-react";
 
 export const Icons = {
   folderOpen: Lucide.FolderOpen,
@@ -36,18 +36,18 @@ export const Icons = {
   users: Lucide.Users,
   user: Lucide.User,
   fileText: Lucide.FileText,
-} as const
+} as const;
 
-export type IconName = keyof typeof Icons
+export type IconName = keyof typeof Icons;
 
 export function Icon({
   name,
-  className = 'w-5 h-5',
+  className = "w-5 h-5",
   ...props
 }: {
   name: IconName;
   className?: string;
 } & React.SVGProps<SVGSVGElement>) {
-  const Component = Icons[name]
-  return <Component className={className} aria-hidden="true" {...props} />
+  const Component = Icons[name];
+  return <Component className={className} aria-hidden="true" {...props} />;
 }

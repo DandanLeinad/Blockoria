@@ -1,15 +1,16 @@
-import { createBrowserRouter } from 'react-router-dom'
-import { ToastProvider } from './components/ToastContainer'
-import { ThemeProvider } from './components/Theme'
-import { WorldListPage } from './pages/WorldListPage'
-import { CreateBackupPage } from './pages/CreateBackupPage'
-import { ListBackupsPage } from './pages/ListBackupsPage'
-import { SettingsPage } from './pages/SettingsPage'
-import { AppLayout } from './components/AppLayout'
+import { createBrowserRouter } from "react-router-dom";
+import { ToastProvider } from "./components/ToastContainer";
+import { ThemeProvider } from "./components/Theme";
+import { RouteError } from "./components/RouteError";
+import { WorldListPage } from "./pages/WorldListPage";
+import { CreateBackupPage } from "./pages/CreateBackupPage";
+import { ListBackupsPage } from "./pages/ListBackupsPage";
+import { SettingsPage } from "./pages/SettingsPage";
+import { AppLayout } from "./components/AppLayout";
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: (
       <ThemeProvider>
         <ToastProvider>
@@ -17,23 +18,24 @@ export const router = createBrowserRouter([
         </ToastProvider>
       </ThemeProvider>
     ),
+    errorElement: <RouteError />,
     children: [
       {
         index: true,
         element: <WorldListPage />,
       },
       {
-        path: 'world/:folderName/backup/create',
+        path: "world/:folderName/backup/create",
         element: <CreateBackupPage />,
       },
       {
-        path: 'world/:folderName/backups',
+        path: "world/:folderName/backups",
         element: <ListBackupsPage />,
       },
       {
-        path: 'settings',
+        path: "settings",
         element: <SettingsPage />,
       },
     ],
   },
-])
+]);

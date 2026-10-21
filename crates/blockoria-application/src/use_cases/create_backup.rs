@@ -14,8 +14,9 @@
 //! 4. Recursively copies all files from the world directory
 //! 5. Returns the created `Backup` aggregate
 
+use crate::error::Result;
 use crate::util::copy_dir_all;
-use blockoria_domain::{AccountId, Backup, BackupPath, BackupTimestamp, DomainError, World};
+use blockoria_domain::{AccountId, Backup, BackupPath, BackupTimestamp, World};
 use std::fs;
 use std::path::Path;
 
@@ -29,10 +30,10 @@ use std::path::Path;
 /// The created `Backup` aggregate on success
 ///
 /// # Errors
-/// Returns `DomainError` if:
-/// - Filesystem operations fail (I/O errors)
-/// - Backup path validation fails
-pub fn create_backup(world: &World, backup_root: &Path) -> Result<Backup, DomainError> {
+/// Returns `ApplicationError` if:
+/// - Backup path validation fails (`Validation`)
+/// - Filesystem operations fail (`Storage`)
+pub fn create_backup(world: &World, backup_root: &Path) -> Result<Backup> {
     // Validate the backup root path
     let backup_root_path = BackupPath::new(backup_root)?;
     let timestamp = BackupTimestamp::now();
@@ -46,10 +47,9 @@ pub fn create_backup(world: &World, backup_root: &Path) -> Result<Backup, Domain
         .join(&safe_folder_name)
         .join(&timestamp_dir_name);
 
-    fs::create_dir_all(&backup_dir).map_err(|e| DomainError::InvalidBackupPath(e.to_string()))?;
+    fs::create_dir_all(&backup_dir)?;
 
-    copy_dir_all(world.path().as_path(), &backup_dir)
-        .map_err(|e| DomainError::InvalidBackupPath(e.to_string()))?;
+    copy_dir_all(world.path().as_path(), &backup_dir)?;
 
     Ok(Backup::new(
         world.folder_name().clone(),

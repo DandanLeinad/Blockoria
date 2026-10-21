@@ -21,7 +21,8 @@
 //! - `ports` — Repository traits (`WorldRepository`, `BackupRepository`)
 //! - `use_cases` — Business logic orchestrations (5 use cases)
 //! - `util` — Shared utilities (filesystem operations)
-//! - `error` — Error type alias (`Result<T>` = `std::result::Result<T, DomainError>`)
+//! - `error` — Error taxonomy (`ApplicationError`: NotFound, Validation, Storage, Config)
+//!   and the `Result<T>` alias currently used by ports and use cases
 //!
 //! ## Use Cases
 //!
@@ -51,6 +52,6 @@ pub mod use_cases;
 /// Shared utilities — filesystem operations.
 pub mod util;
 
-pub use error::Result;
+pub use error::{ApplicationError, Result, What};
 pub use ports::{BackupRepository, WorldRepository};
 pub use use_cases::{create_backup, delete_backup, list_backups, list_worlds, restore_backup};
