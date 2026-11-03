@@ -13,8 +13,11 @@
 
 /// Backup repository port — read/write operations for backups.
 pub mod backup_repository;
+/// Feature flag port — launch-flag resolution (spec 08).
+pub mod feature_flags;
 /// World repository port — read operations for worlds.
 pub mod world_repository;
 
 pub use backup_repository::BackupRepository;
+pub use feature_flags::{FeatureFlags, Flag};
 pub use world_repository::WorldRepository;
