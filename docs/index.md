@@ -90,18 +90,18 @@ A camada de domínio pura, sem dependências externas, contendo:
 | Testes unitários (domain) | 66 |
 | Doctests (domain) | 12 |
 | Testes unitários (application) | 21 |
-| Testes unitários (infrastructure) | 115 |
+| Testes unitários (infrastructure) | 121 |
 | Testes integração (infrastructure) | 20 (inclui bateria de contratos dos ports) |
-| Testes unitários (adapter Tauri) | 3 |
+| Testes unitários (adapter Tauri) | 4 |
 | Testes frontend (Vitest + RTL) | 47 |
-| **Total** | **284 passando** |
+| **Total** | **291 passando** |
 
 ```bash
 # Backend
-cargo test                        # 237 passed (unit + integration + adapter + doc)
+cargo test                        # 244 passed (unit + integration + adapter + doc)
 cargo test -p blockoria-domain    # 66 passed + 12 doctests
 cargo test -p blockoria-application    # 21 passed
-cargo test -p blockoria-infrastructure # 135 passed (115 unit + 20 integration)
+cargo test -p blockoria-infrastructure # 141 passed (121 unit + 20 integration)
 
 # Frontend
 cd app && bun run test            # 47 passed (Vitest + React Testing Library)
@@ -129,6 +129,28 @@ Taxonomia honesta por camada — "não achei", "entrada inválida" e "o disco fa
 - **SDD Spec:** [`docs/specs/07-error-handling.md`](specs/07-error-handling.md)
 - **BDD Scenarios:** [`tests/features/07-error-handling.feature`](../tests/features/07-error-handling.feature)
 - **ADR:** [`docs/adr/0001-error-taxonomy.md`](adr/0001-error-taxonomy.md)
+
+---
+
+## 🚩 Feature Flags (spec 08)
+
+Mecanismo para trunk-based development: trabalho incompleto é integrado à `main` escondido atrás de uma flag de lançamento. **Flag não é setting de usuário** — o default mora no código, e o usuário final não consegue ligar nada:
+
+| Camada | Papel |
+|--------|-------|
+| `application` | Port `FeatureFlags` + enum `Flag` (vazio por ora; `name()`/`default_enabled()` exaustivos sem wildcard — criar/graduar flag é guiado pelo compilador) |
+| `infrastructure` | `CodeFeatureFlags`: default do código + `BLOCKORIA_FLAGS` (só em debug — em release o código do env **nem é compilado**); token desconhecido → aviso em stderr |
+| IPC (Tauri) | `cmd_feature_flags` → mapa resolvido `{ name: enabled }` de todas as flags conhecidas |
+| Frontend | Consumidor read-only; sem `VITE_*` (o consumo real chega com a spec 09) |
+
+- **Criar/editar/graduar/cancelar**: ciclo de vida completo na spec 08 (RF-05); gate de recusa é sempre no command (`ApplicationError::Config`), nunca só na UI.
+- **Em release, ligar uma flag exige recompilar com o default trocado** — custo aceito (ADR-0002); revisitar só se um canal beta distribuído existir um dia.
+
+### Especificação
+
+- **SDD Spec:** [`docs/specs/08-feature-flags.md`](specs/08-feature-flags.md)
+- **BDD Scenarios:** [`tests/features/08-feature-flags.feature`](../tests/features/08-feature-flags.feature)
+- **ADR:** [`docs/adr/0002-feature-flags.md`](adr/0002-feature-flags.md)
 
 ---
 
@@ -326,6 +348,7 @@ cd app && bun run build     # TypeScript + Vite build OK
 | `cmd_get_backup_root` | Retorna backup_root configurado → `String` |
 | `cmd_get_config` | **NOVO** Retorna config (theme) → `ConfigDto` |
 | `cmd_save_config` | **NOVO** Salva config (theme) → `()` |
+| `cmd_feature_flags` | **NOVO** Mapa resolvido de feature flags → `{ name: enabled }` (spec 08) |
 
 > **Erros**: todo command que falha rejeita com objeto `{ "code": "not_found|validation|storage|config|unknown", "message": "..." }` (spec 07, RF-03). O frontend mapeia `code` para mensagens PT-BR via `tauriError.ts`.
 
