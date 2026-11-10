@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.11.0] - 2026-11-09
+
+### Features
+- feat(backend): feature flags mechanism (spec 08) — launch flags with defaults in code (`Flag::default_enabled`), env-var override (`BLOCKORIA_FLAGS`) compiled only in debug builds (`#[cfg(debug_assertions)]`); the end user cannot enable incomplete work in release
+- feat(application): `FeatureFlags` port + empty `Flag` enum — `name()`/`default_enabled()` are exhaustive matches without a wildcard arm: adding an unmapped variant, or graduating a flag to permanent code, is a compiler-guided change (spec 08, RF-05)
+- feat(infrastructure): `CodeFeatureFlags` — pure `resolve()` (unit-test target), comma-list env with trim + exact match, unknown tokens warn on stderr instead of failing silently
+- feat(adapter): `cmd_feature_flags` — read-only resolved map `{ name: enabled }` of all known flags for the frontend (single source in the backend, no `VITE_*`)
+
+### Testing
+- test(infrastructure): 115 -> 121 (+6 resolution unit tests, Given/When/Then)
+- test(adapter): 3 -> 4 (+1 feature flags IPC map test)
+- test: backend total 244 (domain 66 + 12 doctests, application 21, infra 121 + 20 integration, adapter 4); full suite 291 passing
+- test: `cargo check --release` verifies the env read is compiled out in release builds (spec 08 criterion 7)
+
+### Documentation
+- docs: add spec 08 SDD (`docs/specs/08-feature-flags.md`) + 7 BDD Gherkin scenarios (`tests/features/08-feature-flags.feature`)
+- docs: add ADR-0002 (feature flags: defaults in code, debug-only env override, accepted release cost with a revisit trigger for a future beta channel)
+- docs: application.md (FeatureFlags port, command table, structure) and index.md (feature flags section, real test counts)
+
 ## [0.10.0] - 2026-10-20
 
 ### Features
