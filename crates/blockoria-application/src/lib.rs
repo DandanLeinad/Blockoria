@@ -18,7 +18,8 @@
 //!
 //! ## Structure
 //!
-//! - `ports` — Repository traits (`WorldRepository`, `BackupRepository`)
+//! - `ports` — Repository traits (`WorldRepository`, `BackupRepository`) and
+//!   the feature-flag port (`FeatureFlags`, spec 08)
 //! - `use_cases` — Business logic orchestrations (5 use cases)
 //! - `util` — Shared utilities (filesystem operations)
 //! - `error` — Error taxonomy (`ApplicationError`: NotFound, Validation, Storage, Config)
@@ -53,5 +54,5 @@ pub mod use_cases;
 pub mod util;
 
 pub use error::{ApplicationError, Result, What};
-pub use ports::{BackupRepository, WorldRepository};
+pub use ports::{BackupRepository, FeatureFlags, Flag, WorldRepository};
 pub use use_cases::{create_backup, delete_backup, list_backups, list_worlds, restore_backup};
