@@ -8,7 +8,7 @@ Camada de aplicação com use cases e ports (traits). Contém a lógica de negó
 
 ## Ports (Traits)
 
-> Todos os métodos retornam `Result<...>` = `std::result::Result<T, ApplicationError>` — a taxonomia de erros da camada de aplicação (spec 07).
+> Todos os métodos retornam `Result<...>` = `std::result::Result<T, ApplicationError>` — a taxonomia de erros da camada de aplicação (spec 07). Exceção: `FeatureFlags::is_enabled` é **infallível** (flag sem sobreposição resolve pro default — spec 08).
 
 ### `WorldRepository`
 - `list_all()` — Retorna todos os mundos conhecidos
@@ -18,6 +18,11 @@ Camada de aplicação com use cases e ports (traits). Contém a lógica de negó
 - `save()` — Persiste um backup (reservado para uso futuro)
 - `list_by_world(location)` — Lista backups de um mundo por `WorldLocation`
 - `delete(path)` — Remove um backup pelo caminho (idempotente)
+
+### `FeatureFlags`
+- `is_enabled(flag: Flag)` — Resolve a flag de lançamento (infallível: sem sobreposição → default do código)
+
+O enum `Flag` nasce vazio (spec 08): cada flag é introduzida pela spec da feature que esconde (a spec 09 adiciona `OrphanRestore`). `name()` e `default_enabled()` são matches **exaustivos sem wildcard** — criar variante sem mapear, ou graduar uma flag, é erro de compilação que lista cada ponto de toque. Defaults moram no código; sobreposição só em debug (`BLOCKORIA_FLAGS`, removida da compilação em release); gate de recusa no command, nunca só na UI. Detalhes e ciclo de vida: ADR-0002 e spec 08.
 
 ## Taxonomia de Erros (`ApplicationError`)
 
@@ -71,7 +76,8 @@ crates/blockoria-application/
     ├── ports/
     │   ├── mod.rs
     │   ├── world_repository.rs
-    │   └── backup_repository.rs
+    │   ├── backup_repository.rs
+    │   └── feature_flags.rs     # FeatureFlags + Flag (spec 08)
     ├── use_cases/
     │   ├── mod.rs
     │   ├── create_backup.rs
@@ -141,7 +147,11 @@ Os commands Tauri em `src-tauri/src/lib.rs` chamam diretamente estes use cases:
 | `cmd_list_backups` | `list_backups` | `world_folder_name`, `account_id`, `state` |
 | `cmd_restore_backup` | `restore_backup` | `backup_path`, `world_folder_name`, `account_id`, `state` |
 | `cmd_delete_backup` | `delete_backup` | `backup_path`, `state` |
+| `cmd_get_backup_root` | — (acesso direto ao config) | `state` |
+| `cmd_get_config` | — (acesso direto ao config) | `state` |
+| `cmd_save_config` | — (acesso direto ao config) | `theme`, `state` |
+| `cmd_feature_flags` | — (resolução de flags, spec 08) | `state` |
 
-> **Nota**: Os commands `cmd_get_config` e `cmd_save_config` acessam `Config` diretamente no `AppState` (não passam por use cases), pois configuração é concern da infraestrutura, não regra de negócio.
+> **Nota**: Os commands `cmd_get_config`, `cmd_save_config` (acessam `Config` no `AppState`) e `cmd_feature_flags` (resolve `Flag::ALL`) não passam por use cases — configuração e flags são concern de infraestrutura/adapter, não regra de negócio.
 
 > **Erros no IPC**: os commands serializam `ApplicationError` como objeto `{ "code", "message" }` (`CommandError`, spec 07 RF-03) — codes `not_found|validation|storage|config|unknown`, mapeando 1:1 as categorias. O frontend traduz `code` para PT-BR (veja `frontend.md`).

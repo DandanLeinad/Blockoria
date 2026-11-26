@@ -8,10 +8,12 @@
 //! calls to use cases in `blockoria-application`.
 
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
+use blockoria_application::ports::{FeatureFlags, Flag};
 use blockoria_application::{ApplicationError, What};
 use blockoria_infrastructure::{
-    Config, FileBackupRepository, FileWorldRepository, default_backup_root,
+    CodeFeatureFlags, Config, FileBackupRepository, FileWorldRepository, default_backup_root,
 };
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
 use std::sync::Arc;
@@ -19,6 +21,14 @@ use std::sync::Arc;
 fn icon_data_url(path: &Path) -> Option<String> {
     let bytes = fs::read(path).ok()?;
     Some(format!("data:image/jpeg;base64,{}", BASE64.encode(bytes)))
+}
+
+/// Resolves every known feature flag into a name → enabled map (spec 08, RF-03).
+fn feature_flags_map(flags: &dyn FeatureFlags) -> BTreeMap<String, bool> {
+    Flag::ALL
+        .iter()
+        .map(|flag| (flag.name().to_string(), flags.is_enabled(*flag)))
+        .collect()
 }
 
 // ============================================================================
@@ -119,6 +129,7 @@ pub struct AppState {
     #[allow(dead_code)]
     backup_repo: Arc<FileBackupRepository>,
     config: Arc<std::sync::RwLock<Config>>,
+    feature_flags: Arc<dyn FeatureFlags>,
 }
 
 /// Create the application state with real repositories.
@@ -141,6 +152,7 @@ pub fn create_state() -> Result<AppState, ApplicationError> {
         world_repo,
         backup_repo,
         config,
+        feature_flags: Arc::new(CodeFeatureFlags),
     })
 }
 
@@ -330,6 +342,14 @@ mod commands {
         Ok(root)
     }
 
+    /// Read-only view of the resolved feature flags (spec 08, RF-03).
+    #[tauri::command]
+    pub async fn cmd_feature_flags(
+        state: State<'_, AppState>,
+    ) -> CommandResult<BTreeMap<String, bool>> {
+        Ok(feature_flags_map(state.feature_flags.as_ref()))
+    }
+
     #[derive(Serialize, Deserialize)]
     pub struct ConfigDto {
         pub theme: String,
@@ -377,6 +397,7 @@ pub fn run_with_state(state: AppState) {
             commands::cmd_get_backup_root,
             commands::cmd_get_config,
             commands::cmd_save_config,
+            commands::cmd_feature_flags,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Blockoria application");
@@ -386,6 +407,18 @@ pub fn run_with_state(state: AppState) {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn given_no_flags_registered_when_mapped_then_empty_map() {
+        // Given
+        let flags = CodeFeatureFlags; // spec 08 ships zero flags; the first arrives with spec 09
+
+        // When
+        let map = feature_flags_map(&flags);
+
+        // Then
+        assert!(map.is_empty());
+    }
 
     #[test]
     fn given_not_found_when_serialized_then_code_and_message() {

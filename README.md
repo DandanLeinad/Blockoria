@@ -18,13 +18,13 @@
 
 ## 🏗️ Status Atual
 
-**v0.10.0** — **Domain, Application, Infrastructure e Frontend implementadas** com shadcn/ui, Toast v2, Settings e **tratamento de erros completo** (spec 07: taxonomia por camada, contrato IPC estruturado, mensagens PT-BR, ErrorBoundary, startup dialog).
+**v0.11.0** — **Domain, Application, Infrastructure e Frontend implementadas** com shadcn/ui, Toast v2, Settings, **tratamento de erros completo** (spec 07: taxonomia por camada, contrato IPC estruturado, mensagens PT-BR, ErrorBoundary, startup dialog) e **feature flags** (spec 08: defaults no código, ativação só em dev, ciclo de vida guiado pelo compilador).
 
 | Camada                                          | Status                                                                                                                                    |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | **Domain** (`blockoria-domain`)                 | ✅ Completo — 9 VOs, Entities, Aggregates, 66 testes + 12 doctests                                                                        |
 | **Application** (`blockoria-application`)       | ✅ Implementado — 5 use cases, **taxonomia `ApplicationError`** (spec 07), 21 testes                                                     |
-| **Infrastructure** (`blockoria-infrastructure`) | ✅ Implementado — FileWorldRepository, FileBackupRepository, Config, **NBT Parser** (115 testes), Test Contracts, gen_test_worlds example |
+| **Infrastructure** (`blockoria-infrastructure`) | ✅ Implementado — FileWorldRepository, FileBackupRepository, Config, **NBT Parser** (121 testes), **Feature Flags** (spec 08), Test Contracts, gen_test_worlds example |
 | **Frontend (Tauri + React)**                    | ✅ MVP Completo — **4 telas**, **47 testes unitários**, React Router v7, Tailwind v4, **shadcn/ui**, **Toast v2**, **Settings**, **ErrorBoundary + mensagens PT-BR** |
 
 ---
@@ -83,10 +83,10 @@ Camada de domínio pura, sem dependências externas.
 ```bash
 cargo test -p blockoria-domain        # 66 unit tests + 12 doctests = 78
 cargo test -p blockoria-application   # 21 use case + taxonomy tests
-cargo test -p blockoria-infrastructure # 135 unit/integration/contract tests (incl. NBT parser)
-cargo test --workspace                # 237 backend (incl. adapter IPC tests)
+cargo test -p blockoria-infrastructure # 141 unit/integration/contract tests (incl. NBT parser)
+cargo test --workspace                # 244 backend (incl. adapter IPC tests)
 cd app && bun run test                # 47 frontend tests (Vitest + RTL)
-# Total: 284 passing
+# Total: 291 passing
 ```
 
 ---

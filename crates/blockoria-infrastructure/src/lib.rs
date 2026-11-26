@@ -7,10 +7,12 @@
 //! This crate provides filesystem-based implementations for world and backup repositories.
 
 pub mod config;
+pub mod feature_flags;
 pub mod nbt;
 pub mod repositories;
 pub mod test_contract;
 
 pub use config::{Config, default_backup_root};
+pub use feature_flags::CodeFeatureFlags;
 pub use nbt::NbtError;
 pub use repositories::{FileBackupRepository, FileWorldRepository};
